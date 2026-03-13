@@ -295,7 +295,7 @@
     <div class="topbar" id="topbar-main">
       <!-- Bouton gauche -->
       <button class="btn" id="btn-inscription" onclick="go('p-inscription1')">Inscription</button>
-      <button class="btn" id="btn-deconnexion" style="display:none" onclick="deconnexion()">Déconnexion</button>
+      <button class="btn" id="btn-deconnexion" style="display:none" onclick="openModal('deco-popup-main')">Déconnexion</button>
       <!-- Logo toujours au centre -->
       <div class="topbar-center">
         <div class="topbar-logo-box" onclick="go('p-apropos')">
@@ -306,6 +306,18 @@
       <!-- Bouton droite -->
       <button class="btn" id="btn-connexion" onclick="go('p-connexion-modal')">Connexion</button>
       <button class="btn btn-accent" id="btn-moncompte-top" style="display:none" onclick="go('p-moncompte')">Mon compte</button>
+    </div>
+    <!-- Pop-up déconnexion topbar -->
+    <div class="modal-overlay" id="deco-popup-main" onclick="closeModal(event,'deco-popup-main')" style="position:fixed;z-index:200">
+      <div class="modal-box" style="text-align:center">
+        <button class="modal-close" onclick="closeM('deco-popup-main')">✕</button>
+        <div class="modal-title">Se déconnecter</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Voulez-vous vous déconnecter de votre compte Astrolabe ?</p>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-full btn-accent" onclick="closeM('deco-popup-main');deconnexion()">Oui</button>
+          <button class="btn btn-full" onclick="closeM('deco-popup-main')">Non</button>
+        </div>
+      </div>
     </div>
     <div class="search-wrap">
       <div class="search-bar" onclick="go('p-recherche')">
@@ -353,7 +365,10 @@
         </div>
         <div class="form-group">
           <label class="form-label">Mot de passe</label>
-          <input type="password" class="form-input" id="connexion-mdp" placeholder="••••••••">
+          <div style="position:relative">
+            <input type="password" class="form-input" id="connexion-mdp" placeholder="••••••••" style="padding-right:40px">
+            <button type="button" onclick="togglePwd('connexion-mdp','eye-conn')" id="eye-conn" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px">👁</button>
+          </div>
           <button class="form-link" onclick="go('p-mdp-oublie');closeM('p-connexion-modal')">Mot de passe oublié ?</button>
         </div>
         <div id="connexion-error" style="font-size:11px;color:var(--danger);margin-bottom:8px;display:none;"></div>
@@ -398,7 +413,7 @@
   <div class="page" id="p-inscription1">
     <div class="page-header"><button class="btn" onclick="go('p-main')">← Retour</button></div>
     <div class="page-scroll"><div class="page-body">
-      <div class="step-stars"><span class="sstar on">✦</span><span class="sstar">✦</span><span class="sstar">✦</span><span class="sstar">✦</span><span class="sstar">✦</span></div>
+      <div class="step-stars"><span class="sstar on">✦</span><span class="sstar">✦</span><span class="sstar">✦</span><span class="sstar">✦</span></div>
       <div class="page-title">Bienvenue sur Astrolabe</div>
       <div class="page-subtitle">Des histoires d'amour faites avec amour et safe ✦</div>
       <div class="form-group">
@@ -408,12 +423,18 @@
       </div>
       <div class="form-group">
         <label class="form-label">Mot de passe</label>
-        <input type="password" class="form-input" id="insc-mdp" placeholder="••••••••">
+        <div style="position:relative">
+          <input type="password" class="form-input" id="insc-mdp" placeholder="••••••••" style="padding-right:40px">
+          <button type="button" onclick="togglePwd('insc-mdp','eye-mdp')" id="eye-mdp" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px">👁</button>
+        </div>
         <span class="form-error" id="mdp-length-error">Le mot de passe doit faire au moins 6 caractères.</span>
       </div>
       <div class="form-group">
         <label class="form-label">Valider le mot de passe</label>
-        <input type="password" class="form-input" id="insc-mdp2" placeholder="••••••••">
+        <div style="position:relative">
+          <input type="password" class="form-input" id="insc-mdp2" placeholder="••••••••" style="padding-right:40px">
+          <button type="button" onclick="togglePwd('insc-mdp2','eye-mdp2')" id="eye-mdp2" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px">👁</button>
+        </div>
         <span class="form-error" id="mdp-error">Les deux mots de passe ne correspondent pas.</span>
       </div>
       <div class="form-group">
@@ -423,8 +444,24 @@
         <span class="form-hint">Astrolabe ne revend pas tes données. L'e-mail sert uniquement à récupérer ton compte.</span>
       </div>
       <div class="form-group">
-        <label class="form-label">Âge</label>
-        <select class="form-select" id="age-select"></select>
+        <label class="form-label">Date de naissance</label>
+        <!-- Desktop : champ date natif -->
+        <input type="date" class="form-input dob-desktop" id="dob-date" style="display:none">
+        <!-- Mobile : 3 sélecteurs -->
+        <div class="dob-mobile" style="display:none;flex-direction:row;gap:8px">
+          <div style="flex:1;text-align:center">
+            <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Jour</div>
+            <select class="form-select" id="dob-jour" style="text-align:center"></select>
+          </div>
+          <div style="flex:2;text-align:center">
+            <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Mois</div>
+            <select class="form-select" id="dob-mois" style="text-align:center"></select>
+          </div>
+          <div style="flex:2;text-align:center">
+            <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Année</div>
+            <select class="form-select" id="dob-annee" style="text-align:center"></select>
+          </div>
+        </div>
       </div>
       <button class="btn btn-full btn-accent" onclick="handleInscription1()">Valider →</button>
 
@@ -435,7 +472,7 @@
   <div class="page" id="p-inscription2">
     <div class="page-header"><button class="btn" onclick="go('p-inscription1')">← Retour</button></div>
     <div class="page-scroll"><div class="page-body">
-      <div class="step-stars"><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar">✦</span><span class="sstar">✦</span><span class="sstar">✦</span></div>
+      <div class="step-stars"><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar">✦</span><span class="sstar">✦</span></div>
       <div class="page-title">Ton confort de lecture</div>
       <div class="page-subtitle">Sur Astrolabe, nous souhaitons que tu te sentes bien et aies la meilleure expérience possible.</div>
       <div class="toggle-row"><span class="toggle-label">Afficher les trigger warnings au début de chaque histoire</span><label class="tgl"><input type="checkbox" id="twr2-histoire" checked><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
@@ -449,7 +486,7 @@
   <div class="page" id="p-inscription3">
     <div class="page-header"><button class="btn" onclick="go('p-inscription1')">← Retour</button></div>
     <div class="page-scroll"><div class="page-body">
-      <div class="step-stars"><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar">✦</span><span class="sstar">✦</span></div>
+      <div class="step-stars"><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar">✦</span><span class="sstar">✦</span></div>
       <div class="page-title">Personnalise ton expérience</div>
       <div class="page-subtitle">Sur Astrolabe, nous souhaitons que tu te sentes bien et aies la meilleure expérience possible.</div>
       <div class="toggle-row"><span class="toggle-label">Activer l'accès au contenu pour adulte</span><label class="tgl"><input type="checkbox" id="adult3"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
@@ -464,7 +501,7 @@
   <!-- INSCRIPTION 4 cadeau -->
   <div class="page" id="p-inscription4">
     <div class="gift-center">
-      <div class="step-stars"><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar">✦</span></div>
+      <div class="step-stars"><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar">✦</span></div>
       <span class="gift-emoji">🎁</span>
       <div class="gift-title">Merci pour ton inscription !</div>
       <div class="gift-desc">Pour fêter ça, Astrolabe t'offre</div>
@@ -477,7 +514,7 @@
   <!-- INSCRIPTION 5 -->
   <div class="page" id="p-inscription5">
     <div class="page-scroll"><div class="page-body">
-      <div class="step-stars"><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar on">✦</span></div>
+      <div class="step-stars"><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar on">✦</span></div>
       <div class="page-title">C'est à toi de choisir !</div>
       <div class="page-subtitle">Les 8 premiers chapitres de chaque histoire sont gratuits. Les suivants sont publiés chaque semaine.</div>
       <div class="choice-cards">
@@ -554,7 +591,7 @@
       <div class="lecture-titre" id="lecture-titre"></div>
     </div>
     <div class="page-scroll">
-      <div class="lecture-etoile-deco">✦</div>
+      
       <div class="lecture-body" id="lecture-body" style="text-align:justify"></div>
       <div class="lecture-nav" id="lecture-nav"></div>
     </div>
@@ -596,9 +633,9 @@
           <span class="tickets-row-val" id="abo-val" style="font-size:13px;color:var(--text3)">Aucun abonnement en cours</span>
         </div>
         <div class="divider"></div>
-        <div class="toggle-row"><span class="toggle-label">Contenu adulte</span><label class="tgl"><input type="checkbox"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
-        <div class="toggle-row"><span class="toggle-label">Trigger warnings (histoires)</span><label class="tgl"><input type="checkbox" checked><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
-        <div class="toggle-row"><span class="toggle-label">Trigger warnings (chapitres)</span><label class="tgl"><input type="checkbox"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+        <div class="toggle-row" id="row-adulte"><span class="toggle-label">Contenu adulte</span><label class="tgl"><input type="checkbox" id="toggle-adulte" onchange="compte.adulte=this.checked;renderGrid('book-grid',BOOKS);savePrefs()"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+        <div class="toggle-row"><span class="toggle-label">Trigger warnings (histoires)</span><label class="tgl"><input type="checkbox" id="toggle-tw-histoire" checked onchange="compte.twrHistoire=this.checked;savePrefs()"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+        <div class="toggle-row"><span class="toggle-label">Trigger warnings (chapitres)</span><label class="tgl"><input type="checkbox" id="toggle-tw-chapitre" onchange="compte.twrChapitre=this.checked;savePrefs()"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
         <div class="divider"></div>
         <!-- MODE LECTURE -->
         <div class="toggle-row">
@@ -773,7 +810,7 @@ const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const db=window.supabase.createClient(SUPA_URL,SUPA_KEY);
 
 /* ÉTAT */
-const compte={loggedIn:false,pseudo:'',tickets:0,userId:null};
+const compte={loggedIn:false,pseudo:'',tickets:0,userId:null,adulte:false,twrHistoire:true,twrChapitre:false,avatar:'☽',age:16};
 function addTickets(n){compte.tickets+=n;updateTicketsDisplay();sauvegarderTickets();}
 function updateTicketsDisplay(){
   const el=document.getElementById('compte-tickets');if(el)el.textContent=compte.tickets+' ✦';
@@ -790,6 +827,10 @@ async function checkSession(){
     if(profil){
       compte.loggedIn=true;compte.userId=session.user.id;
       compte.pseudo=profil.pseudo||'Astrolectrice';compte.tickets=profil.tickets||0;
+    compte.adulte=profil.adulte||false;
+    compte.twrHistoire=profil.trigger_warnings_histoire!==false;
+    compte.twrChapitre=profil.trigger_warnings_chapitre===true;
+    syncCompteToggles();renderGrid('book-grid',BOOKS);
       document.getElementById('compte-name').textContent=compte.pseudo;
       updateTicketsDisplay();
       updateTopbar();
@@ -802,8 +843,28 @@ const starsEl=document.getElementById('stars');
 for(let i=0;i<70;i++){const s=document.createElement('div');s.className='star';s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';s.style.setProperty('--d',(2+Math.random()*5)+'s');s.style.setProperty('--dl',(-Math.random()*5)+'s');s.style.width=s.style.height=(Math.random()>0.7?3:2)+'px';starsEl.appendChild(s);}
 
 /* AGE SELECT */
-const ageSelect=document.getElementById('age-select');
-for(let a=1;a<=100;a++){const o=document.createElement('option');o.value=a;o.textContent=a+' ans';if(a===16)o.selected=true;ageSelect.appendChild(o);}
+// DOB selectors
+const isMobile=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+if(isMobile){
+  document.querySelector('.dob-mobile').style.display='flex';
+  const jourSel=document.getElementById('dob-jour');
+  const moisSel=document.getElementById('dob-mois');
+  const anneeSel=document.getElementById('dob-annee');
+  const moisNoms=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  for(let i=1;i<=31;i++){const o=document.createElement('option');o.value=i;o.textContent=i;if(i===1)o.selected=true;jourSel.appendChild(o);}
+  moisNoms.forEach((m,i)=>{const o=document.createElement('option');o.value=i+1;o.textContent=m;if(i===0)o.selected=true;moisSel.appendChild(o);});
+  const now2=new Date();const curYear=now2.getFullYear();
+  for(let y=curYear;y>=curYear-100;y--){const o=document.createElement('option');o.value=y;o.textContent=y;if(y===curYear-18)o.selected=true;anneeSel.appendChild(o);}
+} else {
+  const dobDate=document.getElementById('dob-date');
+  dobDate.style.display='block';
+  const now2=new Date();
+  const def=new Date(now2.getFullYear()-18,now2.getMonth(),now2.getDate());
+  dobDate.value=def.toISOString().split('T')[0];
+  dobDate.max=now2.toISOString().split('T')[0];
+  const minDate=new Date(now2.getFullYear()-100,now2.getMonth(),now2.getDate());
+  dobDate.min=minDate.toISOString().split('T')[0];
+}
 
 
 
@@ -825,7 +886,11 @@ function bookCardHTML(b){
   const img=b.cover?`<img src="${b.cover}" alt="${b.title}" loading="lazy">`:'';
   return`<div class="book-card ${b.color}" onclick="openHistoire(${b.id})">${img}<div class="book-card-label">${b.title}</div></div>`;
 }
-function renderGrid(id,books){const el=document.getElementById(id);if(el)el.innerHTML=books.map(b=>bookCardHTML(b)).join('');}
+function renderGrid(id,books){
+  const el=document.getElementById(id);if(!el)return;
+  const filtered=books.filter(b=>!b.adulte||compte.adulte===true);
+  el.innerHTML=filtered.map(b=>bookCardHTML(b)).join('');
+}
 renderGrid('book-grid',BOOKS);renderGrid('search-grid',BOOKS);renderGrid('hashtag-grid',BOOKS);
 
 /* NAV */
@@ -869,7 +934,8 @@ function openHistoire(id){
   document.getElementById('histoire-tags').innerHTML=b.tags.map(t=>`<span class="histoire-tag"># ${t}</span>`).join('');
   document.getElementById('histoire-desc').textContent=b.desc;
   const twBox=document.getElementById('tw-box');
-  if(b.tw){twBox.style.display='block';document.getElementById('tw-text').textContent=b.tw;}else{twBox.style.display='none';}
+  const showTW=compte.twrHistoire!==false; // default true
+  if(b.tw&&showTW){twBox.style.display='block';document.getElementById('tw-text').textContent=b.tw;}else{twBox.style.display='none';}
   const chapList=document.getElementById('chapitres-list');
   chapList.innerHTML=b.chapitres.map(ch=>{
     const libre=ch.gratuit||ch.num<=8;
@@ -894,6 +960,11 @@ function openLecture(bookId,chapNum){
     if(i===0){const parts=line.split('\n');html+=`<div class="lecture-ch-title"><span class="lecture-star-side">✦</span>${parts[0]||''}<span class="lecture-star-side">✦</span></div><div class="lecture-ch-sub">${parts[1]||''}</div>`;}
     else{const isD=line.trim().startsWith('—')||line.trim().startsWith('-');html+=`<p class="${isD?'d':''}">${line.replace(/\n/g,'<br>')}</p>`;}
   });
+  // TW chapitre si activé
+  const showTWCh=compte.twrChapitre===true;
+  if(b.tw&&showTWCh){
+    html=`<div class="tw-box" style="margin:0 0 20px"><div class="tw-label">Trigger warnings</div><div class="tw-text">${b.tw}</div></div>`+html;
+  }
   document.getElementById('lecture-body').innerHTML=html;
   const nav=document.getElementById('lecture-nav');
   const prev=b.chapitres.find(c=>c.num===chapNum-1);
@@ -934,7 +1005,22 @@ async function handleInscription1(){
     if(existing&&existing.length>0){errPseudo.classList.add('show');return;}
     compte.pseudo=pseudo;
   }
-  const age=parseInt(document.getElementById('age-select').value);
+  let age;
+  if(isMobile){
+    const jour=parseInt(document.getElementById('dob-jour').value);
+    const mois=parseInt(document.getElementById('dob-mois').value);
+    const annee=parseInt(document.getElementById('dob-annee').value);
+    const today=new Date();
+    age=today.getFullYear()-annee;
+    if(today.getMonth()+1<mois||(today.getMonth()+1===mois&&today.getDate()<jour))age--;
+  } else {
+    const val=document.getElementById('dob-date').value;
+    if(!val){alert('Merci d\'indiquer ta date de naissance.');return;}
+    const dob=new Date(val);const today=new Date();
+    age=today.getFullYear()-dob.getFullYear();
+    if(today.getMonth()<dob.getMonth()||(today.getMonth()===dob.getMonth()&&today.getDate()<dob.getDate()))age--;
+  }
+  compte.age=age;
   go(age<18?'p-inscription2':'p-inscription3');
 }
 
@@ -944,7 +1030,7 @@ async function finishInscription(){
   const errEmail=document.getElementById('email-error');
   if(!isValidEmail(email)){errEmail.textContent='Adresse e-mail invalide.';errEmail.classList.add('show');go('p-inscription1');return;}
   const pseudo=document.getElementById('insc-pseudo').value.trim()||'Astrolectrice';
-  const age=parseInt(document.getElementById('age-select').value||'16');
+  const age=compte.age||16;
   const adulte=age>=18&&(document.getElementById('adult3')?.checked||false);
   const twrHistoire=document.getElementById('twr3-histoire')?.checked??document.getElementById('twr2-histoire')?.checked??true;
   const twrChapitre=document.getElementById('twr3-chapitre')?.checked??document.getElementById('twr2-chapitre')?.checked??false;
@@ -995,6 +1081,9 @@ async function handleConnexion(){
   if(profil){
     compte.loggedIn=true;compte.userId=data.user.id;
     compte.pseudo=profil.pseudo||'Astrolectrice';compte.tickets=profil.tickets||0;
+    compte.adulte=profil.adulte||false;
+    compte.twrHistoire=profil.trigger_warnings_histoire!==false;
+    compte.twrChapitre=profil.trigger_warnings_chapitre===true;
     document.getElementById('compte-name').textContent=compte.pseudo;
     updateTicketsDisplay();
   }
@@ -1015,6 +1104,13 @@ function setAvatar(symbol){
   });
   const map={'☽':'av-lune','✦':'av-etoile','☀':'av-soleil'};
   if(map[symbol])document.getElementById(map[symbol]).style.borderColor='var(--accent)';
+}
+
+function togglePwd(inputId, btnId){
+  const inp=document.getElementById(inputId);
+  const btn=document.getElementById(btnId);
+  if(inp.type==='password'){inp.type='text';btn.textContent='🙈';}
+  else{inp.type='password';btn.textContent='👁';}
 }
 
 async function deconnexion(){
@@ -1044,6 +1140,27 @@ bWrap.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].
 bWrap.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>40){clearInterval(bTimer);setBanner(dx<0?bIdx+1:bIdx-1);bTimer=setInterval(()=>setBanner(bIdx+1),3500);}},{passive:true});
 
 /* TOPBAR STATE */
+function syncCompteToggles(){
+  const togAdulte=document.getElementById('toggle-adulte');
+  const togTWH=document.getElementById('toggle-tw-histoire');
+  const togTWC=document.getElementById('toggle-tw-chapitre');
+  if(togAdulte)togAdulte.checked=compte.adulte;
+  if(togTWH)togTWH.checked=compte.twrHistoire;
+  if(togTWC)togTWC.checked=compte.twrChapitre;
+  // Hide adulte toggle for under-18
+  const rowAdulte=document.getElementById('row-adulte');
+  if(rowAdulte)rowAdulte.style.display=compte.age>=18?'flex':'none';
+}
+
+async function savePrefs(){
+  if(!compte.userId)return;
+  await db.from('profils').update({
+    adulte:compte.adulte,
+    trigger_warnings_histoire:compte.twrHistoire,
+    trigger_warnings_chapitre:compte.twrChapitre
+  }).eq('id',compte.userId);
+}
+
 function updateTopbar(){
   const loggedIn=compte.loggedIn;
   document.getElementById('btn-inscription').style.display=loggedIn?'none':'';
