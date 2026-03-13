@@ -236,23 +236,21 @@
     .placeholder-text{font-size:13px;color:var(--text3);line-height:1.7;}
 
     /* MODES LECTURE */
-    body.mode-jour { background: #f5f0e8; color: #1a1510; }
-    body.mode-jour #stars { display: none; }
-    body.mode-jour #app { background: #f5f0e8; }
-    body.mode-jour .page { background: #f5f0e8; }
-    body.mode-jour .lecture-body { background: #f5f0e8; color: #1a1510; }
-    body.mode-jour .lecture-body p { color: #1a1510; }
-    body.mode-jour .lecture-ch-title { color: #1a1510; }
-    body.mode-jour .lecture-ch-sub { color: #6b5e4e; }
-    body.mode-jour .lecture-header { background: #ede8df; border-bottom: 1px solid rgba(0,0,0,.08); }
-    body.mode-jour .lecture-titre { color: #6b5e4e; }
-    body.mode-jour .btn { background: rgba(0,0,0,.06); border-color: rgba(0,0,0,.12); color: #1a1510; }
+    #p-lecture.mode-jour-lecture { background: #f5f0e8; }
+    #p-lecture.mode-jour-lecture .lecture-body { background: #f5f0e8; color: #1a1510; }
+    #p-lecture.mode-jour-lecture .lecture-body p,
+    #p-lecture.mode-jour-lecture .lecture-body p.d { color: #1a1510 !important; }
+    #p-lecture.mode-jour-lecture .lecture-ch-title { color: #1a1510; }
+    #p-lecture.mode-jour-lecture .lecture-ch-sub { color: #6b5e4e; }
+    #p-lecture.mode-jour-lecture .lecture-header { background: #ede8df; border-bottom: 1px solid rgba(0,0,0,.08); }
+    #p-lecture.mode-jour-lecture .lecture-titre { color: #6b5e4e; }
+    #p-lecture.mode-jour-lecture .btn { background: rgba(0,0,0,.06); border-color: rgba(0,0,0,.12); color: #1a1510; }
 
     .lecture-body p { text-align: justify; }
-    .lecture-body.texte-bleu p { color: var(--accent) !important; }
-    .lecture-body.texte-bleu .d { color: var(--accent2) !important; }
-    .lecture-body.texte-blanc p { color: #eef0fa !important; }
-    .lecture-body.texte-blanc .d { color: #eef0fa !important; }
+    .lecture-body.texte-bleu p,
+    .lecture-body.texte-bleu p.d { color: var(--accent) !important; }
+    .lecture-body.texte-blanc p,
+    .lecture-body.texte-blanc p.d { color: #eef0fa !important; }
 
     #p-lecture.mode-nuit-actif { background: var(--bg); }
     #p-lecture.mode-nuit-actif #stars-lecture { display: none; }
@@ -294,17 +292,18 @@
   <!-- PAGE PRINCIPALE -->
   <div class="page" id="p-main">
     <div class="topbar" id="topbar-main">
-      <!-- Boutons non connecté -->
+      <!-- Bouton gauche -->
       <button class="btn" id="btn-inscription" onclick="go('p-inscription1')">Inscription</button>
+      <button class="btn" id="btn-deconnexion" style="display:none" onclick="deconnexion()">Déconnexion</button>
+      <!-- Logo toujours au centre -->
       <div class="topbar-center">
         <div class="topbar-logo-box" onclick="go('p-apropos')">
           <span class="tl-icon">✦</span>
           <span class="tl-name">ASTROLABE</span>
         </div>
       </div>
+      <!-- Bouton droite -->
       <button class="btn" id="btn-connexion" onclick="go('p-connexion-modal')">Connexion</button>
-      <!-- Boutons connecté (cachés par défaut) -->
-      <button class="btn" id="btn-deconnexion" style="display:none" onclick="deconnexion()">Déconnexion</button>
       <button class="btn btn-accent" id="btn-moncompte-top" style="display:none" onclick="go('p-moncompte')">Mon compte</button>
     </div>
     <div class="search-wrap">
@@ -559,7 +558,22 @@
 
   <!-- MON COMPTE -->
   <div class="page" id="p-moncompte">
-    <div class="page-header"><button class="btn" onclick="go('p-main')">← Retour</button></div>
+    <div class="page-header" style="justify-content:space-between">
+      <button class="btn" onclick="go('p-main')">← Retour</button>
+      <button class="btn btn-icon" onclick="openModal('deco-popup')" title="Déconnexion" style="font-size:13px">⏻</button>
+    </div>
+    <!-- Pop-up déconnexion -->
+    <div class="modal-overlay" id="deco-popup" onclick="closeModal(event,'deco-popup')">
+      <div class="modal-box" style="text-align:center">
+        <button class="modal-close" onclick="closeM('deco-popup')">✕</button>
+        <div class="modal-title">Se déconnecter</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Voulez-vous vous déconnecter de votre compte Astrolabe ?</p>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-full btn-accent" onclick="closeM('deco-popup');deconnexion()">Oui</button>
+          <button class="btn btn-full" onclick="closeM('deco-popup')">Non</button>
+        </div>
+      </div>
+    </div>
     <div class="page-scroll">
       <div class="compte-top">
         <div class="compte-avatar">☽</div>
@@ -587,13 +601,12 @@
           <span class="toggle-label">Mode lecture : <span id="mode-lecture-label">Nuit</span></span>
           <label class="tgl"><input type="checkbox" id="toggle-mode-jour" onchange="toggleModeJour(this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
         </div>
-        <div class="toggle-row" id="row-couleur-texte">
-          <span class="toggle-label">
-            Couleur du texte :
-            <span style="color:var(--accent);font-weight:500"> Bleu</span> /
-            <span style="color:#eef0fa;font-weight:500"> Blanc</span>
-          </span>
-          <label class="tgl"><input type="checkbox" id="toggle-texte-blanc" onchange="toggleTexte(this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
+        <div class="toggle-row" id="row-couleur-texte" style="justify-content:space-between;align-items:center;">
+          <span class="toggle-label">Couleur du texte en mode nuit</span>
+          <div style="display:flex;gap:8px">
+            <button id="btn-texte-bleu" onclick="setTexte('bleu')" style="background:rgba(126,159,212,.25);border:1.5px solid rgba(126,159,212,.6);color:var(--accent);font-family:'Jost',sans-serif;font-size:11px;padding:5px 14px;border-radius:20px;cursor:pointer;">Bleu</button>
+            <button id="btn-texte-blanc" onclick="setTexte('blanc')" style="background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);color:#eef0fa;font-family:'Jost',sans-serif;font-size:11px;padding:5px 14px;border-radius:20px;cursor:pointer;">Blanc</button>
+          </div>
         </div>
         <div class="divider"></div>
         <!-- BIBLIOTHÈQUE -->
@@ -999,16 +1012,17 @@ function toggleModeJour(actif){
   modeJour=actif;
   document.getElementById('mode-lecture-label').textContent=actif?'Jour':'Nuit';
   document.getElementById('row-couleur-texte').style.display=actif?'none':'flex';
-  document.body.classList.toggle('mode-jour',actif);
+  // Appliquer uniquement sur la page lecture
+  const lp=document.getElementById('p-lecture');
+  if(lp)lp.classList.toggle('mode-jour-lecture',actif);
 }
 
-function toggleTexte(blanc){
-  textesBlancs=blanc;
-  const lb=document.getElementById('lecture-body');
-  if(lb){
-    if(blanc){lb.classList.remove('texte-bleu');lb.classList.add('texte-blanc');}
-    else{lb.classList.remove('texte-blanc');lb.classList.add('texte-bleu');}
-  }
+function setTexte(couleur){
+  textesBlancs=(couleur==='blanc');
+  // Mettre à jour les boutons
+  document.getElementById('btn-texte-bleu').style.opacity=textesBlancs?'0.5':'1';
+  document.getElementById('btn-texte-blanc').style.opacity=textesBlancs?'1':'0.5';
+  applyLectureMode();
 }
 
 function applyLectureMode(){
@@ -1016,8 +1030,9 @@ function applyLectureMode(){
   if(!lb)return;
   lb.classList.remove('texte-bleu','texte-blanc');
   if(!modeJour){lb.classList.add(textesBlancs?'texte-blanc':'texte-bleu');}
-  // Cacher les étoiles en mode lecture
-  document.getElementById('stars').style.opacity=modeJour?'1':'0';
+  // Mode jour sur la page lecture seulement
+  const lp=document.getElementById('p-lecture');
+  if(lp)lp.classList.toggle('mode-jour-lecture',modeJour);
 }
 
 
