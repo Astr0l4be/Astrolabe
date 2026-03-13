@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="theme-color" content="#1a1f2e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Astrolabe">
+  <link rel="manifest" href="manifest.json">
+  <title>Astrolabe</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #1a1f2e; --bg2: #1e2438;
+      --glass: rgba(140,150,195,0.10); --glass-hover: rgba(140,150,195,0.18);
+      --glass-border: rgba(180,190,230,0.18);
+      --text: #eef0fa; --text2: #9aa2c8; --text3: #5d6490;
+      --accent: #7e9fd4; --accent2: #a78fd4; --danger: #d47e7e;
+    }
+    html,body{height:100%;width:100%;background:var(--bg);color:var(--text);font-family:'Jost',sans-serif;font-size:15px;overflow:hidden;}
+
+    /* STARS */
+    #stars{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+    .star{position:absolute;width:2px;height:2px;border-radius:50%;background:rgba(200,210,255,0.7);animation:twinkle var(--d,3s) ease-in-out infinite var(--dl,0s);}
+    @keyframes twinkle{0%,100%{opacity:.15}50%{opacity:.85}}
+
+    /* APP */
+    #app{position:fixed;inset:0;display:flex;flex-direction:column;max-width:480px;margin:0 auto;z-index:1;}
+    .page{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .35s ease;overflow:hidden;}
+    .page.active{opacity:1;pointer-events:all;}
+    .page-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+    .page-scroll::-webkit-scrollbar{width:2px;}
+    .page-scroll::-webkit-scrollbar-thumb{background:rgba(126,159,212,.3);border-radius:2px;}
+
+    /* SPLASH */
+    #p-splash{align-items:center;justify-content:center;background:var(--bg);}
+    .splash-inner{text-align:center;animation:fadeUp 1.2s ease forwards;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+    .splash-orb{width:110px;height:110px;margin:0 auto 22px;border-radius:50%;border:1.5px solid rgba(180,190,255,.25);background:rgba(126,159,212,.07);display:flex;align-items:center;justify-content:center;font-size:46px;animation:splashPulse 2s ease-in-out infinite;}
+    @keyframes splashPulse{0%,100%{box-shadow:0 0 0 0 rgba(126,159,212,0)}50%{box-shadow:0 0 30px 6px rgba(126,159,212,.15)}}
+    .splash-title{font-family:'Cormorant Garamond',serif;font-size:44px;font-weight:600;letter-spacing:7px;}
+    .splash-sub{margin-top:10px;font-size:11px;letter-spacing:3px;color:var(--text2);text-transform:uppercase;}
+
+    /* TOPBAR */
+    .topbar{display:flex;align-items:center;padding:10px 12px 8px;gap:8px;flex-shrink:0;position:relative;z-index:5;}
+    .topbar-center{flex:1;display:flex;justify-content:center;}
+    .topbar-logo-box{
+      width:76px;height:76px;
+      border:1px solid rgba(180,190,255,.18);border-radius:14px;
+      background:rgba(126,159,212,.06);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+      cursor:pointer;transition:background .2s,transform .1s;flex-shrink:0;
+    }
+    .topbar-logo-box:hover{background:rgba(126,159,212,.12);}
+    .topbar-logo-box:active{transform:scale(.97);}
+    .topbar-logo-box .tl-icon{font-size:20px;}
+    .topbar-logo-box .tl-name{font-family:'Cormorant Garamond',serif;font-size:12px;font-weight:600;letter-spacing:2px;}
+
+    /* BUTTONS */
+    .btn{background:var(--glass);border:1px solid var(--glass-border);color:var(--text);font-family:'Jost',sans-serif;font-size:12px;font-weight:400;letter-spacing:.4px;padding:8px 14px;border-radius:24px;cursor:pointer;transition:background .2s,transform .1s;white-space:nowrap;}
+    .btn:hover{background:var(--glass-hover);}
+    .btn:active{transform:scale(.97);}
+    .btn-icon{width:36px;height:36px;padding:0;border-radius:50%;font-size:15px;display:flex;align-items:center;justify-content:center;}
+    .btn-full{width:100%;padding:13px;border-radius:12px;font-size:13px;letter-spacing:.5px;margin-top:10px;}
+    .btn-accent{background:rgba(126,159,212,.18);border-color:rgba(126,159,212,.4);}
+    .btn-accent:hover{background:rgba(126,159,212,.28);}
+
+    /* SEARCH */
+    .search-wrap{padding:0 14px 10px;flex-shrink:0;}
+    .search-bar{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:24px;display:flex;align-items:center;padding:9px 16px;gap:10px;cursor:text;}
+    .search-bar input{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:'Jost',sans-serif;font-size:13px;}
+    .search-bar input::placeholder{color:var(--text3);}
+
+    /* HASHTAG */
+    .hashtag-band{display:flex;gap:8px;padding:0 14px 12px;overflow-x:auto;flex-shrink:0;}
+    .hashtag-band::-webkit-scrollbar{display:none;}
+    .tag-pill{background:var(--glass);border:1px solid var(--glass-border);color:var(--text2);font-size:11px;padding:5px 13px;border-radius:20px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:color .2s,background .2s;}
+    .tag-pill:hover,.tag-pill.active{color:var(--accent);border-color:rgba(126,159,212,.4);background:var(--glass-hover);}
+
+    /* BANNER */
+    .banner-wrap{margin:0 14px 14px;border-radius:14px;overflow:hidden;position:relative;aspect-ratio:2/1;border:1px solid rgba(180,190,255,.1);flex-shrink:0;}
+    .banner-track{display:flex;width:500%;height:100%;transition:transform .4s ease;}
+    .banner-slide{flex:0 0 20%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:16px;letter-spacing:1px;padding:0 20px;text-align:center;position:relative;overflow:hidden;}
+    .banner-slide img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+    .banner-slide-text{position:relative;z-index:1;background:rgba(10,12,25,.5);padding:8px 16px;border-radius:8px;backdrop-filter:blur(2px);}
+    .b1{background:linear-gradient(135deg,#1e2a4a,#2d1f4a)}
+    .b2{background:linear-gradient(135deg,#1f3540,#1a2b40)}
+    .b3{background:linear-gradient(135deg,#3a1f3a,#2a1f4a)}
+    .b4{background:linear-gradient(135deg,#1a3040,#1a2538)}
+    .b5{background:linear-gradient(135deg,#2a1a3a,#1f2a3a)}
+    .banner-dots{position:absolute;bottom:9px;left:0;right:0;display:flex;justify-content:center;gap:5px;pointer-events:none;}
+    .bdot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.25);transition:background .3s;}
+    .bdot.active{background:rgba(255,255,255,.8);}
+
+    /* BOOK GRID */
+    .section-label{padding:4px 14px 8px;font-size:10px;letter-spacing:2.5px;color:var(--text3);text-transform:uppercase;}
+    .book-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 14px 32px;}
+    .book-card{aspect-ratio:2/3;border-radius:8px;border:1px solid rgba(180,190,255,.08);display:flex;align-items:flex-end;overflow:hidden;cursor:pointer;transition:transform .2s,border-color .2s;position:relative;}
+    .book-card:hover{transform:scale(1.04);border-color:rgba(180,190,255,.2);}
+    .book-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+    .book-card-label{width:100%;padding:5px 6px 6px;background:linear-gradient(to top,rgba(10,12,25,.95),transparent);font-size:9px;color:rgba(200,210,255,.85);text-align:center;line-height:1.4;position:relative;z-index:1;}
+    .bc1{background:linear-gradient(160deg,#1e2a4a,#2d1f4a)} .bc2{background:linear-gradient(160deg,#1f3540,#1a2b40)} .bc3{background:linear-gradient(160deg,#3a1f3a,#2a1f4a)} .bc4{background:linear-gradient(160deg,#1a3040,#1a2538)} .bc5{background:linear-gradient(160deg,#2a1a3a,#1f2a3a)} .bc6{background:linear-gradient(160deg,#1f3a2a,#1a2838)} .bc7{background:linear-gradient(160deg,#3a2a1a,#2a1a2a)} .bc8{background:linear-gradient(160deg,#1a2a4a,#2a1f3a)}
+
+    /* MODAL */
+    .modal-overlay{position:absolute;inset:0;background:rgba(15,18,35,.55);display:flex;align-items:center;justify-content:center;z-index:20;opacity:0;pointer-events:none;transition:opacity .3s;}
+    .modal-overlay.open{opacity:1;pointer-events:all;}
+    .modal-box{width:88%;max-height:85vh;overflow-y:auto;background:linear-gradient(145deg,#1e2440,#1a1f38);border:1px solid rgba(180,190,255,.2);border-radius:22px;padding:28px 22px 22px;position:relative;transform:translateY(20px);transition:transform .3s;}
+    .modal-overlay.open .modal-box{transform:none;}
+    .modal-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;text-align:center;letter-spacing:1px;margin-bottom:22px;}
+    .modal-close{position:absolute;top:16px;right:18px;background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;}
+    .modal-close:hover{color:var(--text);}
+
+    /* FORM */
+    .form-group{margin-bottom:14px;}
+    .form-label{display:block;font-size:10px;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;margin-bottom:5px;}
+    .form-input{width:100%;background:rgba(140,150,195,.1);border:1px solid rgba(180,190,230,.16);border-radius:10px;color:var(--text);font-family:'Jost',sans-serif;font-size:13px;padding:10px 13px;outline:none;transition:border-color .2s;}
+    .form-input:focus{border-color:rgba(126,159,212,.5);}
+    .form-input::placeholder{color:var(--text3);}
+    .form-select{width:100%;background:rgba(140,150,195,.1);border:1px solid rgba(180,190,230,.16);border-radius:10px;color:var(--text);font-family:'Jost',sans-serif;font-size:13px;padding:10px 13px;outline:none;-webkit-appearance:none;appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235d6490' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;}
+    .form-select option{background:#1e2438;color:var(--text);}
+    .form-error{font-size:11px;color:var(--danger);display:none;margin-top:5px;}
+    .form-error.show{display:block;}
+    .form-hint{font-size:10px;color:var(--text3);display:block;margin-top:4px;line-height:1.5;}
+    .form-link{font-size:10px;color:var(--accent);cursor:pointer;display:block;text-align:right;margin-top:3px;background:none;border:none;font-family:'Jost',sans-serif;}
+
+    /* PAGE */
+    .page-header{padding:16px 16px 0;flex-shrink:0;display:flex;align-items:center;gap:10px;}
+    .page-body{padding:20px 18px 32px;}
+    .page-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;letter-spacing:1px;margin-bottom:6px;}
+    .page-subtitle{font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:22px;}
+
+    /* STEP STARS */
+    .step-stars{display:flex;justify-content:center;gap:12px;margin-bottom:22px;}
+    .sstar{font-size:13px;color:var(--text3);transition:all .4s ease;display:inline-block;}
+    .sstar.on{color:var(--accent);animation:starGlow 1.6s ease-in-out infinite;}
+    @keyframes starGlow{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.6);opacity:1}}
+
+    /* TOGGLE */
+    .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid rgba(180,190,255,.07);}
+    .toggle-label{font-size:12px;color:var(--text2);max-width:76%;line-height:1.5;}
+    .tgl{position:relative;width:44px;height:25px;flex-shrink:0;}
+    .tgl input{display:none;}
+    .tgl-track{position:absolute;inset:0;background:rgba(140,150,195,.18);border:1px solid rgba(180,190,230,.18);border-radius:13px;cursor:pointer;transition:background .2s;}
+    .tgl input:checked+.tgl-track{background:rgba(126,159,212,.38);border-color:rgba(126,159,212,.5);}
+    .tgl-thumb{position:absolute;top:3px;left:3px;width:17px;height:17px;border-radius:50%;background:var(--text3);pointer-events:none;transition:left .2s,background .2s;}
+    .tgl input:checked~.tgl-thumb{left:22px;background:var(--accent);}
+
+    /* GIFT */
+    .gift-center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px 22px;}
+    .gift-emoji{font-size:64px;display:block;margin-bottom:16px;animation:giftBounce .7s ease infinite alternate;}
+    @keyframes giftBounce{from{transform:translateY(0)}to{transform:translateY(-12px)}}
+    .gift-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;margin-bottom:8px;}
+    .gift-desc{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:18px;}
+    .tickets-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(126,159,212,.12);border:1px solid rgba(126,159,212,.3);color:var(--accent);font-size:32px;font-weight:500;padding:10px 28px;border-radius:14px;margin-bottom:22px;font-family:'Jost',sans-serif;}
+
+    /* CHOICE CARDS */
+    .choice-cards{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;}
+    .choice-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:15px 17px;cursor:pointer;transition:border-color .2s,background .2s;}
+    .choice-card:hover{background:var(--glass-hover);border-color:rgba(126,159,212,.3);}
+    .choice-card.featured{border-color:rgba(126,159,212,.35);}
+    .cc-title{font-size:13px;font-weight:500;margin-bottom:3px;}
+    .cc-desc{font-size:11px;color:var(--text2);line-height:1.5;}
+
+    /* SIMPLE PAGE */
+    .simple-page{flex:1;display:flex;flex-direction:column;padding:32px 22px;}
+
+    /* SEARCH PAGE */
+    .search-results-title{font-size:10px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:12px;}
+    .search-input-big{width:100%;background:rgba(140,150,195,.1);border:1px solid rgba(180,190,230,.18);border-radius:12px;color:var(--text);font-family:'Jost',sans-serif;font-size:15px;padding:13px 16px;outline:none;margin-bottom:20px;}
+    .search-input-big:focus{border-color:rgba(126,159,212,.5);}
+    .search-input-big::placeholder{color:var(--text3);}
+
+    /* HASHTAG PAGE */
+    .hashtag-page-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;padding:18px 16px 2px;letter-spacing:1px;}
+    .hashtag-count{font-size:11px;color:var(--text3);padding:0 16px 12px;}
+
+    /* HISTOIRE PAGE — bannière même format que accueil (2:1) */
+    .histoire-banner{margin:0 14px 16px;border-radius:14px;overflow:hidden;position:relative;aspect-ratio:2/1;border:1px solid rgba(180,190,255,.1);flex-shrink:0;}
+    .histoire-banner img{width:100%;height:100%;object-fit:cover;display:block;}
+    .histoire-banner-bg{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:52px;}
+    .histoire-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;padding:0 16px 4px;letter-spacing:1px;}
+    .histoire-author{font-size:11px;color:var(--text3);padding:0 16px 8px;letter-spacing:1px;}
+    .histoire-tags{display:flex;gap:6px;padding:0 16px 12px;flex-wrap:wrap;}
+    .histoire-tag{background:var(--glass);border:1px solid var(--glass-border);font-size:10px;color:var(--text2);padding:3px 11px;border-radius:20px;}
+    .tw-box{margin:0 16px 14px;background:rgba(167,143,212,.08);border:1px solid rgba(167,143,212,.2);border-radius:10px;padding:11px 14px;}
+    .tw-label{font-size:9px;letter-spacing:2px;color:var(--accent2);text-transform:uppercase;margin-bottom:4px;}
+    .tw-text{font-size:11px;color:rgba(200,190,240,.8);line-height:1.6;}
+    .histoire-desc{font-size:12px;color:var(--text2);line-height:1.8;padding:0 16px 16px;}
+    .chapitres-label{font-size:10px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;padding:0 16px 8px;}
+    .btn-lire{margin:0 16px 8px;display:block;padding:13px 16px;background:rgba(126,159,212,.10);border:1px solid rgba(126,159,212,.25);color:var(--text);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.5px;border-radius:10px;cursor:pointer;text-align:left;transition:background .2s;display:flex;justify-content:space-between;align-items:center;}
+    .btn-lire:hover{background:rgba(126,159,212,.2);}
+    .btn-lire:last-child{margin-bottom:32px;}
+    .btn-lire-locked{background:rgba(140,150,195,.06);border-color:rgba(140,150,195,.15);color:var(--text3);}
+    .ch-badge{font-size:10px;padding:2px 8px;border-radius:12px;background:rgba(126,159,212,.15);color:var(--accent);}
+    .ch-badge-ticket{background:rgba(167,143,212,.12);color:var(--accent2);}
+
+    /* LECTURE */
+    .lecture-header{padding:14px 16px 10px;flex-shrink:0;display:flex;align-items:center;gap:10px;justify-content:space-between;}
+    .lecture-titre{font-family:'Cormorant Garamond',serif;font-size:13px;color:var(--text2);letter-spacing:1px;text-align:center;flex:1;}
+    .lecture-body{padding:20px 22px 40px;font-size:15px;line-height:2.1;color:var(--text2);}
+    .lecture-body p{margin-bottom:1.5em;}
+    .lecture-body .d{color:var(--text);}
+    .lecture-ch-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--text);margin-bottom:6px;text-align:center;}
+    .lecture-ch-sub{font-size:13px;color:var(--text3);font-style:italic;text-align:center;margin-bottom:32px;letter-spacing:.5px;}
+    .lecture-nav{display:flex;gap:10px;padding:0 16px 40px;}
+
+    /* MON COMPTE */
+    .compte-top{display:flex;flex-direction:column;align-items:center;padding:20px 18px 0;}
+    .compte-avatar{width:72px;height:72px;border-radius:50%;border:1px solid rgba(180,190,255,.2);background:rgba(126,159,212,.08);display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:10px;}
+    .compte-name-txt{font-size:15px;font-weight:500;margin-bottom:2px;text-align:center;}
+    .compte-since{font-size:11px;color:var(--text3);text-align:center;margin-bottom:12px;}
+    .badges-row{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-bottom:16px;}
+    .badge{background:rgba(167,143,212,.12);border:1px solid rgba(167,143,212,.25);color:var(--accent2);font-size:10px;letter-spacing:1px;padding:4px 12px;border-radius:20px;}
+    .compte-body{padding:0 18px 32px;}
+    .tickets-row{background:rgba(126,159,212,.08);border:1px solid rgba(126,159,212,.2);border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;cursor:pointer;transition:background .2s;}
+    .tickets-row:hover{background:rgba(126,159,212,.14);}
+    .tickets-row-label{font-size:12px;color:var(--text2);}
+    .tickets-row-val{font-size:20px;font-weight:500;color:var(--accent);}
+    .divider{height:1px;background:rgba(180,190,255,.07);margin:14px 0;}
+
+    /* BIBLIOTHÈQUE */
+    .biblio-section-title{font-size:10px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:10px;margin-top:4px;}
+    .biblio-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;}
+    .biblio-row::-webkit-scrollbar{display:none;}
+    .biblio-card{flex-shrink:0;width:60px;aspect-ratio:2/3;border-radius:6px;border:1px solid rgba(180,190,255,.1);overflow:hidden;cursor:pointer;position:relative;}
+    .biblio-card img{width:100%;height:100%;object-fit:cover;}
+    .biblio-card-bg{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:18px;}
+    .biblio-empty{font-size:11px;color:var(--text3);font-style:italic;padding:4px 0 12px;}
+
+    /* PLACEHOLDER */
+    .placeholder-box{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 24px;gap:12px;}
+    .placeholder-icon{font-size:48px;opacity:.5;}
+    .placeholder-text{font-size:13px;color:var(--text3);line-height:1.7;}
+
+    /* MODES LECTURE */
+    body.mode-jour { background: #f5f0e8; color: #1a1510; }
+    body.mode-jour #stars { display: none; }
+    body.mode-jour #app { background: #f5f0e8; }
+    body.mode-jour .page { background: #f5f0e8; }
+    body.mode-jour .lecture-body { background: #f5f0e8; color: #1a1510; }
+    body.mode-jour .lecture-body p { color: #1a1510; }
+    body.mode-jour .lecture-ch-title { color: #1a1510; }
+    body.mode-jour .lecture-ch-sub { color: #6b5e4e; }
+    body.mode-jour .lecture-header { background: #ede8df; border-bottom: 1px solid rgba(0,0,0,.08); }
+    body.mode-jour .lecture-titre { color: #6b5e4e; }
+    body.mode-jour .btn { background: rgba(0,0,0,.06); border-color: rgba(0,0,0,.12); color: #1a1510; }
+
+    .lecture-body p { text-align: justify; }
+    .lecture-body.texte-bleu p { color: var(--accent) !important; }
+    .lecture-body.texte-bleu .d { color: var(--accent2) !important; }
+    .lecture-body.texte-blanc p { color: #eef0fa !important; }
+    .lecture-body.texte-blanc .d { color: #eef0fa !important; }
+
+    #p-lecture.mode-nuit-actif { background: var(--bg); }
+    #p-lecture.mode-nuit-actif #stars-lecture { display: none; }
+    .lecture-etoile-deco { text-align: center; color: var(--accent); letter-spacing: 8px; font-size: 13px; margin-bottom: 20px; }
+
+    /* SUPPRESSION COMPTE */
+    .delete-page { flex: 1; display: flex; flex-direction: column; padding: 28px 22px; }
+    .delete-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600; margin-bottom: 14px; line-height: 1.4; }
+    .delete-text { font-size: 13px; color: var(--text2); line-height: 1.8; margin-bottom: 22px; }
+    .delete-textarea { width: 100%; background: rgba(140,150,195,.1); border: 1px solid rgba(180,190,230,.16); border-radius: 10px; color: var(--text); font-family: 'Jost', sans-serif; font-size: 13px; padding: 12px 14px; outline: none; resize: none; min-height: 100px; }
+    .delete-textarea::placeholder { color: var(--text3); }
+    .btn-danger { background: rgba(212,126,126,.12); border-color: rgba(212,126,126,.3); color: var(--danger); }
+    .btn-danger:hover { background: rgba(212,126,126,.2); }
+
+    /* PWA */
+    #pwa-banner{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:linear-gradient(135deg,#1e2440,#1a1f38);border-top:1px solid rgba(180,190,255,.18);padding:14px 18px;display:flex;align-items:center;gap:12px;z-index:100;transition:transform .4s ease;}
+    #pwa-banner.hidden{transform:translateX(-50%) translateY(110%);}
+    .pwa-icon{font-size:24px;flex-shrink:0;}
+    .pwa-text{flex:1;}
+    .pwa-text strong{display:block;font-size:13px;font-weight:500;}
+    .pwa-text span{font-size:11px;color:var(--text2);line-height:1.4;display:block;margin-top:2px;}
+    .pwa-install-btn{background:rgba(126,159,212,.2);border:1px solid rgba(126,159,212,.4);color:var(--accent);font-family:'Jost',sans-serif;font-size:11px;padding:7px 13px;border-radius:20px;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+    .pwa-close-btn{background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;flex-shrink:0;padding:0 2px;}
+  </style>
+</head>
+<body>
+<div id="stars"></div>
+<div id="app">
+
+  <!-- SPLASH -->
+  <div class="page active" id="p-splash">
+    <div class="splash-inner">
+      <div class="splash-orb">✦</div>
+      <div class="splash-title">ASTROLABE</div>
+      <div class="splash-sub">Histoires d'amour · Safe · Sincères</div>
+    </div>
+  </div>
+
+  <!-- PAGE PRINCIPALE -->
+  <div class="page" id="p-main">
+    <div class="topbar" id="topbar-main">
+      <!-- Boutons non connecté -->
+      <button class="btn" id="btn-inscription" onclick="go('p-inscription1')">Inscription</button>
+      <div class="topbar-center">
+        <div class="topbar-logo-box" onclick="go('p-apropos')">
+          <span class="tl-icon">✦</span>
+          <span class="tl-name">ASTROLABE</span>
+        </div>
+      </div>
+      <button class="btn" id="btn-connexion" onclick="go('p-connexion-modal')">Connexion</button>
+      <!-- Boutons connecté (cachés par défaut) -->
+      <button class="btn" id="btn-deconnexion" style="display:none" onclick="deconnexion()">Déconnexion</button>
+      <button class="btn btn-accent" id="btn-moncompte-top" style="display:none" onclick="go('p-moncompte')">Mon compte</button>
+    </div>
+    <div class="search-wrap">
+      <div class="search-bar" onclick="go('p-recherche')">
+        <span style="color:var(--text3);font-size:14px">🔍</span>
+        <input type="text" placeholder="Rechercher une histoire, un auteur…" readonly>
+      </div>
+    </div>
+    <div class="hashtag-band">
+      <div class="tag-pill active" onclick="goHashtag('Romance')">✦ Romance</div>
+      <div class="tag-pill" onclick="goHashtag('Surnaturel')">✦ Surnaturel</div>
+      <div class="tag-pill" onclick="goHashtag('Fantastique')">✦ Fantastique</div>
+      <div class="tag-pill" onclick="goHashtag('Contemporain')">✦ Contemporain</div>
+      <div class="tag-pill" onclick="goHashtag('Dark Romance')">✦ Dark Romance</div>
+      <div class="tag-pill" onclick="goHashtag('Feel Good')">✦ Feel Good</div>
+      <div class="tag-pill" onclick="goHashtag('Historique')">✦ Historique</div>
+    </div>
+    <div class="page-scroll">
+      <div class="banner-wrap" id="banner-wrap">
+        <div class="banner-track" id="banner-track">
+          <div class="banner-slide b1" style="cursor:pointer" onclick="openHistoire(1)">
+            <img src="banner_sorciere.jpg" alt="">
+            <div class="banner-slide-text">✦ Nouveauté · Une sorcière au Far West</div>
+          </div>
+          <div class="banner-slide b2">✦ Les Étoiles Inversées · Bientôt</div>
+          <div class="banner-slide b3">✦ L'Horizon Bleu · Bientôt</div>
+          <div class="banner-slide b4">✦ Abonnement illimité disponible</div>
+          <div class="banner-slide b5">✦ 20 tickets offerts à l'inscription !</div>
+        </div>
+        <div class="banner-dots">
+          <div class="bdot active" id="bd0"></div><div class="bdot" id="bd1"></div>
+          <div class="bdot" id="bd2"></div><div class="bdot" id="bd3"></div><div class="bdot" id="bd4"></div>
+        </div>
+      </div>
+      <div class="section-label">Histoires</div>
+      <div class="book-grid" id="book-grid"></div>
+    </div>
+    <div class="modal-overlay" id="p-connexion-modal" onclick="closeModal(event,'p-connexion-modal')">
+      <div class="modal-box">
+        <button class="modal-close" onclick="closeM('p-connexion-modal')">✕</button>
+        <div class="modal-title">Connexion</div>
+        <div class="form-group">
+          <label class="form-label">Adresse e-mail</label>
+          <input type="email" class="form-input" id="connexion-email" placeholder="ton@mail.com">
+          <button class="form-link" onclick="go('p-identifiant-oublie');closeM('p-connexion-modal')">E-mail oublié ?</button>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mot de passe</label>
+          <input type="password" class="form-input" id="connexion-mdp" placeholder="••••••••">
+          <button class="form-link" onclick="go('p-mdp-oublie');closeM('p-connexion-modal')">Mot de passe oublié ?</button>
+        </div>
+        <div id="connexion-error" style="font-size:11px;color:var(--danger);margin-bottom:8px;display:none;"></div>
+        <button class="btn btn-full btn-accent" onclick="handleConnexion()">Valider</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- À PROPOS -->
+  <div class="page" id="p-apropos">
+    <div class="page-header"><button class="btn" onclick="go('p-main')">← Retour</button></div>
+    <div class="placeholder-box">
+      <span class="placeholder-icon">✦</span>
+      <div class="page-title" style="margin:0">À propos d'Astrolabe</div>
+      <div class="placeholder-text">Cette page sera complétée prochainement.</div>
+    </div>
+  </div>
+
+  <!-- IDENTIFIANT OUBLIÉ -->
+  <div class="page" id="p-identifiant-oublie">
+    <div class="page-header"><button class="btn" onclick="go('p-connexion-modal')">← Retour</button></div>
+    <div class="simple-page">
+      <div class="page-title">Identifiant oublié</div>
+      <div class="page-subtitle">Saisis ton adresse e-mail, on t'envoie ton identifiant.</div>
+      <div class="form-group"><label class="form-label">Adresse e-mail</label><input type="email" class="form-input" placeholder="ton@mail.com"></div>
+      <button class="btn btn-full btn-accent" onclick="go('p-main')">Envoyer</button>
+    </div>
+  </div>
+
+  <!-- MDP OUBLIÉ -->
+  <div class="page" id="p-mdp-oublie">
+    <div class="page-header"><button class="btn" onclick="go('p-connexion-modal')">← Retour</button></div>
+    <div class="simple-page">
+      <div class="page-title">Mot de passe oublié</div>
+      <div class="page-subtitle">Saisis ton adresse e-mail, on t'envoie un lien de réinitialisation.</div>
+      <div class="form-group"><label class="form-label">Adresse e-mail</label><input type="email" class="form-input" placeholder="ton@mail.com"></div>
+      <button class="btn btn-full btn-accent" onclick="go('p-main')">Envoyer</button>
+    </div>
+  </div>
+
+  <!-- INSCRIPTION 1 -->
+  <div class="page" id="p-inscription1">
+    <div class="page-header"><button class="btn" onclick="go('p-main')">← Retour</button></div>
+    <div class="page-scroll"><div class="page-body">
+      <div class="step-stars"><span class="sstar on">✦</span><span class="sstar">✦</span><span class="sstar">✦</span><span class="sstar">✦</span><span class="sstar">✦</span></div>
+      <div class="page-title">Bienvenue sur Astrolabe</div>
+      <div class="page-subtitle">Des histoires d'amour faites avec amour et safe ✦</div>
+      <div class="form-group">
+        <label class="form-label">Identifiant <span style="font-size:9px;color:var(--text3)">(affiché dans les commentaires)</span></label>
+        <input type="text" class="form-input" id="insc-pseudo" placeholder="Ton pseudo">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mot de passe</label>
+        <input type="password" class="form-input" id="insc-mdp" placeholder="••••••••">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Valider le mot de passe</label>
+        <input type="password" class="form-input" id="insc-mdp2" placeholder="••••••••">
+        <span class="form-error" id="mdp-error">Les deux mots de passe ne correspondent pas.</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Adresse e-mail</label>
+        <input type="email" class="form-input" id="insc-mail" placeholder="ton@mail.com">
+        <span class="form-hint">Astrolabe ne revend pas tes données. L'e-mail sert uniquement à récupérer ton compte.</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Âge</label>
+        <select class="form-select" id="age-select"></select>
+      </div>
+      <button class="btn btn-full btn-accent" onclick="handleInscription1()">Valider →</button>
+
+    </div></div>
+  </div>
+
+  <!-- INSCRIPTION 2 mineurs -->
+  <div class="page" id="p-inscription2">
+    <div class="page-header"><button class="btn" onclick="go('p-inscription1')">← Retour</button></div>
+    <div class="page-scroll"><div class="page-body">
+      <div class="step-stars"><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar">✦</span><span class="sstar">✦</span><span class="sstar">✦</span></div>
+      <div class="page-title">Ton confort de lecture</div>
+      <div class="page-subtitle">Sur Astrolabe, nous souhaitons que tu te sentes bien et aies la meilleure expérience possible.</div>
+      <div class="toggle-row"><span class="toggle-label">Afficher les trigger warnings au début de chaque histoire</span><label class="tgl"><input type="checkbox" checked><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+      <div class="toggle-row"><span class="toggle-label">Afficher les trigger warnings au début de chaque chapitre</span><label class="tgl"><input type="checkbox"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+      <span class="form-hint" style="margin-top:14px;display:block;">Tu peux modifier ces options depuis les paramètres de ton compte.</span>
+      <button class="btn btn-full btn-accent" style="margin-top:20px" onclick="go('p-inscription4')">Valider →</button>
+    </div></div>
+  </div>
+
+  <!-- INSCRIPTION 3 adultes -->
+  <div class="page" id="p-inscription3">
+    <div class="page-header"><button class="btn" onclick="go('p-inscription1')">← Retour</button></div>
+    <div class="page-scroll"><div class="page-body">
+      <div class="step-stars"><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar">✦</span><span class="sstar">✦</span></div>
+      <div class="page-title">Personnalise ton expérience</div>
+      <div class="page-subtitle">Sur Astrolabe, nous souhaitons que tu te sentes bien et aies la meilleure expérience possible.</div>
+      <div class="toggle-row"><span class="toggle-label">Activer l'accès au contenu pour adulte</span><label class="tgl"><input type="checkbox"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+      <div style="height:1px;background:rgba(180,190,255,.07);margin:6px 0"></div>
+      <div class="toggle-row"><span class="toggle-label">Afficher les trigger warnings au début de chaque histoire</span><label class="tgl"><input type="checkbox" checked><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+      <div class="toggle-row"><span class="toggle-label">Afficher les trigger warnings au début de chaque chapitre</span><label class="tgl"><input type="checkbox"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+      <span class="form-hint" style="margin-top:14px;display:block;">Tu peux modifier ces options depuis les paramètres de ton compte.</span>
+      <button class="btn btn-full btn-accent" style="margin-top:20px" onclick="go('p-inscription4')">Valider →</button>
+    </div></div>
+  </div>
+
+  <!-- INSCRIPTION 4 cadeau -->
+  <div class="page" id="p-inscription4">
+    <div class="gift-center">
+      <div class="step-stars"><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar">✦</span></div>
+      <span class="gift-emoji">🎁</span>
+      <div class="gift-title">Merci pour ton inscription !</div>
+      <div class="gift-desc">Pour fêter ça, Astrolabe t'offre</div>
+      <div class="tickets-badge">20 tickets ✦</div>
+      <div class="gift-desc">Bienvenue dans l'univers Astrolabe ✦</div>
+      <button class="btn btn-full btn-accent" style="max-width:320px" onclick="addTickets(20);go('p-inscription5')">Continuer →</button>
+    </div>
+  </div>
+
+  <!-- INSCRIPTION 5 -->
+  <div class="page" id="p-inscription5">
+    <div class="page-scroll"><div class="page-body">
+      <div class="step-stars"><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar on">✦</span></div>
+      <div class="page-title">C'est à toi de choisir !</div>
+      <div class="page-subtitle">Les 8 premiers chapitres de chaque histoire sont gratuits. Les suivants sont publiés chaque semaine.</div>
+      <div class="choice-cards">
+        <div class="choice-card" onclick="go('p-abonnement')"><div class="cc-title">✦ Prendre un abonnement</div><div class="cc-desc">Accès illimité à tout le contenu, nouveautés en avant-première.</div></div>
+        <div class="choice-card" onclick="goAcheterTickets('p-inscription5')"><div class="cc-title">✦ Acheter des tickets</div><div class="cc-desc">Débloquer des chapitres à la carte, selon tes envies.</div></div>
+        <div class="choice-card featured" onclick="finishInscription()"><div class="cc-title" style="color:var(--accent)">✦ Commencer ma lecture</div><div class="cc-desc">Explorer avec les <span id="ticket-count-insc">20</span> tickets offerts par Astrolabe.</div></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ABONNEMENT -->
+  <div class="page" id="p-abonnement">
+    <div class="page-header"><button class="btn" id="abo-back-btn" onclick="go('p-inscription5')">← Retour</button></div>
+    <div class="placeholder-box">
+      <span class="placeholder-icon">✦</span>
+      <div class="page-title" style="margin:0">Abonnement</div>
+      <div class="placeholder-text">Cette page sera complétée prochainement.</div>
+      <button class="btn btn-full btn-accent" style="max-width:280px;margin-top:10px" onclick="finishInscription()">Valider →</button>
+    </div>
+  </div>
+
+  <!-- ACHETER TICKETS -->
+  <div class="page" id="p-acheter-tickets">
+    <div class="page-header"><button class="btn" id="tickets-back-btn" onclick="go('p-inscription5')">← Retour</button></div>
+    <div class="placeholder-box">
+      <span class="placeholder-icon">🎟</span>
+      <div class="page-title" style="margin:0">Acheter des tickets</div>
+      <div class="placeholder-text">Cette page sera complétée prochainement.</div>
+      <button class="btn btn-full btn-accent" style="max-width:280px;margin-top:10px" onclick="finishInscription()">Valider →</button>
+    </div>
+  </div>
+
+  <!-- RECHERCHE -->
+  <div class="page" id="p-recherche">
+    <div class="page-header"><button class="btn" onclick="go('p-main')">← Retour</button></div>
+    <div class="page-scroll"><div class="page-body">
+      <input type="text" class="search-input-big" placeholder="🔍  Rechercher…" id="search-input" oninput="handleSearch(this.value)">
+      <div class="search-results-title" id="search-label">Suggestions</div>
+      <div class="book-grid" id="search-grid"></div>
+    </div></div>
+  </div>
+
+  <!-- HASHTAG -->
+  <div class="page" id="p-hashtag">
+    <div class="page-header"><button class="btn" onclick="go('p-main')">← Retour</button></div>
+    <div class="hashtag-page-title" id="hashtag-title"># Romance</div>
+    <div class="hashtag-count" id="hashtag-count"></div>
+    <div class="page-scroll"><div class="book-grid" id="hashtag-grid" style="padding-top:8px"></div></div>
+  </div>
+
+  <!-- HISTOIRE -->
+  <div class="page" id="p-histoire">
+    <div class="page-header"><button class="btn" id="histoire-back-btn" onclick="go('p-main')">← Retour</button></div>
+    <div class="page-scroll">
+      <!-- bannière 2:1 identique à la page d'accueil -->
+      <div class="histoire-banner" id="histoire-banner"></div>
+      <div class="histoire-title" id="histoire-title"></div>
+      <div class="histoire-author" id="histoire-author"></div>
+      <div class="histoire-tags" id="histoire-tags"></div>
+      <div class="tw-box" id="tw-box" style="display:none">
+        <div class="tw-label">Trigger warnings</div>
+        <div class="tw-text" id="tw-text"></div>
+      </div>
+      <div class="histoire-desc" id="histoire-desc"></div>
+      <div class="chapitres-label">Chapitres</div>
+      <div id="chapitres-list"></div>
+    </div>
+  </div>
+
+  <!-- LECTURE -->
+  <div class="page" id="p-lecture">
+    <div class="lecture-header">
+      <button class="btn" id="lecture-back-btn" onclick="go('p-histoire')">← Retour</button>
+      <div class="lecture-titre" id="lecture-titre"></div>
+    </div>
+    <div class="page-scroll">
+      <div class="lecture-etoile-deco">✦</div>
+      <div class="lecture-body" id="lecture-body" style="text-align:justify"></div>
+      <div class="lecture-nav" id="lecture-nav"></div>
+    </div>
+  </div>
+
+  <!-- MON COMPTE -->
+  <div class="page" id="p-moncompte">
+    <div class="page-header"><button class="btn" onclick="go('p-main')">← Retour</button></div>
+    <div class="page-scroll">
+      <div class="compte-top">
+        <div class="compte-avatar">☽</div>
+        <div class="compte-name-txt" id="compte-name">Astrolectrice</div>
+        <div class="compte-since">Membre depuis 2025</div>
+        <div class="badges-row"><span class="badge">BADGE</span></div>
+      </div>
+      <div class="compte-body">
+        <div class="tickets-row" onclick="openModal('tickets-popup')">
+          <span class="tickets-row-label">Mes tickets</span>
+          <span class="tickets-row-val" id="compte-tickets">0 ✦</span>
+        </div>
+        <!-- ABONNEMENT -->
+        <div class="tickets-row" id="abo-row" onclick="openAboPopup()" style="margin-top:-8px">
+          <span class="tickets-row-label">Abonnement</span>
+          <span class="tickets-row-val" id="abo-val" style="font-size:13px;color:var(--text3)">Aucun abonnement en cours</span>
+        </div>
+        <div class="divider"></div>
+        <div class="toggle-row"><span class="toggle-label">Contenu adulte</span><label class="tgl"><input type="checkbox"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+        <div class="toggle-row"><span class="toggle-label">Trigger warnings (histoires)</span><label class="tgl"><input type="checkbox" checked><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+        <div class="toggle-row"><span class="toggle-label">Trigger warnings (chapitres)</span><label class="tgl"><input type="checkbox"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+        <div class="divider"></div>
+        <!-- MODE LECTURE -->
+        <div class="toggle-row">
+          <span class="toggle-label">Mode lecture : <span id="mode-lecture-label">Nuit</span></span>
+          <label class="tgl"><input type="checkbox" id="toggle-mode-jour" onchange="toggleModeJour(this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
+        </div>
+        <div class="toggle-row" id="row-couleur-texte">
+          <span class="toggle-label">
+            Couleur du texte :
+            <span style="color:var(--accent);font-weight:500"> Bleu</span> /
+            <span style="color:#eef0fa;font-weight:500"> Blanc</span>
+          </span>
+          <label class="tgl"><input type="checkbox" id="toggle-texte-blanc" onchange="toggleTexte(this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
+        </div>
+        <div class="divider"></div>
+        <!-- BIBLIOTHÈQUE -->
+        <div class="biblio-section-title">Continuer la lecture</div>
+        <div class="biblio-row" id="biblio-continuer"><span class="biblio-empty">Aucune lecture en cours</span></div>
+        <div class="biblio-section-title">Dans ma PAL</div>
+        <div class="biblio-row" id="biblio-pal"><span class="biblio-empty">Ta pile à lire est vide</span></div>
+        <div class="biblio-section-title">Livres terminés</div>
+        <div class="biblio-row" id="biblio-termines"><span class="biblio-empty">Aucun livre terminé</span></div>
+        <div class="divider"></div>
+        <!-- SUPPRESSION -->
+        <div style="text-align:center;padding:8px 0 16px">
+          <button style="background:none;border:none;color:var(--danger);font-family:'Jost',sans-serif;font-size:11px;cursor:pointer;letter-spacing:.5px;opacity:.7" onclick="openModal('delete-popup1')">Supprimer mon compte</button>
+        </div>
+      </div>
+    </div>
+    <!-- Pop-up tickets -->
+    <div class="modal-overlay" id="tickets-popup" onclick="closeModal(event,'tickets-popup')">
+      <div class="modal-box" style="text-align:center">
+        <button class="modal-close" onclick="closeM('tickets-popup')">✕</button>
+        <div class="modal-title">Acheter des tickets</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.7">Tu souhaites acheter des tickets pour débloquer des chapitres ?</p>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-full btn-accent" onclick="closeM('tickets-popup');goAcheterTickets('p-moncompte')">Oui ✦</button>
+          <button class="btn btn-full" onclick="closeM('tickets-popup')">Non</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PAGE SUPPRESSION 1 — raison -->
+  <div class="page" id="p-delete1">
+    <div class="page-header"><button class="btn" onclick="go('p-moncompte')">← Retour</button></div>
+    <div class="delete-page">
+      <div class="delete-title">Cela nous peine de vous voir partir, mais c'est ainsi.</div>
+      <div class="delete-text">Si vous avez quelques minutes, pouvez-vous nous indiquer la raison de votre départ ? Cela n'est pas obligatoire mais nous aiderait grandement à améliorer l'expérience des autres lecteurs et lectrices.</div>
+      <textarea class="delete-textarea" id="delete-raison" placeholder="Votre commentaire (facultatif)…"></textarea>
+      <button class="btn btn-full" style="margin-top:16px" onclick="go('p-delete2')">Valider →</button>
+    </div>
+  </div>
+
+  <!-- PAGE SUPPRESSION 2 — confirmation finale -->
+  <div class="page" id="p-delete2">
+    <div class="page-header"><button class="btn" onclick="go('p-delete1')">← Retour</button></div>
+    <div class="delete-page">
+      <div class="delete-title">Êtes-vous certain·e à 100% de vouloir supprimer votre compte ?</div>
+      <div class="delete-text">Vous n'aurez aucun moyen de le récupérer passé cette étape.</div>
+      <button class="btn btn-full btn-danger" style="margin-top:8px" onclick="confirmerSuppression()">Oui, je suis sûr·e</button>
+      <button class="btn btn-full" style="margin-top:10px" onclick="openModal('delete-ouf-popup')">Non, je vais réfléchir encore un peu</button>
+    </div>
+  </div>
+
+  <!-- PAGE SUPPRESSION 3 — au revoir -->
+  <div class="page" id="p-delete3">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 28px;gap:16px">
+      <div style="font-size:48px">✦</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;line-height:1.5">Merci d'avoir fait partie du club de lecture Astrolabe !</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.8">Nous espérons vous revoir très bientôt mais, en attendant, continuez de briller telle l'étoile que vous êtes !</div>
+      <button class="btn btn-full btn-accent" style="max-width:300px;margin-top:8px" onclick="supprimerCompteDefinitif()">Quitter Astrolabe</button>
+    </div>
+  </div>
+
+  <!-- PAGE INTERROMPRE ABONNEMENT -->
+  <div class="page" id="p-interrompre-abo">
+    <div class="page-header"><button class="btn" onclick="go('p-moncompte')">← Retour</button></div>
+    <div class="placeholder-box">
+      <span class="placeholder-icon">✦</span>
+      <div class="page-title" style="margin:0">Interrompre l'abonnement</div>
+      <div class="placeholder-text">Cette page sera complétée prochainement.</div>
+      <button class="btn btn-full" style="max-width:280px;margin-top:10px" onclick="go('p-moncompte')">← Retour à mon compte</button>
+    </div>
+  </div>
+
+</div><!-- #app -->
+
+<!-- POP-UP ABONNEMENT -->
+<div class="modal-overlay" id="abo-popup" onclick="closeModal(event,'abo-popup')" style="position:fixed;z-index:200">
+  <div class="modal-box" id="abo-popup-box" style="text-align:center">
+    <button class="modal-close" onclick="closeM('abo-popup')">✕</button>
+    <div class="modal-title" id="abo-popup-title">Abonnement</div>
+    <div id="abo-popup-content"></div>
+  </div>
+</div>
+
+<!-- POP-UP SUPPRESSION 1 -->
+<div class="modal-overlay" id="delete-popup1" onclick="closeModal(event,'delete-popup1')" style="position:fixed;z-index:200">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeM('delete-popup1')">✕</button>
+    <div class="modal-title" style="font-size:20px;line-height:1.4">Supprimer mon compte</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Vous êtes sur le point de supprimer votre compte Astrolabe. Cette action est définitive et supprimera toute votre avancée, vos abonnements, lectures, tickets et badges dûment gagnés. Êtes-vous certain·e de vouloir supprimer votre compte ?</p>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-full btn-danger" onclick="closeM('delete-popup1');go('p-delete1')">Oui</button>
+      <button class="btn btn-full btn-accent" onclick="closeM('delete-popup1');openModal('delete-non-popup')">Non</button>
+    </div>
+  </div>
+</div>
+
+<!-- POP-UP OUF -->
+<div class="modal-overlay" id="delete-ouf-popup" onclick="closeModal(event,'delete-ouf-popup')" style="position:fixed;z-index:200">
+  <div class="modal-box" style="text-align:center">
+    <button class="modal-close" onclick="closeM('delete-ouf-popup')">✕</button>
+    <div style="font-size:40px;margin-bottom:12px">😮‍💨</div>
+    <div class="modal-title">Ouf !</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Vous nous avez fait peur ! Retournons lire une histoire pour nous remettre de toutes ces émotions !</p>
+    <button class="btn btn-full btn-accent" onclick="closeM('delete-ouf-popup');go('p-moncompte')">← Retour à mon compte</button>
+  </div>
+</div>
+
+<!-- POP-UP NON SUPPRESSION -->
+<div class="modal-overlay" id="delete-non-popup" onclick="closeModal(event,'delete-non-popup')" style="position:fixed;z-index:200">
+  <div class="modal-box" style="text-align:center">
+    <button class="modal-close" onclick="closeM('delete-non-popup')">✕</button>
+    <div style="font-size:40px;margin-bottom:12px">😮‍💨</div>
+    <div class="modal-title">Ouf !</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Vous nous avez fait peur ! Retournons lire une histoire pour nous remettre de toutes ces émotions !</p>
+    <button class="btn btn-full btn-accent" onclick="closeM('delete-non-popup');go('p-moncompte')">← Retour à mon compte</button>
+  </div>
+</div>
+
+<div id="pwa-banner" class="hidden">
+  <span class="pwa-icon">✦</span>
+  <div class="pwa-text">
+    <strong>Installer Astrolabe</strong>
+    <span id="pwa-install-text">Ajoute l'appli sur ton écran d'accueil</span>
+  </div>
+  <button class="pwa-install-btn" id="pwa-install-btn" onclick="installPWA()">Installer</button>
+  <button class="pwa-close-btn" onclick="closePWABanner()">✕</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPA_URL='https://msownknywszovjnfekde.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zb3dua255d3N6b3ZqbmZla2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MDIxNDUsImV4cCI6MjA4ODk3ODE0NX0.kekcMQQowhhIazwYDhAa4OYWCnHp4-4I_g9RGkxTjy8';
+const db=window.supabase.createClient(SUPA_URL,SUPA_KEY);
+
+/* ÉTAT */
+const compte={loggedIn:false,pseudo:'',tickets:0,userId:null};
+function addTickets(n){compte.tickets+=n;updateTicketsDisplay();sauvegarderTickets();}
+function updateTicketsDisplay(){
+  const el=document.getElementById('compte-tickets');if(el)el.textContent=compte.tickets+' ✦';
+  const i=document.getElementById('ticket-count-insc');if(i)i.textContent=compte.tickets;
+}
+async function sauvegarderTickets(){
+  if(!compte.userId)return;
+  await db.from('profils').update({tickets:compte.tickets}).eq('id',compte.userId);
+}
+async function checkSession(){
+  const {data:{session}}=await db.auth.getSession();
+  if(session){
+    const {data:profil}=await db.from('profils').select('*').eq('id',session.user.id).single();
+    if(profil){
+      compte.loggedIn=true;compte.userId=session.user.id;
+      compte.pseudo=profil.pseudo||'Astrolectrice';compte.tickets=profil.tickets||0;
+      document.getElementById('compte-name').textContent=compte.pseudo;
+      updateTicketsDisplay();
+      updateTopbar();
+    }
+  }
+}
+
+/* STARS */
+const starsEl=document.getElementById('stars');
+for(let i=0;i<70;i++){const s=document.createElement('div');s.className='star';s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';s.style.setProperty('--d',(2+Math.random()*5)+'s');s.style.setProperty('--dl',(-Math.random()*5)+'s');s.style.width=s.style.height=(Math.random()>0.7?3:2)+'px';starsEl.appendChild(s);}
+
+/* AGE SELECT */
+const ageSelect=document.getElementById('age-select');
+for(let a=1;a<=100;a++){const o=document.createElement('option');o.value=a;o.textContent=a+' ans';if(a===16)o.selected=true;ageSelect.appendChild(o);}
+
+
+
+/* DATA — Textes complets */
+const CH1=`Chapitre 1\nBerta\n\nSi je ne m'étais pas arrêté dans ce bar, je pense que ma bonne vieille Berta aurait rendu l'âme au milieu du désert. Presque cinq kilomètres qu'elle crachote comme une vieillarde, me faisant craindre à chaque virage qu'elle ne m'explose sous le séant et ne m'envoie valser dans les nuages. Même la béquille grince lorsque j'y donne un coup de botte pour stabiliser ma bête. Un gémissement douloureux fait trembler jusqu'à ses boulons lorsque j'en descends et je me fends moi-même d'un soupir.\n\nDes Harley. Plein. Beaucoup trop pour un parking aussi petit. Et au milieu de toutes ces bécanes rutilantes, la mienne fait peine à voir. Dire que c'est une antiquité serait malhonnête : cette vieillerie pourrait être datée au carbone 14 tant c'est un vestige ! Elle grince, elle râle, elle crache. Les pièces semblent prêtes à se séparer les unes des autres à tout instant et je soupçonne le responsable de sa fabrication d'avoir piqué des bouts à toutes les motos de son quartier pour créer un monstre de Frankenstein de métal. Si encore elle avait connu des heures de gloire, mais je suis certaine que, même neuve, elle était déjà bonne pour la casse. Et après l'avoir eu sous les fesses depuis Sacramento, je peux affirmer que c'est l'engin de torture le plus sophistiqué de toute l'histoire. J'ai rarement eu aussi mal partout que depuis que trace la route sur ce cheval mort et les quelques nuits que j'ai passées à la belle étoile ont sans doute été salutaires pour mes vertèbres toutes tassées.\n\nAvoir garé une telle épave au milieu de tous ces bijoux me fait déjà mal au cœur, mais bien moins que l'idée d'entrer dans ce bar rempli de motards alors que moi-même je ne sais même pas la marque de ma monture. Depuis que je suis arrivé aux états-unis, j'ai bien compris que pour être un motard, ici, il ne suffisait pas d'avoir le permis et une bécane. C'est un art de vivre et la pauvre franchie que je suis, avec son petit permis A obtenu à la chance et sa vieille moto à moitié crevée… Disons que je passe un peu pour une amatrice, voire une usurpatrice dans certains cercles que j'ai jusqu'ici essayé au possible d'éviter. Mais après m'être tapé une demi-journée de soleil sur une route si droite que j'ai failli m'y endormir, je ne rêve que de m'abriter dans ce bar, et tant pis si c'est un nid de dockers qui vont se faire une joie de me juger. J'ai juste à prier pour que personne n'aperçoive cette honte de la route qu'est Berta avant que je n'aie sifflé un soda pour repartir chargé à bloc sur ces routes interminables.\n\nJe retire mon casque et fourre une main dans mes cheveux pour chasser la coiffure peu avantageuse que m'impose cette protection routière. Prenant une grande inspiration, je pousse la porte de l'édifice et tente au possible de cacher mon malaise lorsque j'y rentre fièrement.\n\nJe m'étais attendue à ce que mon arrivée provoque l'émoi de la faune locale. Que tous s'arrêtent de parler et de boire pour me dévisager d'un air mauvais alors que j'irais m'accouder au bar pour demander un whisky sans faux col tout en expectorant un merveilleux mollard dans le premier crachoir à portée de tire. Peut-être même qu'un pianiste interromprait soudainement son ragtime et que la dernière note serait suspendue dans l'air alors que chacun retiendrait son souffle, se demandant qui de moi ou des locaux dégainerait les premiers.\n\nMais mon entrée se fait dans la parfaite indifférence. Le jukebox placé au fond de la salle ne tressaute même pas, et je le soupçonne d'ailleurs de n'être là qu'à titre décoratif au vu des enceintes dernier cri accrochées au plafond.\n\n— Hello ! Je lance au barman dans mon plus parfait anglais. N'importe quoi sans alcool s'il vous plaît !\n\nLe bar est parfaitement ajusté à la hauteur de mes coudes. Nickel. Je lâche mon sac entre mes pieds et glisse subtilement l'une des anses sous ma chaussure au cas où il viendrait à certains l'idée de se tirer avec mes affaires.\n\nL'homme derrière le comptoir hoche la tête et sort de sa glacière une bouteille de soda qu'il décapsule à la main pour me la tendre sans un mot. Je sors mon billet de ma poche, en espérant ne pas me tromper de président, et le lui tends dans un sourire aimable qu'il regarde à peine, déjà occupé à servir les autres clients.\n\nPersonne ne fait attention à moi, et c'est à peine si ma présence a fait frémir l'air chaud de cette ville perdue.\n\nUn coin paumé au milieu de l'Ouest américain.\n\nParfait pour une sorcière en cavale.`;
+
+const CH2=`Chapitre 2\nL'étrangère\n\nElle n'est pas d'ici. C'est tellement flagrant qu'on pourrait presque croire que c'est fait exprès.\n\nSon jean élimé est trop grand et ne tient à ses hanches que par une ceinture de cuir vieillotte. Sa veste bleue n'est guère en meilleur état, couverte de sable et reprisée au niveau des coudes alors que la bordure basse s'effiloche calmement. Même ses grosses chaussures de motarde semblent avoir déjà vécu mille vies, mais ce n'était rien comparé à son sac à dos si rapiécé que je serais bien en peine de deviner sa couleur d'origine. Elle l'avait laissé tomber à ses pieds en s'accoudant au bar où, depuis ma table, j'ai pu entendre son terrible accent. Difficile à cette distance de pouvoir le situer, mais je penchais pour une langue latine. Italien ou français.\n\n— Qu'est-ce que tu regardes Timy ?\n— La fille là.\n\nAndréa ne fait preuve d'aucune discrétion lorsqu'elle jette un œil derrière elle.\n\n— Mignonne. Valide-t-elle en portant sa bière à ses lèvres. On tire à pile ou face ?\n\nJe lui donne un coup de pied par-dessous la table alors qu'elle pouffe en s'étouffant avec sa gorgée.\n\n— Arrête de me faire honte ! Je râle pour la forme alors que le sourire d'Andréa attire à lui le mien.\n\nMais elle a raison sur ce point : l'étrangère est plutôt mignonne. Des cheveux blonds coupés court, encore un peu aplatis par le poids du casque, dont les pointes oscillent entre le cuivre et le rose comme si elle les avait négligemment laissé traîner dans un pot de peinture. Je n'ai pas vraiment pu voir son visage, hormis le sourire qu'elle a offert à Steve au bar, si lumineux qu'elle aurait pu éclairer toute la ville. Et quand elle a commandé, elle a agité ses mains, mimant presque ses mots pour compenser la raideur de son accent.\n\nMignonne.\n\nC'est effectivement le premier mot qui me vient en tête.\n\n— Tu la fixes. Me rappelle à l'ordre Andréa sans cesser de sourire. Va la voir si elle te plaît.\n\nJe ricane, sirotant ma bière.\n\n— Ouais, t'as raison : c'est tout à fait normal d'aller taper la discute avec une meuf juste parce qu'on la trouve mignonne de dos.\n— Moi c'est comme ça que je fais.\n\nElle me donne un petit coup de coude, ramenant mon attention sur elle. Andréa est le genre de fille à être magnifique sans effort, simplement en existant. De longs cheveux châtain bouclés qui tombent sur ses épaules sur laquelle pend négligemment la bretelle de son débardeur blanc savamment taché d'huile de moteur. Elle ressemble exactement au fantasme de la mécanicienne dans ces vieux films de voiture qu'on regardait en boucle quand on était ados.\n\n— Et qu'est-ce que tu veux que j'aille lui dire ?\n\nElle ricane, puis plisse les yeux et prend un air sombre et mystérieux en une vaine tentative de m'imiter :\n\n— Essaye un truc du genre : salut poupée. Je suis le meilleur garagiste de la région, mais j'ai besoin de quelqu'un pour réparer mon cœur blessé par la vie.\n\nJe pouffe dans ma bière, incrédule.\n\n— Mon cœur blessé par la vie ?\n\nElle hoche la tête, dramatique :\n\n— Ton pauvre cœur brisé par Sharon.\n\nJe fronce les sourcils, tâchant de recoller les morceaux :\n\n— On s'est vus qu'une fois… Je tente d'objecter.\n— Avant qu'elle ne se remette avec son ex ! s'offusque-t-elle, bien plus scandalisée que moi par toute cette affaire.\n— Ouais, mais ils vont super bien ensemble.\n\nMon argument la fait un instant réfléchir puis elle soupire, s'étalant presque sur la table dans un gémissement frustré.\n\n— Raaah, t'as raison… Ils en deviennent même frustrants. Un couple ne devrait jamais être aussi bien assorti, ça fait seulement déprimer les célibataires.\n\nSon minois devient soudain tout triste, et je dois lutter pour ne pas pincer sa joue et lui rendre ainsi un peu de couleur.\n\n— Si on est encore célibataire à 50 ans, tu te maries avec moi ?\n— Promis.\n\nElle m'offre son sourire éclatant.\n\n— Je veux une belle demande en mariage sur une gondole à Venise !\n— Ce que ma meilleure amie veut, ma meilleure amie aura. Je lui promets solennellement en levant ma bière pour qu'elle y heurte la sienne.\n\nEt alors que je m'apprêtais à finir ma bouteille et ma pause d'une même gorgée, quelqu'un entra dans le bar dans un fracas qui fit même tressauter la musique des haut-parleurs. Comme un seul homme, tous les clients se tournèrent vers la porte et sur la bande qui y bloquait la lumière.\n\nArsène.\n\nLe visage rouge, il fit un pas dans le bar, pointant l'extérieur avec autant de dégoût que de fureur avant de tonner avec colère :\n\n— Hé, les gars ! Qui a osé garer son immonde tas de boue devant notre bar ?!\n\nAu milieu du bar bondé, dans un silence mordant, une petite main se lève alors qu'un sourire coupable étire les lèvres de l'étrangère.`;
+
+const BOOKS=[
+  {id:1,title:'Une sorcière au Far West',color:'bc7',cover:'cover_sorciere.jpg',banner:'banner_sorciere.jpg',author:'',tags:['Romance','Surnaturel','Magie','Sorcière','Ennemi to lover'],tw:'Scènes spicy',desc:'Emaline, accompagnée de son fidèle destrier Berta, parcourt le Far West sans ami ni attache, jusqu\'au jour où Berta tombe en rade dans une ville un peu paumée abritant un gang de motards. Obligée de rester sur place, Emaline doit faire face à Tony, le garagiste local, qui s\'offusque qu\'elle fasse confiance à un tel engin sur la route. Mais Emaline a d\'autres soucis que les caprices de Tony, et espère simplement qu\'il fera vite : car il ne fait pas bon rester trop longtemps au même endroit quand on est une sorcière en cavale.',chapitres:[{num:1,titre:'Berta',gratuit:true,texte:CH1},{num:2,titre:'L\'étrangère',gratuit:true,texte:CH2}]},
+  {id:2,title:'Éclipse de Minuit',color:'bc1',cover:null,banner:null,author:'',tags:['Romance','Fantastique','Slow burn'],tw:null,desc:'Dans une ville sous des étoiles inversées, Aelya découvre qu\'elle peut voir les rêves des autres. Tout change quand elle croise le regard d\'un inconnu dont les rêves sont entièrement noirs…',chapitres:[{num:1,titre:'Premier rêve',gratuit:true,texte:'Chapitre à venir…'}]},
+  {id:3,title:'Le Dernier Soupir',color:'bc2',cover:null,banner:null,author:'',tags:['Romance','Drame'],tw:null,desc:'Deux âmes que tout oppose se retrouvent liées par un secret qu\'aucune ne voulait porter.',chapitres:[{num:1,titre:'Chapitre 1',gratuit:true,texte:'Chapitre à venir…'}]},
+  {id:4,title:'L\'Autre Rive',color:'bc3',cover:null,banner:null,author:'',tags:['Romance','Feel Good'],tw:null,desc:'Sur les bords d\'un fleuve qui sépare deux mondes, une rencontre improbable change tout.',chapitres:[{num:1,titre:'Chapitre 1',gratuit:true,texte:'Chapitre à venir…'}]},
+  {id:5,title:'Sous les Cendres',color:'bc4',cover:null,banner:null,author:'',tags:['Dark Romance','Fantastique'],tw:'Violence',desc:'Après la catastrophe, elle pensait avoir tout perdu. Jusqu\'à lui.',chapitres:[{num:1,titre:'Chapitre 1',gratuit:true,texte:'Chapitre à venir…'}]},
+  {id:6,title:'Brise d\'Automne',color:'bc6',cover:null,banner:null,author:'',tags:['Feel Good','Romance'],tw:null,desc:'Les feuilles tombent, les cœurs s\'ouvrent. Une histoire douce comme un dimanche.',chapitres:[{num:1,titre:'Chapitre 1',gratuit:true,texte:'Chapitre à venir…'}]},
+];
+
+function bookCardHTML(b){
+  const img=b.cover?`<img src="${b.cover}" alt="${b.title}" loading="lazy">`:'';
+  return`<div class="book-card ${b.color}" onclick="openHistoire(${b.id})">${img}<div class="book-card-label">${b.title}</div></div>`;
+}
+function renderGrid(id,books){const el=document.getElementById(id);if(el)el.innerHTML=books.map(b=>bookCardHTML(b)).join('');}
+renderGrid('book-grid',BOOKS);renderGrid('search-grid',BOOKS);renderGrid('hashtag-grid',BOOKS);
+
+/* NAV */
+function go(id){
+  document.querySelectorAll('.page').forEach(p=>{p.classList.remove('active');const mo=p.querySelector('.modal-overlay');if(mo)mo.classList.remove('open');});
+  if(id==='p-connexion-modal'){document.getElementById('p-main').classList.add('active');setTimeout(()=>openModal('p-connexion-modal'),50);return;}
+  const el=document.getElementById(id);if(el)el.classList.add('active');
+  // Étoiles : cachées en lecture, visibles ailleurs
+  const stars=document.getElementById('stars');
+  if(stars)stars.style.opacity=(id==='p-lecture')?'0':'1';
+  // Topbar
+  if(id==='p-main'||id==='p-moncompte')updateTopbar();
+}
+function openModal(id){document.getElementById(id)?.classList.add('open');}
+function closeM(id){document.getElementById(id)?.classList.remove('open');}
+function closeModal(e,id){if(e.target===document.getElementById(id))closeM(id);}
+function goCompte(){if(compte.loggedIn)go('p-moncompte');else go('p-inscription1');}
+function goAcheterTickets(fromPage){
+  document.getElementById('tickets-back-btn').onclick=()=>go(fromPage||'p-inscription5');
+  go('p-acheter-tickets');
+}
+
+function goHashtag(name){
+  document.getElementById('hashtag-title').textContent='# '+name;
+  const list=BOOKS.filter(b=>b.tags.some(t=>t.toLowerCase()===name.toLowerCase()));
+  const res=list.length?list:BOOKS;
+  document.getElementById('hashtag-count').textContent=res.length+' histoire'+(res.length>1?'s':'');
+  renderGrid('hashtag-grid',res);go('p-hashtag');
+}
+
+let prevPage='p-main';
+function openHistoire(id){
+  const cur=document.querySelector('.page.active');if(cur)prevPage=cur.id;
+  const b=BOOKS.find(x=>x.id===id);if(!b)return;
+  // Bannière 2:1 (même format que l'accueil)
+  const bannerEl=document.getElementById('histoire-banner');
+  if(b.banner){bannerEl.innerHTML=`<img src="${b.banner}" alt="${b.title}" style="width:100%;height:100%;object-fit:cover;display:block;">`;}
+  else{bannerEl.innerHTML=`<div class="histoire-banner-bg ${b.color}">✦</div>`;}
+  document.getElementById('histoire-title').textContent=b.title;
+  document.getElementById('histoire-author').textContent=b.author?'par '+b.author:'';
+  document.getElementById('histoire-tags').innerHTML=b.tags.map(t=>`<span class="histoire-tag"># ${t}</span>`).join('');
+  document.getElementById('histoire-desc').textContent=b.desc;
+  const twBox=document.getElementById('tw-box');
+  if(b.tw){twBox.style.display='block';document.getElementById('tw-text').textContent=b.tw;}else{twBox.style.display='none';}
+  const chapList=document.getElementById('chapitres-list');
+  chapList.innerHTML=b.chapitres.map(ch=>{
+    const libre=ch.gratuit||ch.num<=8;
+    return`<button class="btn-lire ${libre?'':'btn-lire-locked'}" onclick="openLecture(${b.id},${ch.num})">
+      <span>Chapitre ${ch.num} · ${ch.titre}</span>
+      <span class="ch-badge ${libre?'':'ch-badge-ticket'}">${libre?'Gratuit':'🎟 1 ticket'}</span>
+    </button>`;
+  }).join('');
+  document.getElementById('histoire-back-btn').onclick=()=>go(prevPage);
+  go('p-histoire');
+}
+
+function openLecture(bookId,chapNum){
+  const b=BOOKS.find(x=>x.id===bookId);
+  const ch=b?.chapitres.find(c=>c.num===chapNum);
+  if(!b||!ch)return;
+  document.getElementById('lecture-titre').textContent=b.title;
+  const lines=ch.texte.split('\n\n');
+  // Première ligne = titre chapitre, deuxième = sous-titre
+  let html='';
+  lines.forEach((line,i)=>{
+    if(i===0){const parts=line.split('\n');html+=`<div class="lecture-ch-title">${parts[0]||''}</div><div class="lecture-ch-sub">${parts[1]||''}</div>`;}
+    else{const isD=line.trim().startsWith('—')||line.trim().startsWith('-');html+=`<p class="${isD?'d':''}">${line.replace(/\n/g,'<br>')}</p>`;}
+  });
+  document.getElementById('lecture-body').innerHTML=html;
+  const nav=document.getElementById('lecture-nav');
+  const prev=b.chapitres.find(c=>c.num===chapNum-1);
+  const next=b.chapitres.find(c=>c.num===chapNum+1);
+  nav.innerHTML='';
+  if(prev)nav.innerHTML+=`<button class="btn btn-full" style="flex:1" onclick="openLecture(${bookId},${prev.num})">← Ch.${prev.num}</button>`;
+  if(next)nav.innerHTML+=`<button class="btn btn-full btn-accent" style="flex:1" onclick="openLecture(${bookId},${next.num})">Ch.${next.num} →</button>`;
+  document.getElementById('lecture-back-btn').onclick=()=>go('p-histoire');
+  document.querySelector('#p-lecture .page-scroll').scrollTop=0;
+  go('p-lecture');
+  setTimeout(applyLectureMode, 50);
+}
+
+/* VALIDATION EMAIL */
+function isValidEmail(email){
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+/* INSCRIPTION */
+function handleInscription1(){
+  const mdp=document.getElementById('insc-mdp').value;
+  const mdp2=document.getElementById('insc-mdp2').value;
+  const err=document.getElementById('mdp-error');
+  if(mdp!==mdp2){err.classList.add('show');return;}
+  err.classList.remove('show');
+  const pseudo=document.getElementById('insc-pseudo').value.trim();
+  if(pseudo){compte.pseudo=pseudo;}
+  const age=parseInt(document.getElementById('age-select').value);
+  go(age<18?'p-inscription2':'p-inscription3');
+}
+
+async function finishInscription(){
+  const email=document.getElementById('insc-mail').value.trim();
+  const mdp=document.getElementById('insc-mdp').value;
+  if(!isValidEmail(email)){alert('Oups ! Cette adresse e-mail ne semble pas valide.');return;}
+  const pseudo=document.getElementById('insc-pseudo').value.trim()||'Astrolectrice';
+  const age=parseInt(document.getElementById('age-select').value||'16');
+  const adulte=age>=18&&(document.getElementById('adult3')?.checked||false);
+  const twr=document.getElementById('twr3')?.checked??document.getElementById('twr2')?.checked??true;
+  const finishBtn=document.querySelector('#p-inscription5 .choice-card.featured');
+  if(finishBtn)finishBtn.style.opacity='0.5';
+  try{
+    const {data,error}=await db.auth.signUp({email,password:mdp,options:{data:{pseudo}}});
+    if(error)throw error;
+    const userId=data.user?.id;
+    if(!userId)throw new Error('Erreur creation compte');
+    const {error:pe}=await db.from('profils').insert({id:userId,pseudo,email,tickets:20,adulte,trigger_warnings:twr});
+    if(pe)throw pe;
+    compte.pseudo=pseudo;
+    document.getElementById('compte-name').textContent=pseudo;
+    alert('✦ Bienvenue '+pseudo+' !\n\nUn e-mail de confirmation t\'a été envoyé.\nClique sur le lien pour activer ton compte, puis connecte-toi !');
+    updateTopbar();
+    go('p-main');
+  }catch(e){
+    const msg=e.message==='User already registered'?'Cette adresse e-mail est deja utilisee.':e.message;
+    alert('Oups ! '+msg);
+    if(finishBtn)finishBtn.style.opacity='1';
+  }
+}
+
+/* CONNEXION */
+async function handleConnexion(){
+  const email=document.getElementById('connexion-email').value.trim();
+  const mdp=document.getElementById('connexion-mdp').value;
+  const errEl=document.getElementById('connexion-error');
+  if(!isValidEmail(email)){
+    if(errEl){errEl.textContent='Adresse e-mail invalide.';errEl.style.display='block';}
+    return;
+  }
+  const {data,error}=await db.auth.signInWithPassword({email,password:mdp});
+  if(error){
+    if(errEl){errEl.textContent='E-mail ou mot de passe incorrect.';errEl.style.display='block';}
+    return;
+  }
+  const {data:profil}=await db.from('profils').select('*').eq('id',data.user.id).single();
+  if(profil){
+    compte.loggedIn=true;compte.userId=data.user.id;
+    compte.pseudo=profil.pseudo||'Astrolectrice';compte.tickets=profil.tickets||0;
+    document.getElementById('compte-name').textContent=compte.pseudo;
+    updateTicketsDisplay();
+  }
+  closeM('p-connexion-modal');updateTopbar();go('p-main');
+}
+
+async function deconnexion(){
+  await db.auth.signOut();
+  compte.loggedIn=false;compte.userId=null;compte.pseudo='';compte.tickets=0;
+  updateTicketsDisplay();updateTopbar();go('p-main');
+}
+
+/* SEARCH */
+function handleSearch(val){
+  const label=document.getElementById('search-label');
+  const q=val.trim().toLowerCase();
+  let res;
+  if(!q){label.textContent='Suggestions';res=BOOKS;}
+  else{res=BOOKS.filter(b=>b.title.toLowerCase().includes(q)||b.tags.some(t=>t.toLowerCase().includes(q)));label.textContent=res.length?res.length+' résultat'+(res.length>1?'s':''):'Aucun résultat';}
+  renderGrid('search-grid',res);
+}
+
+/* BANNER */
+let bIdx=0;const BCOUNT=5;
+const track=document.getElementById('banner-track');
+function setBanner(idx){bIdx=(idx+BCOUNT)%BCOUNT;track.style.transform=`translateX(-${bIdx*20}%)`;document.querySelectorAll('.bdot').forEach((d,i)=>d.classList.toggle('active',i===bIdx));}
+let bTimer=setInterval(()=>setBanner(bIdx+1),3500);
+const bWrap=document.getElementById('banner-wrap');
+let tx=0,ty=0;
+bWrap.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
+bWrap.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>40){clearInterval(bTimer);setBanner(dx<0?bIdx+1:bIdx-1);bTimer=setInterval(()=>setBanner(bIdx+1),3500);}},{passive:true});
+
+/* TOPBAR STATE */
+function updateTopbar(){
+  const loggedIn=compte.loggedIn;
+  document.getElementById('btn-inscription').style.display=loggedIn?'none':'';
+  document.getElementById('btn-connexion').style.display=loggedIn?'none':'';
+  document.getElementById('btn-deconnexion').style.display=loggedIn?'':'none';
+  document.getElementById('btn-moncompte-top').style.display=loggedIn?'':'none';
+}
+
+/* ABONNEMENT */
+const aboState={actif:false};
+function openAboPopup(){
+  const box=document.getElementById('abo-popup-content');
+  if(aboState.actif){
+    document.getElementById('abo-popup-title').textContent='Votre abonnement';
+    box.innerHTML=`<p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Voulez-vous interrompre votre abonnement ?</p>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-full btn-danger" onclick="closeM('abo-popup');go('p-interrompre-abo')">Oui</button>
+      <button class="btn btn-full btn-accent" onclick="closeM('abo-popup')">Non</button>
+    </div>`;
+  } else {
+    document.getElementById('abo-popup-title').textContent='Abonnement';
+    box.innerHTML=`<p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Découvrez l'abonnement Astrolabe pour un accès illimité à toutes les histoires.</p>
+    <button class="btn btn-full btn-accent" onclick="closeM('abo-popup')">Voir les offres (bientôt)</button>
+    <button class="btn btn-full" style="margin-top:8px" onclick="closeM('abo-popup')">Retour</button>`;
+  }
+  openModal('abo-popup');
+}
+
+/* MODES LECTURE */
+let modeJour=false;
+let textesBlancs=false;
+
+function toggleModeJour(actif){
+  modeJour=actif;
+  document.getElementById('mode-lecture-label').textContent=actif?'Jour':'Nuit';
+  document.getElementById('row-couleur-texte').style.display=actif?'none':'flex';
+  document.body.classList.toggle('mode-jour',actif);
+}
+
+function toggleTexte(blanc){
+  textesBlancs=blanc;
+  const lb=document.getElementById('lecture-body');
+  if(lb){
+    if(blanc){lb.classList.remove('texte-bleu');lb.classList.add('texte-blanc');}
+    else{lb.classList.remove('texte-blanc');lb.classList.add('texte-bleu');}
+  }
+}
+
+function applyLectureMode(){
+  const lb=document.getElementById('lecture-body');
+  if(!lb)return;
+  lb.classList.remove('texte-bleu','texte-blanc');
+  if(!modeJour){lb.classList.add(textesBlancs?'texte-blanc':'texte-bleu');}
+  // Cacher les étoiles en mode lecture
+  document.getElementById('stars').style.opacity=modeJour?'1':'0';
+}
+
+
+
+/* SUPPRESSION COMPTE */
+function confirmerSuppression(){
+  go('p-delete3');
+}
+
+async function supprimerCompteDefinitif(){
+  // Envoi du commentaire (à brancher sur une table feedback plus tard)
+  const raison=document.getElementById('delete-raison')?.value||'';
+  // Pour l'instant on log juste, l'envoi mail sera ajouté plus tard
+  console.log('Raison suppression:', raison);
+  try{
+    // Marquer le compte comme "à supprimer" dans 30 jours (soft delete)
+    if(compte.userId){
+      await db.from('profils').update({
+        a_supprimer_le: new Date(Date.now()+30*24*60*60*1000).toISOString()
+      }).eq('id',compte.userId);
+    }
+    await db.auth.signOut();
+    compte.loggedIn=false;compte.userId=null;compte.pseudo='';compte.tickets=0;
+    updateTopbar();
+    updateTicketsDisplay();
+    go('p-main');
+  }catch(e){
+    console.error(e);
+    go('p-main');
+  }
+}
+
+/* PWA */
+let deferredPrompt=null;
+const pwaBanner=document.getElementById('pwa-banner');
+const isIOS=/iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+const isStandalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone;
+if(!isStandalone){
+  if(isIOS){setTimeout(()=>{document.getElementById('pwa-install-text').textContent='Appuie sur ⬆ puis "Sur l\'écran d\'accueil"';document.getElementById('pwa-install-btn').textContent='Comment ?';document.getElementById('pwa-install-btn').onclick=()=>alert('1. Appuie sur ⬆ en bas de Safari\n2. Choisis "Sur l\'écran d\'accueil"\n3. Appuie sur "Ajouter"');pwaBanner.classList.remove('hidden');},5000);}
+  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;setTimeout(()=>pwaBanner.classList.remove('hidden'),5000);});
+}
+function installPWA(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;closePWABanner();});}}
+function closePWABanner(){pwaBanner.classList.add('hidden');}
+window.addEventListener('appinstalled',()=>closePWABanner());
+if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
+
+checkSession().catch(()=>{}).finally(()=>setTimeout(()=>go('p-main'),3200));
+</script>
+</body>
+</html>
