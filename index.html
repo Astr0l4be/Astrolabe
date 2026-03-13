@@ -199,14 +199,25 @@
 
     /* LECTURE */
     .lecture-header{padding:14px 16px 10px;flex-shrink:0;display:flex;align-items:center;gap:10px;justify-content:space-between;}
-    .lecture-titre{font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:1px;text-align:center;flex:1;color:inherit;}
+    .lecture-titre{font-family:'Cormorant Garamond',serif;font-size:13px;color:var(--text2);letter-spacing:1px;text-align:center;flex:1;}
     .lecture-body{padding:20px 22px 40px;font-size:15px;line-height:2.1;color:var(--text2);}
     .lecture-body p{margin-bottom:1.5em;}
     .lecture-body .d{color:var(--text);}
+    .lecture-ch-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--text);margin-bottom:6px;text-align:center;}
+    .lecture-ch-sub{font-size:13px;color:var(--text3);font-style:italic;text-align:center;margin-bottom:32px;letter-spacing:.5px;}
+    .lecture-nav{display:flex;gap:10px;padding:0 16px 40px;}
+    #p-lecture.mode-jour-lecture{background:#f5f0e8;}
+    #p-lecture.mode-jour-lecture .lecture-body{background:#f5f0e8;color:#1a1510;}
+    #p-lecture.mode-jour-lecture .lecture-body p,#p-lecture.mode-jour-lecture .lecture-body p.d{color:#1a1510!important;}
+    #p-lecture.mode-jour-lecture .lecture-ch-title{color:#1a1510;}
+    #p-lecture.mode-jour-lecture .lecture-ch-sub{color:#6b5e4e;}
+    #p-lecture.mode-jour-lecture .lecture-header{background:#ede8df;}
+    #p-lecture.mode-jour-lecture .lecture-titre{color:#6b5e4e;}
+    .lecture-body.texte-bleu p,.lecture-body.texte-bleu p.d{color:var(--accent)!important;}
+    .lecture-body.texte-blanc p,.lecture-body.texte-blanc p.d{color:#eef0fa!important;}
     .lecture-ch-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--text);margin-bottom:6px;text-align:center;display:flex;align-items:center;justify-content:center;gap:12px;}
     .lecture-star-side{font-size:20px;color:inherit;opacity:.8;}
     .lecture-ch-sub{font-size:13px;color:var(--text3);font-style:italic;text-align:center;margin-bottom:32px;letter-spacing:.5px;}
-    .lecture-nav{display:flex;gap:10px;padding:0 16px 40px;}
 
     /* MON COMPTE */
     .compte-top{display:flex;flex-direction:column;align-items:center;padding:20px 18px 0;}
@@ -236,35 +247,6 @@
     .placeholder-icon{font-size:48px;opacity:.5;}
     .placeholder-text{font-size:13px;color:var(--text3);line-height:1.7;}
 
-    /* MODES LECTURE */
-    #p-lecture.mode-jour-lecture { background: #f5f0e8; }
-    #p-lecture.mode-jour-lecture .lecture-body { background: #f5f0e8; color: #1a1510; }
-    #p-lecture.mode-jour-lecture .lecture-body p,
-    #p-lecture.mode-jour-lecture .lecture-body p.d { color: #1a1510 !important; }
-    #p-lecture.mode-jour-lecture .lecture-ch-title { color: #1a1510; }
-    #p-lecture.mode-jour-lecture .lecture-ch-sub { color: #6b5e4e; }
-    #p-lecture.mode-jour-lecture .lecture-header { background: #ede8df; border-bottom: 1px solid rgba(0,0,0,.08); }
-    #p-lecture.mode-jour-lecture .lecture-titre { color: #6b5e4e; }
-    #p-lecture.mode-jour-lecture .btn { background: rgba(0,0,0,.06); border-color: rgba(0,0,0,.12); color: #1a1510; }
-
-    .lecture-body p { text-align: justify; }
-    .lecture-body.texte-bleu p,
-    .lecture-body.texte-bleu p.d { color: var(--accent) !important; }
-    .lecture-body.texte-blanc p,
-    .lecture-body.texte-blanc p.d { color: #eef0fa !important; }
-
-    #p-lecture.mode-nuit-actif { background: var(--bg); }
-    #p-lecture.mode-nuit-actif #stars-lecture { display: none; }
-
-    /* SUPPRESSION COMPTE */
-    .delete-page { flex: 1; display: flex; flex-direction: column; padding: 28px 22px; }
-    .delete-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600; margin-bottom: 14px; line-height: 1.4; }
-    .delete-text { font-size: 13px; color: var(--text2); line-height: 1.8; margin-bottom: 22px; }
-    .delete-textarea { width: 100%; background: rgba(140,150,195,.1); border: 1px solid rgba(180,190,230,.16); border-radius: 10px; color: var(--text); font-family: 'Jost', sans-serif; font-size: 13px; padding: 12px 14px; outline: none; resize: none; min-height: 100px; }
-    .delete-textarea::placeholder { color: var(--text3); }
-    .btn-danger { background: rgba(212,126,126,.12); border-color: rgba(212,126,126,.3); color: var(--danger); }
-    .btn-danger:hover { background: rgba(212,126,126,.2); }
-
     /* PWA */
     #pwa-banner{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:linear-gradient(135deg,#1e2440,#1a1f38);border-top:1px solid rgba(180,190,255,.18);padding:14px 18px;display:flex;align-items:center;gap:12px;z-index:100;transition:transform .4s ease;}
     #pwa-banner.hidden{transform:translateX(-50%) translateY(110%);}
@@ -292,19 +274,16 @@
   <!-- PAGE PRINCIPALE -->
   <div class="page" id="p-main">
     <div class="topbar" id="topbar-main">
-      <!-- Bouton gauche -->
       <button class="btn" id="btn-inscription" onclick="go('p-inscription1')">Inscription</button>
       <button class="btn" id="btn-deconnexion" style="display:none" onclick="openModal('deco-popup-main')">Déconnexion</button>
-      <!-- Logo toujours au centre -->
       <div class="topbar-center">
         <div class="topbar-logo-box" onclick="go('p-apropos')">
           <span class="tl-icon">✦</span>
           <span class="tl-name">ASTROLABE</span>
         </div>
       </div>
-      <!-- Bouton droite -->
       <button class="btn" id="btn-connexion" onclick="go('p-connexion-modal')">Connexion</button>
-      <button class="btn btn-accent" id="btn-moncompte-top" style="display:none" onclick="go('p-moncompte')">Mon compte</button>
+      <button class="btn btn-accent" id="btn-moncompte-top" style="display:none;align-items:center;gap:6px" onclick="go('p-moncompte')"><span id="topbar-avatar" style="font-size:14px">☽</span> Mon compte</button>
     </div>
     <!-- Pop-up déconnexion topbar -->
     <div class="modal-overlay" id="deco-popup-main" onclick="closeModal(event,'deco-popup-main')" style="position:fixed;z-index:200">
@@ -319,8 +298,8 @@
       </div>
     </div>
     <div class="search-wrap">
-      <div class="search-bar" onclick="go('p-recherche')">
-        <span style="color:var(--text3);font-size:14px">🔍</span>
+      <div class="search-bar" onclick="go('p-recherche')" style="gap:8px">
+        <svg id="search-icon-main" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" placeholder="Rechercher une histoire, un auteur…" readonly>
       </div>
     </div>
@@ -366,7 +345,7 @@
           <label class="form-label">Mot de passe</label>
           <div style="position:relative">
             <input type="password" class="form-input" id="connexion-mdp" placeholder="••••••••" style="padding-right:40px">
-            <button type="button" onclick="togglePwd('connexion-mdp','eye-conn')" id="eye-conn" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#fff;font-size:14px;font-weight:700;opacity:.4">👁</button>
+            <button type="button" onclick="togglePwd('connexion-mdp','eye-conn')" id="eye-conn" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--accent);font-size:14px">👁</button>
           </div>
           <button class="form-link" onclick="go('p-mdp-oublie');closeM('p-connexion-modal')">Mot de passe oublié ?</button>
         </div>
@@ -418,13 +397,13 @@
       <div class="form-group">
         <label class="form-label">Identifiant <span style="font-size:9px;color:var(--text3)">(affiché dans les commentaires)</span></label>
         <input type="text" class="form-input" id="insc-pseudo" placeholder="Ton pseudo">
-        <span class="form-error" id="pseudo-error">Nom d'utilisateur déjà pris.</span>
+        <span class="form-error" id="pseudo-error">Pseudo non disponible.</span>
       </div>
       <div class="form-group">
         <label class="form-label">Mot de passe</label>
         <div style="position:relative">
           <input type="password" class="form-input" id="insc-mdp" placeholder="••••••••" style="padding-right:40px">
-          <button type="button" onclick="togglePwd('insc-mdp','eye-mdp')" id="eye-mdp" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#fff;font-size:14px;font-weight:700;opacity:.4">👁</button>
+          <button type="button" onclick="togglePwd('insc-mdp','eye-mdp')" id="eye-mdp" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--accent);font-size:14px">👁</button>
         </div>
         <span class="form-error" id="mdp-length-error">Le mot de passe doit faire au moins 6 caractères.</span>
       </div>
@@ -432,38 +411,26 @@
         <label class="form-label">Valider le mot de passe</label>
         <div style="position:relative">
           <input type="password" class="form-input" id="insc-mdp2" placeholder="••••••••" style="padding-right:40px">
-          <button type="button" onclick="togglePwd('insc-mdp2','eye-mdp2')" id="eye-mdp2" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#fff;font-size:14px;font-weight:700;opacity:.4">👁</button>
+          <button type="button" onclick="togglePwd('insc-mdp2','eye-mdp2')" id="eye-mdp2" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--accent);font-size:14px">👁</button>
         </div>
         <span class="form-error" id="mdp-error">Les deux mots de passe ne correspondent pas.</span>
       </div>
       <div class="form-group">
         <label class="form-label">Adresse e-mail</label>
         <input type="email" class="form-input" id="insc-mail" placeholder="ton@mail.com">
-        <span class="form-error" id="email-error">E-mail déjà utilisé.</span>
-        <span class="form-hint">Astrolabe ne revend pas tes données. L'e-mail sert uniquement à récupérer ton compte.</span>
+        <span class="form-error" id="email-error">E-mail déjà associé à un compte.</span>
+        <span class="form-hint">Astrolabe ne revend pas tes données.</span>
       </div>
       <div class="form-group">
         <label class="form-label">Date de naissance</label>
-        <!-- Desktop : champ date natif -->
         <input type="date" class="form-input dob-desktop" id="dob-date" style="display:none">
-        <!-- Mobile : 3 sélecteurs -->
         <div class="dob-mobile" style="display:none;flex-direction:row;gap:8px">
-          <div style="flex:1;text-align:center">
-            <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Jour</div>
-            <select class="form-select" id="dob-jour" style="text-align:center"></select>
-          </div>
-          <div style="flex:2;text-align:center">
-            <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Mois</div>
-            <select class="form-select" id="dob-mois" style="text-align:center"></select>
-          </div>
-          <div style="flex:2;text-align:center">
-            <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Année</div>
-            <select class="form-select" id="dob-annee" style="text-align:center"></select>
-          </div>
+          <div style="flex:1;text-align:center"><div style="font-size:10px;color:var(--text3);margin-bottom:4px">Jour</div><select class="form-select" id="dob-jour" style="text-align:center"></select></div>
+          <div style="flex:2;text-align:center"><div style="font-size:10px;color:var(--text3);margin-bottom:4px">Mois</div><select class="form-select" id="dob-mois" style="text-align:center"></select></div>
+          <div style="flex:2;text-align:center"><div style="font-size:10px;color:var(--text3);margin-bottom:4px">Année</div><select class="form-select" id="dob-annee" style="text-align:center"></select></div>
         </div>
       </div>
       <button class="btn btn-full btn-accent" onclick="handleInscription1()">Valider →</button>
-
     </div></div>
   </div>
 
@@ -550,7 +517,10 @@
   <div class="page" id="p-recherche">
     <div class="page-header"><button class="btn" onclick="go('p-main')">← Retour</button></div>
     <div class="page-scroll"><div class="page-body">
-      <input type="text" class="search-input-big" placeholder="🔍  Rechercher…" id="search-input" oninput="handleSearch(this.value)">
+      <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:24px;padding:10px 16px;margin-bottom:16px" id="search-container">
+        <svg id="search-icon-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" style="flex:1;background:none;border:none;outline:none;color:var(--text);font-family:'Jost',sans-serif;font-size:13px;" placeholder="Rechercher…" id="search-input" oninput="handleSearch(this.value)" onfocus="document.getElementById('search-icon-svg').style.stroke='#fff'" onblur="document.getElementById('search-icon-svg').style.stroke='var(--accent)'">
+      </div>
       <div class="search-results-title" id="search-label">Suggestions</div>
       <div class="book-grid" id="search-grid"></div>
     </div></div>
@@ -566,16 +536,23 @@
 
   <!-- HISTOIRE -->
   <div class="page" id="p-histoire">
-    <div class="page-header"><button class="btn" id="histoire-back-btn" onclick="go('p-main')">← Retour</button></div>
+    <div class="page-header" style="justify-content:space-between">
+      <button class="btn" id="histoire-back-btn" onclick="go('p-main')">← Retour</button>
+      <button class="btn btn-icon" id="histoire-opt-btn" onclick="openOptionsPopup(currentHistoireId)" style="font-size:16px;background:none;border:1px solid rgba(180,190,255,.2);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center">⚙</button>
+    </div>
     <div class="page-scroll">
-      <!-- bannière 2:1 identique à la page d'accueil -->
       <div class="histoire-banner" id="histoire-banner"></div>
       <div class="histoire-title" id="histoire-title"></div>
       <div class="histoire-author" id="histoire-author"></div>
       <div class="histoire-tags" id="histoire-tags"></div>
+      <button id="tw-reveal-btn" style="display:none;margin:0 16px 10px;background:none;border:1px solid rgba(167,143,212,.3);border-radius:8px;padding:7px 14px;color:rgba(167,143,212,.8);font-family:'Jost',sans-serif;font-size:11px;cursor:pointer;width:calc(100% - 32px)" onclick="document.getElementById('tw-box-reveal').style.display='block';this.style.display='none'">⚠ Afficher les trigger warnings</button>
       <div class="tw-box" id="tw-box" style="display:none">
         <div class="tw-label">Trigger warnings</div>
         <div class="tw-text" id="tw-text"></div>
+      </div>
+      <div class="tw-box" id="tw-box-reveal" style="display:none">
+        <div class="tw-label">Trigger warnings</div>
+        <div class="tw-text" id="tw-text-reveal"></div>
       </div>
       <div class="histoire-desc" id="histoire-desc"></div>
       <div class="chapitres-label">Chapitres</div>
@@ -587,11 +564,10 @@
   <div class="page" id="p-lecture">
     <div class="lecture-header">
       <button class="btn" id="lecture-back-btn" onclick="go('p-histoire')">← Retour</button>
-      <div class="lecture-titre" id="lecture-titre"></div>
+      <div class="lecture-titre" id="lecture-titre" style="color:inherit"></div>
     </div>
     <div class="page-scroll">
-      
-      <div class="lecture-body" id="lecture-body" style="text-align:justify"></div>
+      <div class="lecture-body" id="lecture-body"></div>
       <div class="lecture-nav" id="lecture-nav"></div>
     </div>
   </div>
@@ -600,9 +576,9 @@
   <div class="page" id="p-moncompte">
     <div class="page-header" style="justify-content:space-between">
       <button class="btn" onclick="go('p-main')">← Retour</button>
-      <button class="btn btn-icon" onclick="openModal('deco-popup')" title="Déconnexion" style="font-size:13px">⏻</button>
+      <button class="btn btn-icon" onclick="openModal('deco-popup')" title="Déconnexion" style="font-size:16px;background:none;border:none;cursor:pointer;color:var(--text2)">🚪</button>
     </div>
-    <!-- Pop-up déconnexion -->
+    <!-- Pop-up déconnexion compte -->
     <div class="modal-overlay" id="deco-popup" onclick="closeModal(event,'deco-popup')">
       <div class="modal-box" style="text-align:center">
         <button class="modal-close" onclick="closeM('deco-popup')">✕</button>
@@ -616,7 +592,7 @@
     </div>
     <div class="page-scroll">
       <div class="compte-top">
-        <div class="compte-avatar" id="compte-avatar" onclick="openModal('avatar-popup')" style="cursor:pointer">☽</div>
+        <div class="compte-avatar" id="compte-avatar" onclick="openAvatarPopup()" style="cursor:pointer">☽</div>
         <div class="compte-name-txt" id="compte-name">Astrolectrice</div>
         <div class="compte-since">Membre depuis 2025</div>
         <div class="badges-row"><span class="badge">BADGE</span></div>
@@ -625,11 +601,6 @@
         <div class="tickets-row" onclick="openModal('tickets-popup')">
           <span class="tickets-row-label">Mes tickets</span>
           <span class="tickets-row-val" id="compte-tickets">0 ✦</span>
-        </div>
-        <!-- ABONNEMENT -->
-        <div class="tickets-row" id="abo-row" onclick="openAboPopup()" style="margin-top:-8px">
-          <span class="tickets-row-label">Abonnement</span>
-          <span class="tickets-row-val" id="abo-val" style="font-size:13px;color:var(--text3)">Aucun abonnement en cours</span>
         </div>
         <div class="divider"></div>
         <div class="toggle-row" id="row-adulte"><span class="toggle-label">Contenu adulte</span><label class="tgl"><input type="checkbox" id="toggle-adulte" onchange="compte.adulte=this.checked;renderGrid('book-grid',BOOKS);savePrefs()"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
@@ -649,6 +620,11 @@
           </div>
         </div>
         <div class="divider"></div>
+        <!-- SUPPRESSION -->
+        <div style="text-align:center;padding:8px 0 16px">
+          <button style="background:none;border:none;color:var(--danger);font-family:'Jost',sans-serif;font-size:11px;cursor:pointer;letter-spacing:.5px;opacity:.7" onclick="openModal('delete-popup1')">Supprimer mon compte</button>
+        </div>
+        <div class="divider"></div>
         <!-- BIBLIOTHÈQUE -->
         <div class="biblio-section-title">Continuer la lecture</div>
         <div class="biblio-row" id="biblio-continuer"><span class="biblio-empty">Aucune lecture en cours</span></div>
@@ -656,11 +632,6 @@
         <div class="biblio-row" id="biblio-pal"><span class="biblio-empty">Ta pile à lire est vide</span></div>
         <div class="biblio-section-title">Livres terminés</div>
         <div class="biblio-row" id="biblio-termines"><span class="biblio-empty">Aucun livre terminé</span></div>
-        <div class="divider"></div>
-        <!-- SUPPRESSION -->
-        <div style="text-align:center;padding:8px 0 16px">
-          <button style="background:none;border:none;color:var(--danger);font-family:'Jost',sans-serif;font-size:11px;cursor:pointer;letter-spacing:.5px;opacity:.7" onclick="openModal('delete-popup1')">Supprimer mon compte</button>
-        </div>
       </div>
     </div>
     <!-- Pop-up tickets -->
@@ -677,120 +648,262 @@
     </div>
   </div>
 
+  <!-- POP-UP SUPPRESSION 1 -->
+  <div class="modal-overlay" id="delete-popup1" onclick="closeModal(event,'delete-popup1')" style="position:fixed;z-index:200">
+    <div class="modal-box" style="text-align:center">
+      <button class="modal-close" onclick="closeM('delete-popup1')">✕</button>
+      <div class="modal-title">Supprimer mon compte</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Es-tu sûr·e de vouloir supprimer ton compte ? Toutes tes données seront perdues dans 30 jours.</p>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-full btn-danger" style="background:rgba(212,126,126,.15);border-color:rgba(212,126,126,.4);color:var(--danger)" onclick="closeM('delete-popup1');go('p-delete1')">Oui</button>
+        <button class="btn btn-full btn-accent" onclick="closeM('delete-popup1');openModal('delete-non-popup')">Non</button>
+      </div>
+    </div>
+  </div>
 
-  <!-- PAGE SUPPRESSION 1 — raison -->
+  <!-- POP-UP OUF -->
+  <div class="modal-overlay" id="delete-non-popup" onclick="closeModal(event,'delete-non-popup')" style="position:fixed;z-index:200">
+    <div class="modal-box" style="text-align:center">
+      <button class="modal-close" onclick="closeM('delete-non-popup')">✕</button>
+      <div style="font-size:40px;margin-bottom:12px">😮‍💨</div>
+      <div class="modal-title">Ouf !</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">On a eu peur ! Content·e de te garder parmi nous ✦</p>
+      <button class="btn btn-full btn-accent" onclick="closeM('delete-non-popup')">Rester sur Astrolabe ✦</button>
+    </div>
+  </div>
+
+  <!-- PAGE RAISON SUPPRESSION -->
   <div class="page" id="p-delete1">
     <div class="page-header"><button class="btn" onclick="go('p-moncompte')">← Retour</button></div>
-    <div class="delete-page">
-      <div class="delete-title">Cela nous peine de vous voir partir, mais c'est ainsi.</div>
-      <div class="delete-text">Si vous avez quelques minutes, pouvez-vous nous indiquer la raison de votre départ ? Cela n'est pas obligatoire mais nous aiderait grandement à améliorer l'expérience des autres lecteurs et lectrices.</div>
-      <textarea class="delete-textarea" id="delete-raison" placeholder="Votre commentaire (facultatif)…"></textarea>
-      <button class="btn btn-full" style="margin-top:16px" onclick="go('p-delete2')">Valider →</button>
+    <div class="page-scroll"><div class="page-body">
+      <div class="page-title">Une dernière chose…</div>
+      <div class="page-subtitle">Pourquoi souhaites-tu supprimer ton compte ? (facultatif)</div>
+      <textarea id="delete-raison" style="width:100%;background:rgba(140,150,195,.1);border:1px solid rgba(180,190,230,.16);border-radius:10px;color:var(--text);font-family:'Jost',sans-serif;font-size:13px;padding:12px;outline:none;resize:none;min-height:100px;" placeholder="Ton retour nous aide à améliorer Astrolabe…"></textarea>
+      <button class="btn btn-full btn-accent" style="margin-top:16px" onclick="openModal('delete-popup2')">Valider →</button>
+    </div></div>
+  </div>
+
+  <!-- POP-UP SUPPRESSION 2 -->
+  <div class="modal-overlay" id="delete-popup2" onclick="closeModal(event,'delete-popup2')" style="position:fixed;z-index:200">
+    <div class="modal-box" style="text-align:center">
+      <button class="modal-close" onclick="closeM('delete-popup2')">✕</button>
+      <div class="modal-title">100% sûr·e ?</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Cette action est irréversible. Ton compte sera supprimé dans 30 jours.</p>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-full btn-danger" style="background:rgba(212,126,126,.15);border-color:rgba(212,126,126,.4);color:var(--danger)" onclick="closeM('delete-popup2');go('p-au-revoir')">Oui, supprimer</button>
+        <button class="btn btn-full btn-accent" onclick="closeM('delete-popup2');openModal('delete-non-popup')">Non</button>
+      </div>
     </div>
   </div>
 
-  <!-- PAGE SUPPRESSION 2 — confirmation finale -->
-  <div class="page" id="p-delete2">
-    <div class="page-header"><button class="btn" onclick="go('p-delete1')">← Retour</button></div>
-    <div class="delete-page">
-      <div class="delete-title">Êtes-vous certain·e à 100% de vouloir supprimer votre compte ?</div>
-      <div class="delete-text">Vous n'aurez aucun moyen de le récupérer passé cette étape.</div>
-      <button class="btn btn-full btn-danger" style="margin-top:8px" onclick="confirmerSuppression()">Oui, je suis sûr·e</button>
-      <button class="btn btn-full" style="margin-top:10px" onclick="openModal('delete-ouf-popup')">Non, je vais réfléchir encore un peu</button>
-    </div>
+  <!-- PAGE AU REVOIR -->
+  <div class="page" id="p-au-revoir">
+    <div class="page-scroll"><div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:40px 24px;">
+      <div style="font-size:52px;margin-bottom:20px">🌙</div>
+      <div class="page-title">Au revoir…</div>
+      <p style="font-size:13px;color:var(--text2);line-height:1.8;margin-bottom:30px">Ton compte sera supprimé dans 30 jours. Si tu changes d'avis, tu peux te reconnecter avant ce délai pour annuler.</p>
+      <button class="btn btn-full btn-accent" style="max-width:300px" onclick="supprimerCompteDefinitif()">Quitter Astrolabe</button>
+    </div></div>
   </div>
 
-  <!-- PAGE SUPPRESSION 3 — au revoir -->
-  <div class="page" id="p-delete3">
-    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 28px;gap:16px">
-      <div style="font-size:48px">✦</div>
-      <div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;line-height:1.5">Merci d'avoir fait partie du club de lecture Astrolabe !</div>
-      <div style="font-size:13px;color:var(--text2);line-height:1.8">Nous espérons vous revoir très bientôt mais, en attendant, continuez de briller telle l'étoile que vous êtes !</div>
-      <button class="btn btn-full btn-accent" style="max-width:300px;margin-top:8px" onclick="supprimerCompteDefinitif()">Quitter Astrolabe</button>
+  <!-- POP-UP SUPPRESSION 1 -->
+  <div class="modal-overlay" id="delete-popup1" onclick="closeModal(event,'delete-popup1')" style="position:fixed;z-index:200">
+    <div class="modal-box" style="text-align:center">
+      <button class="modal-close" onclick="closeM('delete-popup1')">✕</button>
+      <div class="modal-title">Supprimer mon compte</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Es-tu sûr·e de vouloir supprimer ton compte ? Toutes tes données seront supprimées dans 30 jours.</p>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-full" style="background:rgba(212,126,126,.15);border-color:rgba(212,126,126,.4);color:var(--danger)" onclick="closeM('delete-popup1');go('p-delete1')">Oui</button>
+        <button class="btn btn-full btn-accent" onclick="closeM('delete-popup1');openModal('delete-non-popup')">Non</button>
+      </div>
     </div>
   </div>
-
-  <!-- PAGE INTERROMPRE ABONNEMENT -->
-  <div class="page" id="p-interrompre-abo">
+  <div class="modal-overlay" id="delete-non-popup" onclick="closeModal(event,'delete-non-popup')" style="position:fixed;z-index:200">
+    <div class="modal-box" style="text-align:center">
+      <button class="modal-close" onclick="closeM('delete-non-popup')">✕</button>
+      <div style="font-size:40px;margin-bottom:12px">😮‍💨</div>
+      <div class="modal-title">Ouf !</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">On a eu peur ! Content·e de te garder parmi nous ✦</p>
+      <button class="btn btn-full btn-accent" onclick="closeM('delete-non-popup')">Rester sur Astrolabe ✦</button>
+    </div>
+  </div>
+  <div class="page" id="p-delete1">
     <div class="page-header"><button class="btn" onclick="go('p-moncompte')">← Retour</button></div>
-    <div class="placeholder-box">
-      <span class="placeholder-icon">✦</span>
-      <div class="page-title" style="margin:0">Interrompre l'abonnement</div>
-      <div class="placeholder-text">Cette page sera complétée prochainement.</div>
-      <button class="btn btn-full" style="max-width:280px;margin-top:10px" onclick="go('p-moncompte')">← Retour à mon compte</button>
+    <div class="page-scroll"><div class="page-body">
+      <div class="page-title">Une dernière chose…</div>
+      <div class="page-subtitle">Pourquoi souhaites-tu supprimer ton compte ? (facultatif)</div>
+      <textarea id="delete-raison" style="width:100%;background:rgba(140,150,195,.1);border:1px solid rgba(180,190,230,.16);border-radius:10px;color:var(--text);font-family:'Jost',sans-serif;font-size:13px;padding:12px;outline:none;resize:none;min-height:100px;" placeholder="Ton retour nous aide à améliorer Astrolabe…"></textarea>
+      <button class="btn btn-full btn-accent" style="margin-top:16px" onclick="openModal('delete-popup2')">Valider →</button>
+    </div></div>
+  </div>
+  <div class="modal-overlay" id="delete-popup2" onclick="closeModal(event,'delete-popup2')" style="position:fixed;z-index:200">
+    <div class="modal-box" style="text-align:center">
+      <button class="modal-close" onclick="closeM('delete-popup2')">✕</button>
+      <div class="modal-title">100% sûr·e ?</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Cette action est irréversible. Ton compte sera supprimé dans 30 jours.</p>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-full" style="background:rgba(212,126,126,.15);border-color:rgba(212,126,126,.4);color:var(--danger)" onclick="closeM('delete-popup2');go('p-au-revoir')">Oui, supprimer</button>
+        <button class="btn btn-full btn-accent" onclick="closeM('delete-popup2');openModal('delete-non-popup')">Non</button>
+      </div>
+    </div>
+  </div>
+  <div class="page" id="p-au-revoir">
+    <div class="page-scroll"><div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:40px 24px;">
+      <div style="font-size:52px;margin-bottom:20px">🌙</div>
+      <div class="page-title">Au revoir…</div>
+      <p style="font-size:13px;color:var(--text2);line-height:1.8;margin-bottom:30px">Ton compte sera supprimé dans 30 jours. Si tu changes d'avis, reconnecte-toi avant ce délai.</p>
+      <button class="btn btn-full btn-accent" style="max-width:300px" onclick="supprimerCompteDefinitif()">Quitter Astrolabe</button>
+    </div></div>
+  </div>
+
+  <!-- POP-UP BIENVENUE -->
+  <div class="modal-overlay" id="bienvenue-popup" style="position:fixed;z-index:200">
+    <div class="modal-box" style="text-align:center">
+      <div style="font-size:40px;margin-bottom:12px">🎁</div>
+      <div class="modal-title" style="display:flex;align-items:center;justify-content:center;gap:8px"><span>✦</span><span>Bienvenue <span id="bienvenue-pseudo"></span></span><span>✦</span></div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:8px;line-height:1.7">Un e-mail de confirmation t'a été envoyé.<br>Clique sur le lien pour activer ton compte.</p>
+      <p style="font-size:11px;color:var(--text3);margin-bottom:22px;line-height:1.6">En attendant, tu peux explorer le site avec tes 20 tickets offerts ✦</p>
+      <button class="btn btn-full btn-accent" onclick="closeM('bienvenue-popup');updateTopbar();go('p-main')">Commencer l'aventure ✦</button>
+    </div>
+  </div>
+
+  <!-- POP-UP AVATAR -->
+  <div class="modal-overlay" id="avatar-popup" onclick="closeModal(event,'avatar-popup')" style="position:fixed;z-index:200">
+    <div class="modal-box" style="text-align:center">
+      <button class="modal-close" onclick="cancelAvatar()">✕</button>
+      <div class="modal-title">Changer ma photo de profil</div>
+      <div style="display:flex;justify-content:center;gap:16px;margin:20px 0 24px">
+        <div onclick="setAvatar('☽')" id="av-lune" style="width:64px;height:64px;border-radius:50%;border:1.5px solid rgba(180,190,255,.2);background:rgba(126,159,212,.08);display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;">☽</div>
+        <div onclick="setAvatar('✦')" id="av-etoile" style="width:64px;height:64px;border-radius:50%;border:1.5px solid rgba(180,190,255,.2);background:rgba(126,159,212,.08);display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;">✦</div>
+        <div onclick="setAvatar('☀')" id="av-soleil" style="width:64px;height:64px;border-radius:50%;border:1.5px solid rgba(180,190,255,.2);background:rgba(126,159,212,.08);display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;">☀</div>
+      </div>
+      <button class="btn btn-full btn-accent" onclick="confirmAvatar()">Valider</button>
+    </div>
+  </div>
+
+  <!-- POP-UP OPTIONS HISTOIRE -->
+  <div class="modal-overlay" id="options-popup" onclick="closeModal(event,'options-popup')" style="position:fixed;z-index:200">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeM('options-popup')">✕</button>
+      <div class="modal-title" style="margin-bottom:16px">Paramètres de lecture</div>
+      <div style="display:flex;gap:10px;margin-bottom:18px">
+        <button id="opt-btn-cette" onclick="selectOptScope('cette')" class="btn btn-full btn-accent" style="font-size:11px">Pour cette histoire</button>
+        <button id="opt-btn-toutes" onclick="selectOptScope('toutes')" class="btn btn-full" style="font-size:11px">Pour toutes les histoires</button>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-label">Mode lecture : <span id="opt-mode-label">Nuit</span></span>
+        <label class="tgl"><input type="checkbox" id="opt-mode-jour" onchange="document.getElementById('opt-mode-label').textContent=this.checked?'Jour':'Nuit';document.getElementById('opt-row-couleur').style.display=this.checked?'none':'flex'"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
+      </div>
+      <div id="opt-row-couleur" class="toggle-row" style="justify-content:space-between;align-items:center;margin-top:8px">
+        <span class="toggle-label">Couleur du texte</span>
+        <div style="display:flex;gap:8px">
+          <button id="opt-btn-bleu" onclick="setOptTexte('bleu')" style="background:rgba(126,159,212,.25);border:1.5px solid rgba(126,159,212,.6);color:var(--accent);font-family:'Jost',sans-serif;font-size:11px;padding:5px 14px;border-radius:20px;cursor:pointer;">Bleu</button>
+          <button id="opt-btn-blanc" onclick="setOptTexte('blanc')" style="background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);color:#eef0fa;font-family:'Jost',sans-serif;font-size:11px;padding:5px 14px;border-radius:20px;cursor:pointer;">Blanc</button>
+        </div>
+      </div>
+      <div class="toggle-row" style="margin-top:8px"><span class="toggle-label">TW par histoire</span><label class="tgl"><input type="checkbox" id="opt-tw-histoire" checked><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+      <div class="toggle-row" style="margin-top:8px"><span class="toggle-label">TW par chapitre</span><label class="tgl"><input type="checkbox" id="opt-tw-chapitre"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+      <button class="btn btn-full btn-accent" style="margin-top:20px" onclick="saveOptions()">Valider</button>
+    </div>
+  </div>
+
+
+  <!-- POP-UP SUPPRESSION 1 -->
+  <div class="modal-overlay" id="delete-popup1" onclick="closeModal(event,'delete-popup1')" style="position:fixed;z-index:200">
+    <div class="modal-box" style="text-align:center">
+      <button class="modal-close" onclick="closeM('delete-popup1')">✕</button>
+      <div class="modal-title">Supprimer mon compte</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Es-tu sûr·e de vouloir supprimer ton compte ? Toutes tes données seront supprimées dans 30 jours.</p>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-full" style="background:rgba(212,126,126,.15);border-color:rgba(212,126,126,.4);color:var(--danger)" onclick="closeM('delete-popup1');go('p-delete1')">Oui</button>
+        <button class="btn btn-full btn-accent" onclick="closeM('delete-popup1');openModal('delete-non-popup')">Non</button>
+      </div>
+    </div>
+  </div>
+  <div class="modal-overlay" id="delete-non-popup" onclick="closeModal(event,'delete-non-popup')" style="position:fixed;z-index:200">
+    <div class="modal-box" style="text-align:center">
+      <button class="modal-close" onclick="closeM('delete-non-popup')">✕</button>
+      <div style="font-size:40px;margin-bottom:12px">😮‍💨</div>
+      <div class="modal-title">Ouf !</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">On a eu peur ! Content·e de te garder parmi nous ✦</p>
+      <button class="btn btn-full btn-accent" onclick="closeM('delete-non-popup')">Rester sur Astrolabe ✦</button>
+    </div>
+  </div>
+  <div class="page" id="p-delete1">
+    <div class="page-header"><button class="btn" onclick="go('p-moncompte')">← Retour</button></div>
+    <div class="page-scroll"><div class="page-body">
+      <div class="page-title">Une dernière chose…</div>
+      <div class="page-subtitle">Pourquoi souhaites-tu supprimer ton compte ? (facultatif)</div>
+      <textarea id="delete-raison" style="width:100%;background:rgba(140,150,195,.1);border:1px solid rgba(180,190,230,.16);border-radius:10px;color:var(--text);font-family:'Jost',sans-serif;font-size:13px;padding:12px;outline:none;resize:none;min-height:100px;" placeholder="Ton retour nous aide à améliorer Astrolabe…"></textarea>
+      <button class="btn btn-full btn-accent" style="margin-top:16px" onclick="openModal('delete-popup2')">Valider →</button>
+    </div></div>
+  </div>
+  <div class="modal-overlay" id="delete-popup2" onclick="closeModal(event,'delete-popup2')" style="position:fixed;z-index:200">
+    <div class="modal-box" style="text-align:center">
+      <button class="modal-close" onclick="closeM('delete-popup2')">✕</button>
+      <div class="modal-title">100% sûr·e ?</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Cette action est irréversible. Ton compte sera supprimé dans 30 jours.</p>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-full" style="background:rgba(212,126,126,.15);border-color:rgba(212,126,126,.4);color:var(--danger)" onclick="closeM('delete-popup2');go('p-au-revoir')">Oui, supprimer</button>
+        <button class="btn btn-full btn-accent" onclick="closeM('delete-popup2');openModal('delete-non-popup')">Non</button>
+      </div>
+    </div>
+  </div>
+  <div class="page" id="p-au-revoir">
+    <div class="page-scroll"><div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:40px 24px;">
+      <div style="font-size:52px;margin-bottom:20px">🌙</div>
+      <div class="page-title">Au revoir…</div>
+      <p style="font-size:13px;color:var(--text2);line-height:1.8;margin-bottom:30px">Ton compte sera supprimé dans 30 jours. Si tu changes d'avis, reconnecte-toi avant ce délai.</p>
+      <button class="btn btn-full btn-accent" style="max-width:300px" onclick="supprimerCompteDefinitif()">Quitter Astrolabe</button>
+    </div></div>
+  </div>
+  <!-- POP-UP BIENVENUE -->
+  <div class="modal-overlay" id="bienvenue-popup" style="position:fixed;z-index:200">
+    <div class="modal-box" style="text-align:center">
+      <div style="font-size:40px;margin-bottom:12px">🎁</div>
+      <div class="modal-title" style="display:flex;align-items:center;justify-content:center;gap:8px"><span>✦</span><span>Bienvenue <span id="bienvenue-pseudo"></span></span><span>✦</span></div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:8px;line-height:1.7">Un e-mail de confirmation t'a été envoyé.<br>Clique sur le lien pour activer ton compte.</p>
+      <p style="font-size:11px;color:var(--text3);margin-bottom:22px;line-height:1.6">En attendant, explore le site avec tes 20 tickets offerts ✦</p>
+      <button class="btn btn-full btn-accent" onclick="closeM('bienvenue-popup');updateTopbar();go('p-main')">Commencer l'aventure ✦</button>
+    </div>
+  </div>
+  <!-- POP-UP AVATAR -->
+  <div class="modal-overlay" id="avatar-popup" onclick="closeModal(event,'avatar-popup')" style="position:fixed;z-index:200">
+    <div class="modal-box" style="text-align:center">
+      <button class="modal-close" onclick="cancelAvatar()">✕</button>
+      <div class="modal-title">Changer ma photo de profil</div>
+      <div style="display:flex;justify-content:center;gap:16px;margin:20px 0 24px">
+        <div onclick="setAvatar('☽')" id="av-lune" style="width:64px;height:64px;border-radius:50%;border:1.5px solid rgba(180,190,255,.2);background:rgba(126,159,212,.08);display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;">☽</div>
+        <div onclick="setAvatar('✦')" id="av-etoile" style="width:64px;height:64px;border-radius:50%;border:1.5px solid rgba(180,190,255,.2);background:rgba(126,159,212,.08);display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;">✦</div>
+        <div onclick="setAvatar('☀')" id="av-soleil" style="width:64px;height:64px;border-radius:50%;border:1.5px solid rgba(180,190,255,.2);background:rgba(126,159,212,.08);display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;">☀</div>
+      </div>
+      <button class="btn btn-full btn-accent" onclick="confirmAvatar()">Valider</button>
+    </div>
+  </div>
+  <!-- POP-UP OPTIONS -->
+  <div class="modal-overlay" id="options-popup" onclick="closeModal(event,'options-popup')" style="position:fixed;z-index:200">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeM('options-popup')">✕</button>
+      <div class="modal-title" style="margin-bottom:16px">Paramètres de lecture</div>
+      <div style="display:flex;gap:10px;margin-bottom:18px">
+        <button id="opt-btn-cette" onclick="selectOptScope('cette')" class="btn btn-full btn-accent" style="font-size:11px">Pour cette histoire</button>
+        <button id="opt-btn-toutes" onclick="selectOptScope('toutes')" class="btn btn-full" style="font-size:11px">Pour toutes les histoires</button>
+      </div>
+      <div class="toggle-row"><span class="toggle-label">Mode lecture : <span id="opt-mode-label">Nuit</span></span><label class="tgl"><input type="checkbox" id="opt-mode-jour" onchange="document.getElementById('opt-mode-label').textContent=this.checked?'Jour':'Nuit';document.getElementById('opt-row-couleur').style.display=this.checked?'none':'flex'"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+      <div id="opt-row-couleur" class="toggle-row" style="justify-content:space-between;align-items:center;margin-top:8px">
+        <span class="toggle-label">Couleur du texte</span>
+        <div style="display:flex;gap:8px">
+          <button id="opt-btn-bleu" onclick="setOptTexte('bleu')" style="background:rgba(126,159,212,.25);border:1.5px solid rgba(126,159,212,.6);color:var(--accent);font-family:'Jost',sans-serif;font-size:11px;padding:5px 14px;border-radius:20px;cursor:pointer;">Bleu</button>
+          <button id="opt-btn-blanc" onclick="setOptTexte('blanc')" style="background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);color:#eef0fa;font-family:'Jost',sans-serif;font-size:11px;padding:5px 14px;border-radius:20px;cursor:pointer;">Blanc</button>
+        </div>
+      </div>
+      <div class="toggle-row" style="margin-top:8px"><span class="toggle-label">TW par histoire</span><label class="tgl"><input type="checkbox" id="opt-tw-histoire" checked><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+      <div class="toggle-row" style="margin-top:8px"><span class="toggle-label">TW par chapitre</span><label class="tgl"><input type="checkbox" id="opt-tw-chapitre"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+      <button class="btn btn-full btn-accent" style="margin-top:20px" onclick="saveOptions()">Valider</button>
     </div>
   </div>
 
 </div><!-- #app -->
-
-<!-- POP-UP BIENVENUE -->
-<div class="modal-overlay" id="bienvenue-popup" style="position:fixed;z-index:200">
-  <div class="modal-box" style="text-align:center">
-    <div style="font-size:40px;margin-bottom:12px">🎁</div>
-    <div class="modal-title">✦ Bienvenue <span id="bienvenue-pseudo"></span> !</div>
-    <p style="font-size:13px;color:var(--text2);margin-bottom:8px;line-height:1.7">Un e-mail de confirmation t'a été envoyé.<br>Clique sur le lien pour activer ton compte.</p>
-    <p style="font-size:11px;color:var(--text3);margin-bottom:22px;line-height:1.6">En attendant, tu peux explorer le site avec tes 20 tickets offerts ✦</p>
-    <button class="btn btn-full btn-accent" onclick="closeM('bienvenue-popup');updateTopbar();go('p-main')">Commencer l'aventure ✦</button>
-  </div>
-</div>
-
-<!-- POP-UP AVATAR -->
-<div class="modal-overlay" id="avatar-popup" onclick="closeModal(event,'avatar-popup')" style="position:fixed;z-index:200">
-  <div class="modal-box" style="text-align:center">
-    <button class="modal-close" onclick="closeM('avatar-popup')">✕</button>
-    <div class="modal-title">Changer ma photo de profil</div>
-    <div style="display:flex;justify-content:center;gap:16px;margin:20px 0 24px">
-      <div onclick="setAvatar('☽')" id="av-lune" style="width:64px;height:64px;border-radius:50%;border:1.5px solid rgba(180,190,255,.2);background:rgba(126,159,212,.08);display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;">☽</div>
-      <div onclick="setAvatar('✦')" id="av-etoile" style="width:64px;height:64px;border-radius:50%;border:1.5px solid rgba(180,190,255,.2);background:rgba(126,159,212,.08);display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;">✦</div>
-      <div onclick="setAvatar('☀')" id="av-soleil" style="width:64px;height:64px;border-radius:50%;border:1.5px solid rgba(180,190,255,.2);background:rgba(126,159,212,.08);display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;">☀</div>
-    </div>
-    <button class="btn btn-full btn-accent" onclick="closeM('avatar-popup')">Valider</button>
-  </div>
-</div>
-
-<!-- POP-UP ABONNEMENT -->
-<div class="modal-overlay" id="abo-popup" onclick="closeModal(event,'abo-popup')" style="position:fixed;z-index:200">
-  <div class="modal-box" id="abo-popup-box" style="text-align:center">
-    <button class="modal-close" onclick="closeM('abo-popup')">✕</button>
-    <div class="modal-title" id="abo-popup-title">Abonnement</div>
-    <div id="abo-popup-content"></div>
-  </div>
-</div>
-
-<!-- POP-UP SUPPRESSION 1 -->
-<div class="modal-overlay" id="delete-popup1" onclick="closeModal(event,'delete-popup1')" style="position:fixed;z-index:200">
-  <div class="modal-box">
-    <button class="modal-close" onclick="closeM('delete-popup1')">✕</button>
-    <div class="modal-title" style="font-size:20px;line-height:1.4">Supprimer mon compte</div>
-    <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Vous êtes sur le point de supprimer votre compte Astrolabe. Cette action est définitive et supprimera toute votre avancée, vos abonnements, lectures, tickets et badges dûment gagnés. Êtes-vous certain·e de vouloir supprimer votre compte ?</p>
-    <div style="display:flex;gap:10px">
-      <button class="btn btn-full btn-danger" onclick="closeM('delete-popup1');go('p-delete1')">Oui</button>
-      <button class="btn btn-full btn-accent" onclick="closeM('delete-popup1');openModal('delete-non-popup')">Non</button>
-    </div>
-  </div>
-</div>
-
-<!-- POP-UP OUF -->
-<div class="modal-overlay" id="delete-ouf-popup" onclick="closeModal(event,'delete-ouf-popup')" style="position:fixed;z-index:200">
-  <div class="modal-box" style="text-align:center">
-    <button class="modal-close" onclick="closeM('delete-ouf-popup')">✕</button>
-    <div style="font-size:40px;margin-bottom:12px">😮‍💨</div>
-    <div class="modal-title">Ouf !</div>
-    <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Vous nous avez fait peur ! Retournons lire une histoire pour nous remettre de toutes ces émotions !</p>
-    <button class="btn btn-full btn-accent" onclick="closeM('delete-ouf-popup');go('p-moncompte')">← Retour à mon compte</button>
-  </div>
-</div>
-
-<!-- POP-UP NON SUPPRESSION -->
-<div class="modal-overlay" id="delete-non-popup" onclick="closeModal(event,'delete-non-popup')" style="position:fixed;z-index:200">
-  <div class="modal-box" style="text-align:center">
-    <button class="modal-close" onclick="closeM('delete-non-popup')">✕</button>
-    <div style="font-size:40px;margin-bottom:12px">😮‍💨</div>
-    <div class="modal-title">Ouf !</div>
-    <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Vous nous avez fait peur ! Retournons lire une histoire pour nous remettre de toutes ces émotions !</p>
-    <button class="btn btn-full btn-accent" onclick="closeM('delete-non-popup');go('p-moncompte')">← Retour à mon compte</button>
-  </div>
-</div>
 
 <div id="pwa-banner" class="hidden">
   <span class="pwa-icon">✦</span>
@@ -808,41 +921,11 @@ const SUPA_URL='https://msownknywszovjnfekde.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zb3dua255d3N6b3ZqbmZla2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MDIxNDUsImV4cCI6MjA4ODk3ODE0NX0.kekcMQQowhhIazwYDhAa4OYWCnHp4-4I_g9RGkxTjy8';
 const db=window.supabase.createClient(SUPA_URL,SUPA_KEY);
 
-/* ÉTAT */
-const compte={loggedIn:false,pseudo:'',tickets:0,userId:null,adulte:false,twrHistoire:true,twrChapitre:false,avatar:'☽',age:16};
-function addTickets(n){compte.tickets+=n;updateTicketsDisplay();sauvegarderTickets();}
-function updateTicketsDisplay(){
-  const el=document.getElementById('compte-tickets');if(el)el.textContent=compte.tickets+' ✦';
-  const i=document.getElementById('ticket-count-insc');if(i)i.textContent=compte.tickets;
-}
-async function sauvegarderTickets(){
-  if(!compte.userId)return;
-  await db.from('profils').update({tickets:compte.tickets}).eq('id',compte.userId);
-}
-async function checkSession(){
-  const {data:{session}}=await db.auth.getSession();
-  if(session){
-    const {data:profil}=await db.from('profils').select('*').eq('id',session.user.id).single();
-    if(profil){
-      compte.loggedIn=true;compte.userId=session.user.id;
-      compte.pseudo=profil.pseudo||'Astrolectrice';compte.tickets=profil.tickets||0;
-    compte.adulte=profil.adulte||false;
-    compte.twrHistoire=profil.trigger_warnings_histoire!==false;
-    compte.twrChapitre=profil.trigger_warnings_chapitre===true;
-    syncCompteToggles();renderGrid('book-grid',BOOKS);
-      document.getElementById('compte-name').textContent=compte.pseudo;
-      updateTicketsDisplay();
-      updateTopbar();
-    }
-  }
-}
-
 /* STARS */
 const starsEl=document.getElementById('stars');
 for(let i=0;i<70;i++){const s=document.createElement('div');s.className='star';s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';s.style.setProperty('--d',(2+Math.random()*5)+'s');s.style.setProperty('--dl',(-Math.random()*5)+'s');s.style.width=s.style.height=(Math.random()>0.7?3:2)+'px';starsEl.appendChild(s);}
 
-/* AGE SELECT */
-// DOB selectors
+/* DATE NAISSANCE */
 const isMobile=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 if(isMobile){
   document.querySelector('.dob-mobile').style.display='flex';
@@ -861,11 +944,16 @@ if(isMobile){
   const def=new Date(now2.getFullYear()-18,now2.getMonth(),now2.getDate());
   dobDate.value=def.toISOString().split('T')[0];
   dobDate.max=now2.toISOString().split('T')[0];
-  const minDate=new Date(now2.getFullYear()-100,now2.getMonth(),now2.getDate());
-  dobDate.min=minDate.toISOString().split('T')[0];
+  dobDate.min=new Date(now2.getFullYear()-100,now2.getMonth(),now2.getDate()).toISOString().split('T')[0];
 }
 
-
+/* ÉTAT */
+const compte={loggedIn:false,pseudo:'',tickets:0,userId:null,adulte:false,twrHistoire:true,twrChapitre:false,avatar:'☽',age:16};
+function addTickets(n){compte.tickets+=n;updateTicketsDisplay();}
+function updateTicketsDisplay(){
+  const el=document.getElementById('compte-tickets');if(el)el.textContent=compte.tickets+' ✦';
+  const i=document.getElementById('ticket-count-insc');if(i)i.textContent=compte.tickets;
+}
 
 /* DATA — Textes complets */
 const CH1=`Chapitre 1\nBerta\n\nSi je ne m'étais pas arrêté dans ce bar, je pense que ma bonne vieille Berta aurait rendu l'âme au milieu du désert. Presque cinq kilomètres qu'elle crachote comme une vieillarde, me faisant craindre à chaque virage qu'elle ne m'explose sous le séant et ne m'envoie valser dans les nuages. Même la béquille grince lorsque j'y donne un coup de botte pour stabiliser ma bête. Un gémissement douloureux fait trembler jusqu'à ses boulons lorsque j'en descends et je me fends moi-même d'un soupir.\n\nDes Harley. Plein. Beaucoup trop pour un parking aussi petit. Et au milieu de toutes ces bécanes rutilantes, la mienne fait peine à voir. Dire que c'est une antiquité serait malhonnête : cette vieillerie pourrait être datée au carbone 14 tant c'est un vestige ! Elle grince, elle râle, elle crache. Les pièces semblent prêtes à se séparer les unes des autres à tout instant et je soupçonne le responsable de sa fabrication d'avoir piqué des bouts à toutes les motos de son quartier pour créer un monstre de Frankenstein de métal. Si encore elle avait connu des heures de gloire, mais je suis certaine que, même neuve, elle était déjà bonne pour la casse. Et après l'avoir eu sous les fesses depuis Sacramento, je peux affirmer que c'est l'engin de torture le plus sophistiqué de toute l'histoire. J'ai rarement eu aussi mal partout que depuis que trace la route sur ce cheval mort et les quelques nuits que j'ai passées à la belle étoile ont sans doute été salutaires pour mes vertèbres toutes tassées.\n\nAvoir garé une telle épave au milieu de tous ces bijoux me fait déjà mal au cœur, mais bien moins que l'idée d'entrer dans ce bar rempli de motards alors que moi-même je ne sais même pas la marque de ma monture. Depuis que je suis arrivé aux états-unis, j'ai bien compris que pour être un motard, ici, il ne suffisait pas d'avoir le permis et une bécane. C'est un art de vivre et la pauvre franchie que je suis, avec son petit permis A obtenu à la chance et sa vieille moto à moitié crevée… Disons que je passe un peu pour une amatrice, voire une usurpatrice dans certains cercles que j'ai jusqu'ici essayé au possible d'éviter. Mais après m'être tapé une demi-journée de soleil sur une route si droite que j'ai failli m'y endormir, je ne rêve que de m'abriter dans ce bar, et tant pis si c'est un nid de dockers qui vont se faire une joie de me juger. J'ai juste à prier pour que personne n'aperçoive cette honte de la route qu'est Berta avant que je n'aie sifflé un soda pour repartir chargé à bloc sur ces routes interminables.\n\nJe retire mon casque et fourre une main dans mes cheveux pour chasser la coiffure peu avantageuse que m'impose cette protection routière. Prenant une grande inspiration, je pousse la porte de l'édifice et tente au possible de cacher mon malaise lorsque j'y rentre fièrement.\n\nJe m'étais attendue à ce que mon arrivée provoque l'émoi de la faune locale. Que tous s'arrêtent de parler et de boire pour me dévisager d'un air mauvais alors que j'irais m'accouder au bar pour demander un whisky sans faux col tout en expectorant un merveilleux mollard dans le premier crachoir à portée de tire. Peut-être même qu'un pianiste interromprait soudainement son ragtime et que la dernière note serait suspendue dans l'air alors que chacun retiendrait son souffle, se demandant qui de moi ou des locaux dégainerait les premiers.\n\nMais mon entrée se fait dans la parfaite indifférence. Le jukebox placé au fond de la salle ne tressaute même pas, et je le soupçonne d'ailleurs de n'être là qu'à titre décoratif au vu des enceintes dernier cri accrochées au plafond.\n\n— Hello ! Je lance au barman dans mon plus parfait anglais. N'importe quoi sans alcool s'il vous plaît !\n\nLe bar est parfaitement ajusté à la hauteur de mes coudes. Nickel. Je lâche mon sac entre mes pieds et glisse subtilement l'une des anses sous ma chaussure au cas où il viendrait à certains l'idée de se tirer avec mes affaires.\n\nL'homme derrière le comptoir hoche la tête et sort de sa glacière une bouteille de soda qu'il décapsule à la main pour me la tendre sans un mot. Je sors mon billet de ma poche, en espérant ne pas me tromper de président, et le lui tends dans un sourire aimable qu'il regarde à peine, déjà occupé à servir les autres clients.\n\nPersonne ne fait attention à moi, et c'est à peine si ma présence a fait frémir l'air chaud de cette ville perdue.\n\nUn coin paumé au milieu de l'Ouest américain.\n\nParfait pour une sorcière en cavale.`;
@@ -897,10 +985,8 @@ function go(id){
   document.querySelectorAll('.page').forEach(p=>{p.classList.remove('active');const mo=p.querySelector('.modal-overlay');if(mo)mo.classList.remove('open');});
   if(id==='p-connexion-modal'){document.getElementById('p-main').classList.add('active');setTimeout(()=>openModal('p-connexion-modal'),50);return;}
   const el=document.getElementById(id);if(el)el.classList.add('active');
-  // Étoiles : cachées en lecture, visibles ailleurs
   const stars=document.getElementById('stars');
   if(stars)stars.style.opacity=(id==='p-lecture')?'0':'1';
-  // Topbar
   if(id==='p-main'||id==='p-moncompte')updateTopbar();
 }
 function openModal(id){document.getElementById(id)?.classList.add('open');}
@@ -908,7 +994,7 @@ function closeM(id){document.getElementById(id)?.classList.remove('open');}
 function closeModal(e,id){if(e.target===document.getElementById(id))closeM(id);}
 function goCompte(){if(compte.loggedIn)go('p-moncompte');else go('p-inscription1');}
 function goAcheterTickets(fromPage){
-  document.getElementById('tickets-back-btn').onclick=()=>go(fromPage||'p-inscription5');
+  if(document.getElementById('tickets-back-btn'))document.getElementById('tickets-back-btn').onclick=()=>go(fromPage||'p-inscription5');
   go('p-acheter-tickets');
 }
 
@@ -922,6 +1008,7 @@ function goHashtag(name){
 
 let prevPage='p-main';
 function openHistoire(id){
+  currentHistoireId=id;
   const cur=document.querySelector('.page.active');if(cur)prevPage=cur.id;
   const b=BOOKS.find(x=>x.id===id);if(!b)return;
   // Bannière 2:1 (même format que l'accueil)
@@ -933,8 +1020,14 @@ function openHistoire(id){
   document.getElementById('histoire-tags').innerHTML=b.tags.map(t=>`<span class="histoire-tag"># ${t}</span>`).join('');
   document.getElementById('histoire-desc').textContent=b.desc;
   const twBox=document.getElementById('tw-box');
-  const showTW=compte.twrHistoire!==false; // default true
-  if(b.tw&&showTW){twBox.style.display='block';document.getElementById('tw-text').textContent=b.tw;}else{twBox.style.display='none';}
+  const twRevealBtn=document.getElementById('tw-reveal-btn');
+  const twBoxReveal=document.getElementById('tw-box-reveal');
+  twBox.style.display='none';if(twBoxReveal)twBoxReveal.style.display='none';
+  if(twRevealBtn)twRevealBtn.style.display='none';
+  if(b.tw){
+    if(compte.twrHistoire!==false){twBox.style.display='block';document.getElementById('tw-text').textContent=b.tw;}
+    else{if(twRevealBtn){twRevealBtn.style.display='block';}if(document.getElementById('tw-text-reveal'))document.getElementById('tw-text-reveal').textContent=b.tw;}
+  }
   const chapList=document.getElementById('chapitres-list');
   chapList.innerHTML=b.chapitres.map(ch=>{
     const libre=ch.gratuit||ch.num<=8;
@@ -959,11 +1052,10 @@ function openLecture(bookId,chapNum){
     if(i===0){const parts=line.split('\n');html+=`<div class="lecture-ch-title"><span class="lecture-star-side">✦</span>${parts[0]||''}<span class="lecture-star-side">✦</span></div><div class="lecture-ch-sub">${parts[1]||''}</div>`;}
     else{const isD=line.trim().startsWith('—')||line.trim().startsWith('-');html+=`<p class="${isD?'d':''}">${line.replace(/\n/g,'<br>')}</p>`;}
   });
-  // TW chapitre si activé
   const showTWCh=compte.twrChapitre===true;
-  if(b.tw&&showTWCh){
-    html=`<div class="tw-box" style="margin:0 0 20px"><div class="tw-label">Trigger warnings</div><div class="tw-text">${b.tw}</div></div>`+html;
-  }
+  const histPrefs=optParHistoire[bookId];
+  const useTWCh=histPrefs?histPrefs.twrChapitre:showTWCh;
+  if(b.tw&&useTWCh){html=`<div class="tw-box" style="margin:0 0 20px"><div class="tw-label">Trigger warnings</div><div class="tw-text">${b.tw}</div></div>`+html;}
   document.getElementById('lecture-body').innerHTML=html;
   const nav=document.getElementById('lecture-nav');
   const prev=b.chapitres.find(c=>c.num===chapNum-1);
@@ -974,15 +1066,12 @@ function openLecture(bookId,chapNum){
   document.getElementById('lecture-back-btn').onclick=()=>go('p-histoire');
   document.querySelector('#p-lecture .page-scroll').scrollTop=0;
   go('p-lecture');
-  setTimeout(applyLectureMode, 50);
-}
-
-/* VALIDATION EMAIL */
-function isValidEmail(email){
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  setTimeout(applyLectureMode,50);
 }
 
 /* INSCRIPTION */
+function isValidEmail(e){return/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);}
+
 async function handleInscription1(){
   const mdp=document.getElementById('insc-mdp').value;
   const mdp2=document.getElementById('insc-mdp2').value;
@@ -990,21 +1079,15 @@ async function handleInscription1(){
   const errMdp=document.getElementById('mdp-error');
   const errLen=document.getElementById('mdp-length-error');
   const errPseudo=document.getElementById('pseudo-error');
-  const errEmail=document.getElementById('email-error');
-  // Reset errors
-  errMdp.classList.remove('show');errLen.classList.remove('show');
-  errPseudo.classList.remove('show');errEmail.classList.remove('show');
-  // Validate password length
+  errMdp.classList.remove('show');errLen.classList.remove('show');errPseudo.classList.remove('show');
   if(mdp.length<6){errLen.classList.add('show');return;}
-  // Validate passwords match
   if(mdp!==mdp2){errMdp.classList.add('show');return;}
-  // Check pseudo uniqueness
   if(pseudo){
     const {data:existing}=await db.from('profils').select('id').eq('pseudo',pseudo).limit(1);
     if(existing&&existing.length>0){errPseudo.classList.add('show');return;}
     compte.pseudo=pseudo;
   }
-  let age;
+  let age=16;
   if(isMobile){
     const jour=parseInt(document.getElementById('dob-jour').value);
     const mois=parseInt(document.getElementById('dob-mois').value);
@@ -1014,10 +1097,7 @@ async function handleInscription1(){
     if(today.getMonth()+1<mois||(today.getMonth()+1===mois&&today.getDate()<jour))age--;
   } else {
     const val=document.getElementById('dob-date').value;
-    if(!val){alert('Merci d\'indiquer ta date de naissance.');return;}
-    const dob=new Date(val);const today=new Date();
-    age=today.getFullYear()-dob.getFullYear();
-    if(today.getMonth()<dob.getMonth()||(today.getMonth()===dob.getMonth()&&today.getDate()<dob.getDate()))age--;
+    if(val){const dob=new Date(val);const today=new Date();age=today.getFullYear()-dob.getFullYear();if(today.getMonth()<dob.getMonth()||(today.getMonth()===dob.getMonth()&&today.getDate()<dob.getDate()))age--;}
   }
   compte.age=age;
   go(age<18?'p-inscription2':'p-inscription3');
@@ -1027,10 +1107,9 @@ async function finishInscription(){
   const email=document.getElementById('insc-mail').value.trim();
   const mdp=document.getElementById('insc-mdp').value;
   const errEmail=document.getElementById('email-error');
-  if(!isValidEmail(email)){errEmail.textContent='Adresse e-mail invalide.';errEmail.classList.add('show');go('p-inscription1');return;}
+  if(!isValidEmail(email)){errEmail.classList.add('show');go('p-inscription1');return;}
   const pseudo=document.getElementById('insc-pseudo').value.trim()||'Astrolectrice';
-  const age=compte.age||16;
-  const adulte=age>=18&&(document.getElementById('adult3')?.checked||false);
+  const adulte=compte.age>=18&&(document.getElementById('adult3')?.checked||false);
   const twrHistoire=document.getElementById('twr3-histoire')?.checked??document.getElementById('twr2-histoire')?.checked??true;
   const twrChapitre=document.getElementById('twr3-chapitre')?.checked??document.getElementById('twr2-chapitre')?.checked??false;
   const finishBtn=document.querySelector('#p-inscription5 .choice-card.featured');
@@ -1039,85 +1118,24 @@ async function finishInscription(){
     const {data,error}=await db.auth.signUp({email,password:mdp,options:{data:{pseudo}}});
     if(error){
       if(error.message.includes('already registered')||error.message.includes('already been registered')){
-        errEmail.textContent='E-mail déjà utilisé.';errEmail.classList.add('show');go('p-inscription1');
-      } else { alert('Oups ! '+error.message); }
-      if(finishBtn)finishBtn.style.opacity='1';
-      return;
+        errEmail.classList.add('show');go('p-inscription1');
+      } else {alert('Oups ! '+error.message);}
+      if(finishBtn)finishBtn.style.opacity='1';return;
     }
     const userId=data.user?.id;
-    if(!userId)throw new Error('Erreur creation compte');
+    if(!userId)throw new Error('Erreur création compte');
     const {error:pe}=await db.from('profils').insert({id:userId,pseudo,email,tickets:20,adulte,trigger_warnings_histoire:twrHistoire,trigger_warnings_chapitre:twrChapitre});
     if(pe)throw pe;
-    // Connecter directement
-    compte.loggedIn=true;compte.userId=userId;
-    compte.pseudo=pseudo;compte.tickets=20;
+    compte.loggedIn=true;compte.userId=userId;compte.pseudo=pseudo;compte.tickets=20;
     compte.adulte=adulte;compte.twrHistoire=twrHistoire;compte.twrChapitre=twrChapitre;
-    compte.age=compte.age||16;
     document.getElementById('compte-name').textContent=pseudo;
-    updateTicketsDisplay();
-    syncCompteToggles();
-    updateTopbar();
-    openBienvenue(pseudo);
+    updateTicketsDisplay();syncCompteToggles();updateTopbar();
+    document.getElementById('bienvenue-pseudo').textContent=pseudo;
+    document.getElementById('bienvenue-popup').classList.add('open');
   }catch(e){
     alert('Oups ! '+e.message);
     if(finishBtn)finishBtn.style.opacity='1';
   }
-}
-
-/* CONNEXION */
-async function handleConnexion(){
-  const email=document.getElementById('connexion-email').value.trim();
-  const mdp=document.getElementById('connexion-mdp').value;
-  const errEl=document.getElementById('connexion-error');
-  if(!isValidEmail(email)){
-    if(errEl){errEl.textContent='Adresse e-mail invalide.';errEl.style.display='block';}
-    return;
-  }
-  const {data,error}=await db.auth.signInWithPassword({email,password:mdp});
-  if(error){
-    if(errEl){errEl.textContent='E-mail ou mot de passe incorrect.';errEl.style.display='block';}
-    return;
-  }
-  const {data:profil}=await db.from('profils').select('*').eq('id',data.user.id).single();
-  if(profil){
-    compte.loggedIn=true;compte.userId=data.user.id;
-    compte.pseudo=profil.pseudo||'Astrolectrice';compte.tickets=profil.tickets||0;
-    compte.adulte=profil.adulte||false;
-    compte.twrHistoire=profil.trigger_warnings_histoire!==false;
-    compte.twrChapitre=profil.trigger_warnings_chapitre===true;
-    document.getElementById('compte-name').textContent=compte.pseudo;
-    updateTicketsDisplay();
-  }
-  closeM('p-connexion-modal');updateTopbar();go('p-main');
-}
-
-function openBienvenue(pseudo){
-  document.getElementById('bienvenue-pseudo').textContent=pseudo;
-  document.getElementById('bienvenue-popup').classList.add('open');
-}
-
-function setAvatar(symbol){
-  document.getElementById('compte-avatar').textContent=symbol;
-  compte.avatar=symbol;
-  // Highlight selected
-  ['av-lune','av-etoile','av-soleil'].forEach(id=>{
-    document.getElementById(id).style.borderColor='rgba(180,190,255,.2)';
-  });
-  const map={'☽':'av-lune','✦':'av-etoile','☀':'av-soleil'};
-  if(map[symbol])document.getElementById(map[symbol]).style.borderColor='var(--accent)';
-}
-
-function togglePwd(inputId, btnId){
-  const inp=document.getElementById(inputId);
-  const btn=document.getElementById(btnId);
-  if(inp.type==='password'){inp.type='text';btn.style.opacity='1';}
-  else{inp.type='password';btn.style.opacity='0.4';}
-}
-
-async function deconnexion(){
-  await db.auth.signOut();
-  compte.loggedIn=false;compte.userId=null;compte.pseudo='';compte.tickets=0;
-  updateTicketsDisplay();updateTopbar();go('p-main');
 }
 
 /* SEARCH */
@@ -1140,117 +1158,6 @@ let tx=0,ty=0;
 bWrap.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
 bWrap.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>40){clearInterval(bTimer);setBanner(dx<0?bIdx+1:bIdx-1);bTimer=setInterval(()=>setBanner(bIdx+1),3500);}},{passive:true});
 
-/* TOPBAR STATE */
-function syncCompteToggles(){
-  const togAdulte=document.getElementById('toggle-adulte');
-  const togTWH=document.getElementById('toggle-tw-histoire');
-  const togTWC=document.getElementById('toggle-tw-chapitre');
-  if(togAdulte)togAdulte.checked=compte.adulte;
-  if(togTWH)togTWH.checked=compte.twrHistoire;
-  if(togTWC)togTWC.checked=compte.twrChapitre;
-  // Hide adulte toggle for under-18
-  const rowAdulte=document.getElementById('row-adulte');
-  if(rowAdulte)rowAdulte.style.display=compte.age>=18?'flex':'none';
-}
-
-async function savePrefs(){
-  if(!compte.userId)return;
-  await db.from('profils').update({
-    adulte:compte.adulte,
-    trigger_warnings_histoire:compte.twrHistoire,
-    trigger_warnings_chapitre:compte.twrChapitre
-  }).eq('id',compte.userId);
-}
-
-function updateTopbar(){
-  const loggedIn=compte.loggedIn;
-  document.getElementById('btn-inscription').style.display=loggedIn?'none':'';
-  document.getElementById('btn-connexion').style.display=loggedIn?'none':'';
-  document.getElementById('btn-deconnexion').style.display=loggedIn?'':'none';
-  document.getElementById('btn-moncompte-top').style.display=loggedIn?'':'none';
-}
-
-/* ABONNEMENT */
-const aboState={actif:false};
-function openAboPopup(){
-  const box=document.getElementById('abo-popup-content');
-  if(aboState.actif){
-    document.getElementById('abo-popup-title').textContent='Votre abonnement';
-    box.innerHTML=`<p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Voulez-vous interrompre votre abonnement ?</p>
-    <div style="display:flex;gap:10px">
-      <button class="btn btn-full btn-danger" onclick="closeM('abo-popup');go('p-interrompre-abo')">Oui</button>
-      <button class="btn btn-full btn-accent" onclick="closeM('abo-popup')">Non</button>
-    </div>`;
-  } else {
-    document.getElementById('abo-popup-title').textContent='Abonnement';
-    box.innerHTML=`<p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Découvrez l'abonnement Astrolabe pour un accès illimité à toutes les histoires.</p>
-    <button class="btn btn-full btn-accent" onclick="closeM('abo-popup')">Voir les offres (bientôt)</button>
-    <button class="btn btn-full" style="margin-top:8px" onclick="closeM('abo-popup')">Retour</button>`;
-  }
-  openModal('abo-popup');
-}
-
-/* MODES LECTURE */
-let modeJour=false;
-let textesBlancs=false;
-
-function toggleModeJour(actif){
-  modeJour=actif;
-  document.getElementById('mode-lecture-label').textContent=actif?'Jour':'Nuit';
-  document.getElementById('row-couleur-texte').style.display=actif?'none':'flex';
-  // Appliquer uniquement sur la page lecture
-  const lp=document.getElementById('p-lecture');
-  if(lp)lp.classList.toggle('mode-jour-lecture',actif);
-}
-
-function setTexte(couleur){
-  textesBlancs=(couleur==='blanc');
-  // Mettre à jour les boutons
-  document.getElementById('btn-texte-bleu').style.opacity=textesBlancs?'0.5':'1';
-  document.getElementById('btn-texte-blanc').style.opacity=textesBlancs?'1':'0.5';
-  applyLectureMode();
-}
-
-function applyLectureMode(){
-  const lb=document.getElementById('lecture-body');
-  if(!lb)return;
-  lb.classList.remove('texte-bleu','texte-blanc');
-  if(!modeJour){lb.classList.add(textesBlancs?'texte-blanc':'texte-bleu');}
-  // Mode jour sur la page lecture seulement
-  const lp=document.getElementById('p-lecture');
-  if(lp)lp.classList.toggle('mode-jour-lecture',modeJour);
-}
-
-
-
-/* SUPPRESSION COMPTE */
-function confirmerSuppression(){
-  go('p-delete3');
-}
-
-async function supprimerCompteDefinitif(){
-  // Envoi du commentaire (à brancher sur une table feedback plus tard)
-  const raison=document.getElementById('delete-raison')?.value||'';
-  // Pour l'instant on log juste, l'envoi mail sera ajouté plus tard
-  console.log('Raison suppression:', raison);
-  try{
-    // Marquer le compte comme "à supprimer" dans 30 jours (soft delete)
-    if(compte.userId){
-      await db.from('profils').update({
-        a_supprimer_le: new Date(Date.now()+30*24*60*60*1000).toISOString()
-      }).eq('id',compte.userId);
-    }
-    await db.auth.signOut();
-    compte.loggedIn=false;compte.userId=null;compte.pseudo='';compte.tickets=0;
-    updateTopbar();
-    updateTicketsDisplay();
-    go('p-main');
-  }catch(e){
-    console.error(e);
-    go('p-main');
-  }
-}
-
 /* PWA */
 let deferredPrompt=null;
 const pwaBanner=document.getElementById('pwa-banner');
@@ -1264,6 +1171,187 @@ function installPWA(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.
 function closePWABanner(){pwaBanner.classList.add('hidden');}
 window.addEventListener('appinstalled',()=>closePWABanner());
 if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
+
+/* CONNEXION */
+async function handleConnexion(){
+  const email=document.getElementById('connexion-email').value.trim();
+  const mdp=document.getElementById('connexion-mdp').value;
+  const errEl=document.getElementById('connexion-error');
+  const {data,error}=await db.auth.signInWithPassword({email,password:mdp});
+  if(error){if(errEl){errEl.textContent='E-mail ou mot de passe incorrect.';errEl.style.display='block';}return;}
+  const {data:profil}=await db.from('profils').select('*').eq('id',data.user.id).single();
+  if(profil){
+    compte.loggedIn=true;compte.userId=data.user.id;
+    compte.pseudo=profil.pseudo||'Astrolectrice';compte.tickets=profil.tickets||0;
+    compte.adulte=profil.adulte||false;
+    compte.twrHistoire=profil.trigger_warnings_histoire!==false;
+    compte.twrChapitre=profil.trigger_warnings_chapitre===true;
+    document.getElementById('compte-name').textContent=compte.pseudo;
+    updateTicketsDisplay();syncCompteToggles();renderGrid('book-grid',BOOKS);
+  }
+  closeM('p-connexion-modal');updateTopbar();go('p-main');
+}
+
+async function deconnexion(){
+  await db.auth.signOut();
+  compte.loggedIn=false;compte.userId=null;compte.pseudo='';compte.tickets=0;
+  updateTicketsDisplay();updateTopbar();go('p-main');
+}
+
+async function savePrefs(){
+  if(!compte.userId)return;
+  await db.from('profils').update({adulte:compte.adulte,trigger_warnings_histoire:compte.twrHistoire,trigger_warnings_chapitre:compte.twrChapitre}).eq('id',compte.userId);
+}
+
+function syncCompteToggles(){
+  const togAdulte=document.getElementById('toggle-adulte');
+  const togTWH=document.getElementById('toggle-tw-histoire');
+  const togTWC=document.getElementById('toggle-tw-chapitre');
+  if(togAdulte)togAdulte.checked=compte.adulte;
+  if(togTWH)togTWH.checked=compte.twrHistoire;
+  if(togTWC)togTWC.checked=compte.twrChapitre;
+  const rowAdulte=document.getElementById('row-adulte');
+  if(rowAdulte)rowAdulte.style.display=compte.age>=18?'flex':'none';
+}
+
+function updateTopbar(){
+  const loggedIn=compte.loggedIn;
+  document.getElementById('btn-inscription').style.display=loggedIn?'none':'';
+  document.getElementById('btn-connexion').style.display=loggedIn?'none':'';
+  document.getElementById('btn-deconnexion').style.display=loggedIn?'':'none';
+  document.getElementById('btn-moncompte-top').style.display=loggedIn?'flex':'none';
+  if(loggedIn){
+    const av=document.getElementById('topbar-avatar');
+    if(av)av.textContent=compte.avatar||'☽';
+  }
+}
+
+/* MODE LECTURE */
+let modeJour=false;let textesBlancs=false;
+function toggleModeJour(actif){
+  modeJour=actif;
+  document.getElementById('mode-lecture-label').textContent=actif?'Jour':'Nuit';
+  document.getElementById('row-couleur-texte').style.display=actif?'none':'flex';
+  const lp=document.getElementById('p-lecture');
+  if(lp)lp.classList.toggle('mode-jour-lecture',actif);
+}
+function setTexte(couleur){
+  textesBlancs=(couleur==='blanc');
+  document.getElementById('btn-texte-bleu').style.opacity=textesBlancs?'0.5':'1';
+  document.getElementById('btn-texte-blanc').style.opacity=textesBlancs?'1':'0.5';
+  applyLectureMode();
+}
+function applyLectureMode(){
+  const lb=document.getElementById('lecture-body');
+  if(!lb)return;
+  lb.classList.remove('texte-bleu','texte-blanc');
+  if(!modeJour){lb.classList.add(textesBlancs?'texte-blanc':'texte-bleu');}
+  const lp=document.getElementById('p-lecture');
+  if(lp)lp.classList.toggle('mode-jour-lecture',modeJour);
+}
+
+/* AVATAR */
+let _tempAvatar=null;let _savedAvatar='☽';
+function openAvatarPopup(){_tempAvatar=compte.avatar||'☽';openModal('avatar-popup');}
+function setAvatar(symbol){
+  _tempAvatar=symbol;
+  document.getElementById('compte-avatar').textContent=symbol;
+  const topbarAv=document.getElementById('topbar-avatar');if(topbarAv)topbarAv.textContent=symbol;
+  ['av-lune','av-etoile','av-soleil'].forEach(id=>{document.getElementById(id).style.borderColor='rgba(180,190,255,.2)';});
+  const map={'☽':'av-lune','✦':'av-etoile','☀':'av-soleil'};
+  if(map[symbol])document.getElementById(map[symbol]).style.borderColor='var(--accent)';
+}
+function cancelAvatar(){
+  document.getElementById('compte-avatar').textContent=_savedAvatar;
+  const topbarAv=document.getElementById('topbar-avatar');if(topbarAv)topbarAv.textContent=_savedAvatar;
+  compte.avatar=_savedAvatar;closeM('avatar-popup');
+}
+function confirmAvatar(){
+  _savedAvatar=_tempAvatar||compte.avatar;compte.avatar=_savedAvatar;
+  document.getElementById('compte-avatar').textContent=_savedAvatar;
+  const topbarAv=document.getElementById('topbar-avatar');if(topbarAv)topbarAv.textContent=_savedAvatar;
+  closeM('avatar-popup');
+}
+
+/* TOGGLE PASSWORD */
+function togglePwd(inputId,btnId){
+  const inp=document.getElementById(inputId);const btn=document.getElementById(btnId);
+  if(inp.type==='password'){inp.type='text';btn.style.color='#fff';btn.style.fontWeight='700';}
+  else{inp.type='password';btn.style.color='var(--accent)';btn.style.fontWeight='400';}
+}
+
+/* OPTIONS LECTURE */
+let optScope='toutes';let optParHistoire={};let currentHistoireId=null;
+function selectOptScope(scope){
+  optScope=scope;
+  document.getElementById('opt-btn-cette').className='btn btn-full'+(scope==='cette'?' btn-accent':'');
+  document.getElementById('opt-btn-toutes').className='btn btn-full'+(scope==='toutes'?' btn-accent':'');
+}
+function setOptTexte(couleur){
+  document.getElementById('opt-btn-bleu').dataset.sel=couleur==='bleu'?'1':'0';
+  document.getElementById('opt-btn-blanc').dataset.sel=couleur==='blanc'?'1':'0';
+  document.getElementById('opt-btn-bleu').style.opacity=couleur==='bleu'?'1':'0.5';
+  document.getElementById('opt-btn-blanc').style.opacity=couleur==='blanc'?'1':'0.5';
+}
+function openOptionsPopup(bookId){
+  currentHistoireId=bookId;
+  const prefs=optParHistoire[bookId]||{modeJour,textesBlancs,twrHistoire:compte.twrHistoire,twrChapitre:compte.twrChapitre};
+  document.getElementById('opt-mode-jour').checked=prefs.modeJour||false;
+  document.getElementById('opt-mode-label').textContent=prefs.modeJour?'Jour':'Nuit';
+  document.getElementById('opt-row-couleur').style.display=prefs.modeJour?'none':'flex';
+  setOptTexte(prefs.textesBlancs?'blanc':'bleu');
+  document.getElementById('opt-tw-histoire').checked=prefs.twrHistoire!==false;
+  document.getElementById('opt-tw-chapitre').checked=prefs.twrChapitre===true;
+  selectOptScope('cette');openModal('options-popup');
+}
+function saveOptions(){
+  const newModeJour=document.getElementById('opt-mode-jour').checked;
+  const newTextesBlancs=document.getElementById('opt-btn-blanc').dataset.sel==='1';
+  const newTwrHistoire=document.getElementById('opt-tw-histoire').checked;
+  const newTwrChapitre=document.getElementById('opt-tw-chapitre').checked;
+  const prefs={modeJour:newModeJour,textesBlancs:newTextesBlancs,twrHistoire:newTwrHistoire,twrChapitre:newTwrChapitre};
+  optParHistoire[currentHistoireId]=prefs;
+  if(optScope==='toutes'){
+    modeJour=newModeJour;textesBlancs=newTextesBlancs;
+    compte.twrHistoire=newTwrHistoire;compte.twrChapitre=newTwrChapitre;
+    toggleModeJour(newModeJour);setTexte(newTextesBlancs?'blanc':'bleu');
+    const togTWH=document.getElementById('toggle-tw-histoire');if(togTWH)togTWH.checked=newTwrHistoire;
+    const togTWC=document.getElementById('toggle-tw-chapitre');if(togTWC)togTWC.checked=newTwrChapitre;
+    savePrefs();
+  }
+  closeM('options-popup');
+}
+
+/* SUPPRESSION */
+async function supprimerCompteDefinitif(){
+  try{
+    if(compte.userId){
+      await db.from('profils').update({a_supprimer_le:new Date(Date.now()+30*24*60*60*1000).toISOString()}).eq('id',compte.userId);
+    }
+    await db.auth.signOut();
+    compte.loggedIn=false;compte.userId=null;compte.pseudo='';compte.tickets=0;
+    updateTopbar();updateTicketsDisplay();go('p-main');
+  }catch(e){
+    await db.auth.signOut();compte.loggedIn=false;compte.userId=null;go('p-main');
+  }
+}
+
+/* SESSION */
+async function checkSession(){
+  const {data:{session}}=await db.auth.getSession();
+  if(session){
+    const {data:profil}=await db.from('profils').select('*').eq('id',session.user.id).single();
+    if(profil){
+      compte.loggedIn=true;compte.userId=session.user.id;
+      compte.pseudo=profil.pseudo||'Astrolectrice';compte.tickets=profil.tickets||0;
+      compte.adulte=profil.adulte||false;
+      compte.twrHistoire=profil.trigger_warnings_histoire!==false;
+      compte.twrChapitre=profil.trigger_warnings_chapitre===true;
+      document.getElementById('compte-name').textContent=compte.pseudo;
+      updateTicketsDisplay();syncCompteToggles();renderGrid('book-grid',BOOKS);updateTopbar();
+    }
+  }
+}
 
 checkSession().catch(()=>{}).finally(()=>setTimeout(()=>go('p-main'),3200));
 </script>
