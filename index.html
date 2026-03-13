@@ -255,7 +255,6 @@
 
     #p-lecture.mode-nuit-actif { background: var(--bg); }
     #p-lecture.mode-nuit-actif #stars-lecture { display: none; }
-    .lecture-etoile-deco { text-align: center; color: var(--accent); letter-spacing: 8px; font-size: 13px; margin-bottom: 20px; }
 
     /* SUPPRESSION COMPTE */
     .delete-page { flex: 1; display: flex; flex-direction: column; padding: 28px 22px; }
@@ -367,7 +366,7 @@
           <label class="form-label">Mot de passe</label>
           <div style="position:relative">
             <input type="password" class="form-input" id="connexion-mdp" placeholder="••••••••" style="padding-right:40px">
-            <button type="button" onclick="togglePwd('connexion-mdp','eye-conn')" id="eye-conn" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px">👁</button>
+            <button type="button" onclick="togglePwd('connexion-mdp','eye-conn')" id="eye-conn" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#fff;font-size:14px;font-weight:700;opacity:.4">👁</button>
           </div>
           <button class="form-link" onclick="go('p-mdp-oublie');closeM('p-connexion-modal')">Mot de passe oublié ?</button>
         </div>
@@ -425,7 +424,7 @@
         <label class="form-label">Mot de passe</label>
         <div style="position:relative">
           <input type="password" class="form-input" id="insc-mdp" placeholder="••••••••" style="padding-right:40px">
-          <button type="button" onclick="togglePwd('insc-mdp','eye-mdp')" id="eye-mdp" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px">👁</button>
+          <button type="button" onclick="togglePwd('insc-mdp','eye-mdp')" id="eye-mdp" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#fff;font-size:14px;font-weight:700;opacity:.4">👁</button>
         </div>
         <span class="form-error" id="mdp-length-error">Le mot de passe doit faire au moins 6 caractères.</span>
       </div>
@@ -433,7 +432,7 @@
         <label class="form-label">Valider le mot de passe</label>
         <div style="position:relative">
           <input type="password" class="form-input" id="insc-mdp2" placeholder="••••••••" style="padding-right:40px">
-          <button type="button" onclick="togglePwd('insc-mdp2','eye-mdp2')" id="eye-mdp2" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px">👁</button>
+          <button type="button" onclick="togglePwd('insc-mdp2','eye-mdp2')" id="eye-mdp2" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#fff;font-size:14px;font-weight:700;opacity:.4">👁</button>
         </div>
         <span class="form-error" id="mdp-error">Les deux mots de passe ne correspondent pas.</span>
       </div>
@@ -1049,13 +1048,15 @@ async function finishInscription(){
     if(!userId)throw new Error('Erreur creation compte');
     const {error:pe}=await db.from('profils').insert({id:userId,pseudo,email,tickets:20,adulte,trigger_warnings_histoire:twrHistoire,trigger_warnings_chapitre:twrChapitre});
     if(pe)throw pe;
-    // Sync preferences to compte object
+    // Connecter directement
+    compte.loggedIn=true;compte.userId=userId;
+    compte.pseudo=pseudo;compte.tickets=20;
     compte.adulte=adulte;compte.twrHistoire=twrHistoire;compte.twrChapitre=twrChapitre;
-    // Sync toggles on compte page
-    const togAdulte=document.querySelector('#p-moncompte .toggle-row:nth-child(1) input');
-    if(togAdulte)togAdulte.checked=adulte;
-    compte.pseudo=pseudo;
+    compte.age=compte.age||16;
     document.getElementById('compte-name').textContent=pseudo;
+    updateTicketsDisplay();
+    syncCompteToggles();
+    updateTopbar();
     openBienvenue(pseudo);
   }catch(e){
     alert('Oups ! '+e.message);
@@ -1109,8 +1110,8 @@ function setAvatar(symbol){
 function togglePwd(inputId, btnId){
   const inp=document.getElementById(inputId);
   const btn=document.getElementById(btnId);
-  if(inp.type==='password'){inp.type='text';btn.textContent='🙈';}
-  else{inp.type='password';btn.textContent='👁';}
+  if(inp.type==='password'){inp.type='text';btn.style.opacity='1';}
+  else{inp.type='password';btn.style.opacity='0.4';}
 }
 
 async function deconnexion(){
