@@ -275,7 +275,7 @@
   <div class="page" id="p-main">
     <div class="topbar" id="topbar-main">
       <button class="btn" id="btn-inscription" onclick="go('p-inscription1')">Inscription</button>
-      <button class="btn" id="btn-deconnexion" style="display:none" onclick="openModal('deco-popup-main')">Déconnexion</button>
+      <button class="btn" id="btn-deconnexion" style="display:none;padding:8px 18px" onclick="openModal('deco-popup-main')">✦ Déconnexion ✦</button>
       <div class="topbar-center">
         <div class="topbar-logo-box" onclick="go('p-apropos')">
           <span class="tl-icon">✦</span>
@@ -283,7 +283,7 @@
         </div>
       </div>
       <button class="btn" id="btn-connexion" onclick="go('p-connexion-modal')">Connexion</button>
-      <button class="btn btn-accent" id="btn-moncompte-top" style="display:none;align-items:center;gap:6px" onclick="go('p-moncompte')"><span id="topbar-avatar" style="font-size:14px">☽</span> Mon compte</button>
+      <button class="btn btn-accent" id="btn-moncompte-top" style="display:none;align-items:center;gap:6px;padding:8px 18px" onclick="go('p-moncompte')"><span id="topbar-avatar" style="font-size:14px">☽</span> Mon compte <span id="topbar-avatar2" style="font-size:14px;transform:scaleX(-1);display:inline-block">☽</span></button>
     </div>
     <!-- Pop-up déconnexion topbar -->
     <div class="modal-overlay" id="deco-popup-main" onclick="closeModal(event,'deco-popup-main')" style="position:fixed;z-index:200">
@@ -303,14 +303,8 @@
         <input type="text" placeholder="Rechercher une histoire, un auteur…" readonly>
       </div>
     </div>
-    <div class="hashtag-band">
-      <div class="tag-pill active" onclick="goHashtag('Romance')">✦ Romance</div>
-      <div class="tag-pill" onclick="goHashtag('Surnaturel')">✦ Surnaturel</div>
-      <div class="tag-pill" onclick="goHashtag('Fantastique')">✦ Fantastique</div>
-      <div class="tag-pill" onclick="goHashtag('Contemporain')">✦ Contemporain</div>
-      <div class="tag-pill" onclick="goHashtag('Dark Romance')">✦ Dark Romance</div>
-      <div class="tag-pill" onclick="goHashtag('Feel Good')">✦ Feel Good</div>
-      <div class="tag-pill" onclick="goHashtag('Historique')">✦ Historique</div>
+    <div class="hashtag-band" id="hashtag-band">
+      <div class="tag-pill active" onclick="goHashtag(null)" id="tag-pill-all">✦ Tout</div>
     </div>
     <div class="page-scroll">
       <div class="banner-wrap" id="banner-wrap">
@@ -1003,6 +997,20 @@ async function loadHistoires(){
   renderGrid('book-grid',BOOKS);
   renderGrid('search-grid',BOOKS);
   renderGrid('hashtag-grid',BOOKS);
+
+  // Peupler la bande de hashtags avec les tags existants
+  const allTagNames=[...new Set(BOOKS.flatMap(b=>b.tags))].sort();
+  const band=document.getElementById('hashtag-band');
+  if(band){
+    band.innerHTML='<div class="tag-pill active" onclick="goHashtag(null)" id="tag-pill-all">✦ Tout</div>';
+    allTagNames.forEach(tag=>{
+      const pill=document.createElement('div');
+      pill.className='tag-pill';
+      pill.textContent='✦ '+tag;
+      pill.onclick=()=>goHashtag(tag);
+      band.appendChild(pill);
+    });
+  }
 }
 
 async function loadContenuChapitre(bookId, chapNum){
@@ -1031,6 +1039,8 @@ function go(id){
   const stars=document.getElementById('stars');
   if(stars)stars.style.opacity=(id==='p-lecture')?'0':'1';
   if(id==='p-main'||id==='p-moncompte')updateTopbar();
+  // Sauvegarder la page courante (sauf splash)
+  if(id!=='p-splash')sessionStorage.setItem('lastPage',id);
 }
 function openModal(id){document.getElementById(id)?.classList.add('open');}
 function closeM(id){document.getElementById(id)?.classList.remove('open');}
@@ -1042,11 +1052,21 @@ function goAcheterTickets(fromPage){
 }
 
 function goHashtag(name){
-  document.getElementById('hashtag-title').textContent='# '+name;
-  const list=BOOKS.filter(b=>b.tags.some(t=>t.toLowerCase()===name.toLowerCase()));
-  const res=list.length?list:BOOKS;
-  document.getElementById('hashtag-count').textContent=res.length+' histoire'+(res.length>1?'s':'');
-  renderGrid('hashtag-grid',res);go('p-hashtag');
+  // Mettre à jour pills actives
+  document.querySelectorAll('.tag-pill').forEach(p=>p.classList.remove('active'));
+  if(!name){
+    document.getElementById('tag-pill-all')?.classList.add('active');
+    document.getElementById('hashtag-title').textContent='✦ Toutes les histoires';
+    const filtered=BOOKS.filter(b=>!b.adulte||compte.adulte);
+    document.getElementById('hashtag-count').textContent=filtered.length+' histoire'+(filtered.length>1?'s':'');
+    renderGrid('hashtag-grid',filtered);
+  } else {
+    const res=BOOKS.filter(b=>b.tags.some(t=>t.toLowerCase()===name.toLowerCase())&&(!b.adulte||compte.adulte));
+    document.getElementById('hashtag-title').textContent='# '+name;
+    document.getElementById('hashtag-count').textContent=res.length+' histoire'+(res.length>1?'s':'');
+    renderGrid('hashtag-grid',res);
+  }
+  go('p-hashtag');
 }
 
 let prevPage='p-main';
@@ -1273,6 +1293,8 @@ function updateTopbar(){
   if(loggedIn){
     const av=document.getElementById('topbar-avatar');
     if(av)av.textContent=compte.avatar||'☽';
+    const av2=document.getElementById('topbar-avatar2');
+    if(av2)av2.textContent=compte.avatar||'☽';
   }
 }
 
@@ -1320,6 +1342,7 @@ function confirmAvatar(){
   _savedAvatar=_tempAvatar||compte.avatar;compte.avatar=_savedAvatar;
   document.getElementById('compte-avatar').textContent=_savedAvatar;
   const topbarAv=document.getElementById('topbar-avatar');if(topbarAv)topbarAv.textContent=_savedAvatar;
+  const topbarAv2=document.getElementById('topbar-avatar2');if(topbarAv2)topbarAv2.textContent=_savedAvatar;
   closeM('avatar-popup');
 }
 
@@ -1405,7 +1428,14 @@ async function checkSession(){
 
 checkSession().catch(()=>{}).finally(()=>{
   loadHistoires().catch(()=>{});
-  setTimeout(()=>go('p-main'),3200);
+  setTimeout(()=>{
+    const lastPage=sessionStorage.getItem('lastPage');
+    if(lastPage&&lastPage!=='p-splash'&&document.getElementById(lastPage)){
+      go(lastPage);
+    } else {
+      go('p-main');
+    }
+  },3200);
 });
 </script>
 </body>

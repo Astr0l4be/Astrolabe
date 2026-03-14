@@ -136,14 +136,27 @@
       <button class="tab active" onclick="switchTab('histoires')">📚 Histoires</button>
       <button class="tab" onclick="switchTab('nouvelle')">✦ Nouvelle histoire</button>
       <button class="tab" onclick="switchTab('chapitre')">📝 Ajouter chapitre</button>
+      <button class="tab" onclick="switchTab('auteurs')">✍ Auteur·ices</button>
     </div>
 
     <!-- PANEL HISTOIRES -->
     <div class="panel active" id="panel-histoires">
       <div id="alert-histoires" class="alert"></div>
       <div class="card">
-        <div class="card-title">Histoires publiées</div>
+        <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+          <span>Toutes les histoires</span>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-sm filter-btn active" onclick="filterHistoires('all',this)">Toutes</button>
+            <button class="btn btn-sm filter-btn" onclick="filterHistoires('publie',this)" style="background:rgba(126,212,160,.1);border-color:rgba(126,212,160,.3);color:var(--success)">Publiées</button>
+            <button class="btn btn-sm filter-btn" onclick="filterHistoires('brouillon',this)">Brouillons</button>
+          </div>
+        </div>
         <div id="histoires-list"><div class="loading"><span class="spinner"></span>Chargement…</div></div>
+      </div>
+      <!-- DETAIL HISTOIRE (caché par défaut) -->
+      <div id="histoire-detail" style="display:none">
+        <button class="btn btn-sm" onclick="document.getElementById('histoire-detail').style.display='none';document.querySelector('.card').style.display='block'" style="margin-bottom:12px">← Retour</button>
+        <div class="card" id="detail-card"></div>
       </div>
     </div>
 
@@ -159,7 +172,9 @@
           </div>
           <div class="form-group">
             <label class="form-label">Auteur·ice</label>
-            <input type="text" class="form-input" id="n-auteur" placeholder="Nom de plume">
+            <select class="form-select" id="n-auteur">
+              <option value="">— Choisir un·e auteur·ice —</option>
+            </select>
           </div>
         </div>
         <div class="form-group">
@@ -170,18 +185,20 @@
           <div class="form-group">
             <label class="form-label">Couverture (portrait 2:3)</label>
             <div class="img-upload" id="cover-zone">
-              <input type="file" accept="image/*" onchange="previewImg(this,'cover-preview','cover-zone')">
+              <input type="file" accept="image/*" id="cover-input" onchange="previewImg(this,'cover-preview','cover-zone')">
               <div class="img-upload-text">📎 Cliquer ou glisser une image</div>
               <img id="cover-preview" class="img-preview">
             </div>
+            <button class="btn btn-sm btn-danger" style="margin-top:6px;display:none" id="cover-remove" onclick="removeImg('cover')">✕ Supprimer</button>
           </div>
           <div class="form-group">
             <label class="form-label">Bannière (paysage 2:1)</label>
             <div class="img-upload" id="banner-zone">
-              <input type="file" accept="image/*" onchange="previewImg(this,'banner-preview','banner-zone')">
+              <input type="file" accept="image/*" id="banner-input" onchange="previewImg(this,'banner-preview','banner-zone')">
               <div class="img-upload-text">📎 Cliquer ou glisser une image</div>
               <img id="banner-preview" class="img-preview">
             </div>
+            <button class="btn btn-sm btn-danger" style="margin-top:6px;display:none" id="banner-remove" onclick="removeImg('banner')">✕ Supprimer</button>
           </div>
         </div>
         <div class="form-group">
@@ -189,12 +206,14 @@
           <div class="tags-wrap" id="tags-wrap" onclick="document.getElementById('tags-input').focus()">
             <input type="text" id="tags-input" placeholder="Romance, Fantastique…" onkeydown="handleTagInput(event)">
           </div>
+          <div id="tags-suggestions" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
         </div>
         <div class="form-group">
           <label class="form-label">Trigger warnings <span style="color:var(--text3);font-size:9px">(appuie sur Entrée pour ajouter)</span></label>
           <div class="tags-wrap" id="tw-wrap" onclick="document.getElementById('tw-input').focus()">
             <input type="text" id="tw-input" placeholder="Scènes spicy, Violence…" onkeydown="handleTWInput(event)">
           </div>
+          <div id="tw-suggestions" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
         </div>
         <div class="form-row">
           <div class="form-group">
@@ -224,6 +243,65 @@
           </div>
         </div>
         <button class="btn btn-accent btn-full" onclick="creerHistoire()" style="margin-top:8px">✦ Créer l'histoire</button>
+      </div>
+    </div>
+
+    <!-- PANEL AUTEURS -->
+    <div class="panel" id="panel-auteurs">
+      <div id="alert-auteurs" class="alert"></div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Nouvel·le auteur·ice</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Nom de plume *</label>
+            <input type="text" class="form-input" id="a-pseudo" placeholder="Nom affiché sur le site">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Vrai nom (privé)</label>
+            <input type="text" class="form-input" id="a-nom" placeholder="Non visible par les lecteurs">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Bio courte</label>
+          <textarea class="form-textarea" id="a-bio" placeholder="Quelques mots sur l'auteur·ice…" style="min-height:70px"></textarea>
+        </div>
+        <button class="btn btn-accent btn-full" onclick="creerAuteur()" style="margin-top:8px">✦ Ajouter l'auteur·ice</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Auteur·ices</div>
+        <div id="auteurs-list"><div class="loading"><span class="spinner"></span>Chargement…</div></div>
+      </div>
+      <!-- DETAIL AUTEUR -->
+      <div id="auteur-detail" style="display:none">
+        <button class="btn btn-sm" onclick="document.getElementById('auteur-detail').style.display='none'" style="margin-bottom:12px">← Retour</button>
+        <div class="card" id="auteur-detail-card"></div>
+      </div>
+    </div>
+
+    <!-- PANEL AUTEURS -->
+    <div class="panel" id="panel-auteurs">
+      <div id="alert-auteurs" class="alert"></div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Nouvel·le auteur·ice</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Nom de plume *</label>
+            <input type="text" class="form-input" id="a-pseudo" placeholder="Nom affiché sur le site">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Vrai nom (privé)</label>
+            <input type="text" class="form-input" id="a-nom" placeholder="Non visible par les lecteurs">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Bio courte</label>
+          <textarea class="form-textarea" id="a-bio" placeholder="Quelques mots sur l'auteur·ice…" style="min-height:70px"></textarea>
+        </div>
+        <button class="btn btn-accent btn-full" onclick="creerAuteur()" style="margin-top:8px">✦ Ajouter l'auteur·ice</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Auteur·ices</div>
+        <div id="auteurs-list"><div class="loading"><span class="spinner"></span>Chargement…</div></div>
       </div>
     </div>
 
@@ -315,6 +393,9 @@ function showAdmin(){
   document.getElementById('admin-app').style.display='block';
   document.getElementById('admin-user-label').textContent=currentUser.email;
   loadHistoires();
+  loadAuteursSelect();
+  loadTagsSuggestions();
+  loadTWSuggestions();
 }
 
 /* TABS */
@@ -324,6 +405,7 @@ function switchTab(tab){
   event.target.classList.add('active');
   document.getElementById('panel-'+tab).classList.add('active');
   if(tab==='chapitre')loadHistoiresSelect();
+  if(tab==='auteurs')loadAuteurs();
 }
 
 /* ALERTS */
@@ -340,8 +422,19 @@ function previewImg(input,previewId,zoneId){
   reader.onload=e=>{
     const img=document.getElementById(previewId);
     img.src=e.target.result;img.style.display='block';
+    const type=previewId.includes('cover')?'cover':'banner';
+    const removeBtn=document.getElementById(type+'-remove');
+    if(removeBtn)removeBtn.style.display='inline-block';
   };
   reader.readAsDataURL(input.files[0]);
+}
+
+function removeImg(type){
+  document.getElementById(type+'-preview').style.display='none';
+  document.getElementById(type+'-preview').src='';
+  document.getElementById(type+'-remove').style.display='none';
+  const input=document.getElementById(type+'-input');
+  input.value='';
 }
 
 /* UPLOAD IMAGE SUPABASE */
@@ -458,6 +551,7 @@ async function creerHistoire(){
     document.getElementById('n-gratuit').value='8';document.getElementById('n-prix').value='1';
     document.getElementById('n-adulte').value='false';document.getElementById('n-statut').value='brouillon';
     tags=[];tws=[];renderTags();renderTWs();
+    document.querySelectorAll('[id^="sug-"]').forEach(b=>b.classList.remove('btn-accent'));
     ['cover-preview','banner-preview'].forEach(id=>{document.getElementById(id).style.display='none';});
     loadHistoires();
   }catch(e){
@@ -518,7 +612,8 @@ async function loadChapitresExistants(histoireId){
   const section=document.getElementById('chapitres-existants');
   const list=document.getElementById('ch-list');
   if(!data||!data.length){section.style.display='none';
-    document.getElementById('ch-num').value=1;return;}
+    document.getElementById('ch-num').value=1;
+    document.getElementById('ch-gratuit').value='true';return;}
   section.style.display='block';
   list.innerHTML=data.map(ch=>`
     <div class="chapitre-item">
@@ -530,7 +625,12 @@ async function loadChapitresExistants(histoireId){
       <button class="btn btn-sm btn-danger" onclick="supprimerChapitre('${ch.id}','${histoireId}')">Suppr.</button>
     </div>
   `).join('');
-  document.getElementById('ch-num').value=(Math.max(...data.map(c=>c.numero))+1)||1;
+  const nextNum=(Math.max(...data.map(c=>c.numero))+1)||1;
+  document.getElementById('ch-num').value=nextNum;
+  // Auto-sélectionner gratuit/payant selon le numéro et le seuil de l'histoire
+  const histoire=histoires.find(h=>h.id===histoireId);
+  const seuil=histoire?.gratuit_jusqu_au||8;
+  document.getElementById('ch-gratuit').value=nextNum<=seuil?'true':'false';
 }
 
 /* AJOUTER CHAPITRE */
@@ -563,6 +663,182 @@ async function supprimerChapitre(id,histoireId){
   await db.from('chapitres').delete().eq('id',id);
   loadChapitresExistants(histoireId);
   showAlert('chapitre','Chapitre supprimé.');
+}
+
+/* AUTEURS */
+let auteurs=[];
+
+async function loadAuteursSelect(){
+  const {data}=await db.from('auteurs').select('id,pseudo').order('pseudo');
+  auteurs=data||[];
+  const sel=document.getElementById('n-auteur');
+  if(!sel)return;
+  sel.innerHTML='<option value="">— Choisir un·e auteur·ice —</option>';
+  auteurs.forEach(a=>{
+    const o=document.createElement('option');o.value=a.pseudo;o.textContent=a.pseudo;sel.appendChild(o);
+  });
+}
+
+async function loadAuteurs(){
+  const {data}=await db.from('auteurs').select('*').order('pseudo');
+  const list=document.getElementById('auteurs-list');
+  if(!data||!data.length){list.innerHTML='<div class="loading">Aucun·e auteur·ice pour l'instant.</div>';return;}
+  // Pour chaque auteur, compter ses histoires
+  const {data:hists}=await db.from('histoires').select('auteur_pseudo');
+  list.innerHTML=data.map(a=>{
+    const nbHistoires=(hists||[]).filter(h=>h.auteur_pseudo===a.pseudo).length;
+    return`<div class="histoire-item">
+      <div class="histoire-item-info">
+        <div class="histoire-item-title">${a.pseudo}</div>
+        <div class="histoire-item-meta">${a.nom_reel?'('+a.nom_reel+') · ':''}<strong>${nbHistoires}</strong> histoire(s)</div>
+        ${a.bio?`<div class="histoire-item-meta" style="margin-top:4px;font-style:italic">${a.bio}</div>`:''}
+      </div>
+      <button class="btn btn-sm btn-danger" onclick="supprimerAuteur('${a.id}')">Suppr.</button>
+    </div>`;
+  }).join('');
+}
+
+async function creerAuteur(){
+  const pseudo=document.getElementById('a-pseudo').value.trim();
+  const nom=document.getElementById('a-nom').value.trim();
+  const bio=document.getElementById('a-bio').value.trim();
+  if(!pseudo){showAlert('auteurs','Le nom de plume est obligatoire.','error');return;}
+  const btn=document.querySelector('#panel-auteurs .btn-accent');
+  btn.textContent='Création…';btn.disabled=true;
+  try{
+    const {error}=await db.from('auteurs').insert({pseudo,nom_reel:nom||null,bio:bio||null});
+    if(error)throw error;
+    showAlert('auteurs','Auteur·ice ajouté·e avec succès ! ✦');
+    document.getElementById('a-pseudo').value='';
+    document.getElementById('a-nom').value='';
+    document.getElementById('a-bio').value='';
+    loadAuteurs();loadAuteursSelect();
+  }catch(e){
+    showAlert('auteurs','Erreur : '+e.message,'error');
+  }finally{btn.textContent='✦ Ajouter l'auteur·ice';btn.disabled=false;}
+}
+
+async function supprimerAuteur(id){
+  if(!confirm('Supprimer cet·te auteur·ice ?'))return;
+  await db.from('auteurs').delete().eq('id',id);
+  loadAuteurs();loadAuteursSelect();
+}
+
+/* SUGGESTIONS TAGS & TW */
+async function loadTagsSuggestions(){
+  const {data}=await db.from('tags').select('nom').order('nom');
+  const container=document.getElementById('tags-suggestions');
+  if(!container||!data)return;
+  container.innerHTML=(data||[]).map(t=>`
+    <button class="btn btn-sm" style="font-size:11px" onclick="toggleSuggestion('${t.nom}','tag')" id="sug-tag-${t.nom.replace(/\s/g,'-')}">${t.nom}</button>
+  `).join('');
+}
+
+async function loadTWSuggestions(){
+  const {data}=await db.from('trigger_warnings_histoires').select('contenu');
+  const uniq=[...new Set((data||[]).map(t=>t.contenu))];
+  const container=document.getElementById('tw-suggestions');
+  if(!container)return;
+  container.innerHTML=uniq.map(t=>`
+    <button class="btn btn-sm" style="font-size:11px" onclick="toggleSuggestion('${t}','tw')" id="sug-tw-${t.replace(/\s/g,'-')}">${t}</button>
+  `).join('');
+}
+
+function toggleSuggestion(val,type){
+  const arr=type==='tag'?tags:tws;
+  const btnId='sug-'+type+'-'+val.replace(/\s/g,'-');
+  const btn=document.getElementById(btnId);
+  if(arr.includes(val)){
+    const idx=arr.indexOf(val);arr.splice(idx,1);
+    if(btn)btn.classList.remove('btn-accent');
+  } else {
+    arr.push(val);
+    if(btn)btn.classList.add('btn-accent');
+  }
+  type==='tag'?renderTags():renderTWs();
+}
+
+
+/* AUTEURS */
+let auteurs=[];
+
+async function loadAuteursSelect(){
+  const {data}=await db.from('auteurs').select('id,pseudo').order('pseudo');
+  auteurs=data||[];
+  const sel=document.getElementById('n-auteur');
+  if(!sel)return;
+  sel.innerHTML='<option value="">— Choisir un·e auteur·ice —</option>';
+  auteurs.forEach(a=>{
+    const o=document.createElement('option');o.value=a.pseudo;o.textContent=a.pseudo;sel.appendChild(o);
+  });
+}
+
+async function loadAuteurs(){
+  const {data}=await db.from('auteurs').select('*').order('pseudo');
+  const list=document.getElementById('auteurs-list');
+  if(!data||!data.length){list.innerHTML='<div class="loading">Aucun·e auteur·ice pour l'instant.</div>';return;}
+  const {data:hists}=await db.from('histoires').select('auteur_pseudo');
+  list.innerHTML=data.map(a=>{
+    const nbH=(hists||[]).filter(h=>h.auteur_pseudo===a.pseudo).length;
+    return`<div class="histoire-item">
+      <div class="histoire-item-info">
+        <div class="histoire-item-title">${a.pseudo}</div>
+        <div class="histoire-item-meta">${a.nom_reel?'('+a.nom_reel+') · ':''}<strong>${nbH}</strong> histoire(s)</div>
+        ${a.bio?`<div class="histoire-item-meta" style="margin-top:4px;font-style:italic">${a.bio}</div>`:''}
+      </div>
+      <button class="btn btn-sm btn-danger" onclick="supprimerAuteur('${a.id}')">Suppr.</button>
+    </div>`;
+  }).join('');
+}
+
+async function creerAuteur(){
+  const pseudo=document.getElementById('a-pseudo').value.trim();
+  const nom=document.getElementById('a-nom').value.trim();
+  const bio=document.getElementById('a-bio').value.trim();
+  if(!pseudo){showAlert('auteurs','Le nom de plume est obligatoire.','error');return;}
+  const btn=document.querySelector('#panel-auteurs .btn-accent');
+  btn.textContent='Création…';btn.disabled=true;
+  try{
+    const {error}=await db.from('auteurs').insert({pseudo,nom_reel:nom||null,bio:bio||null});
+    if(error)throw error;
+    showAlert('auteurs','Auteur·ice ajouté·e ! ✦');
+    document.getElementById('a-pseudo').value='';
+    document.getElementById('a-nom').value='';
+    document.getElementById('a-bio').value='';
+    loadAuteurs();loadAuteursSelect();
+  }catch(e){showAlert('auteurs','Erreur : '+e.message,'error');}
+  finally{btn.textContent='✦ Ajouter l'auteur·ice';btn.disabled=false;}
+}
+
+async function supprimerAuteur(id){
+  if(!confirm('Supprimer cet·te auteur·ice ?'))return;
+  await db.from('auteurs').delete().eq('id',id);
+  loadAuteurs();loadAuteursSelect();
+}
+
+/* SUGGESTIONS */
+async function loadTagsSuggestions(){
+  const {data}=await db.from('tags').select('nom').order('nom');
+  const container=document.getElementById('tags-suggestions');
+  if(!container)return;
+  container.innerHTML=(data||[]).map(t=>`<button class="btn btn-sm" style="font-size:11px" onclick="toggleSuggestion('${t.nom}','tag')" id="sug-tag-${t.nom.replace(/ /g,'-')}">${t.nom}</button>`).join('');
+}
+
+async function loadTWSuggestions(){
+  const {data}=await db.from('trigger_warnings_histoires').select('contenu');
+  const uniq=[...new Set((data||[]).map(t=>t.contenu))];
+  const container=document.getElementById('tw-suggestions');
+  if(!container)return;
+  container.innerHTML=uniq.map(t=>`<button class="btn btn-sm" style="font-size:11px" onclick="toggleSuggestion('${t}','tw')" id="sug-tw-${t.replace(/ /g,'-')}">${t}</button>`).join('');
+}
+
+function toggleSuggestion(val,type){
+  const arr=type==='tag'?tags:tws;
+  const btnId='sug-'+type+'-'+val.replace(/ /g,'-');
+  const btn=document.getElementById(btnId);
+  if(arr.includes(val)){arr.splice(arr.indexOf(val),1);if(btn)btn.classList.remove('btn-accent');}
+  else{arr.push(val);if(btn)btn.classList.add('btn-accent');}
+  type==='tag'?renderTags():renderTWs();
 }
 
 checkSession();
