@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Astrolabe — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --bg:#1a1f2e;--bg2:#1e2438;--glass:rgba(140,150,195,.10);--glass-border:rgba(180,190,230,.18);
+      --text:#eef0fa;--text2:#9aa2c8;--text3:#5d6490;
+      --accent:#7e9fd4;--accent2:#a78fd4;--danger:#d47e7e;--success:#7ed4a0;
+    }
+    body{background:var(--bg);color:var(--text);font-family:'Jost',sans-serif;font-size:14px;min-height:100vh;}
+    #app{max-width:800px;margin:0 auto;padding:24px 20px;}
+
+    /* AUTH */
+    #auth-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:16px;}
+    .auth-logo{font-family:'Cormorant Garamond',serif;font-size:32px;letter-spacing:6px;margin-bottom:8px;}
+    .auth-sub{font-size:11px;letter-spacing:2px;color:var(--text3);margin-bottom:24px;}
+    .auth-box{width:320px;background:var(--bg2);border:1px solid var(--glass-border);border-radius:16px;padding:24px;}
+
+    /* HEADER */
+    .admin-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;padding-bottom:16px;border-bottom:1px solid var(--glass-border);}
+    .admin-title{font-family:'Cormorant Garamond',serif;font-size:24px;letter-spacing:2px;}
+    .admin-user{font-size:11px;color:var(--text3);}
+
+    /* TABS */
+    .tabs{display:flex;gap:8px;margin-bottom:24px;}
+    .tab{background:var(--glass);border:1px solid var(--glass-border);color:var(--text2);font-family:'Jost',sans-serif;font-size:12px;padding:8px 18px;border-radius:20px;cursor:pointer;transition:all .2s;}
+    .tab.active{background:rgba(126,159,212,.2);border-color:rgba(126,159,212,.4);color:var(--accent);}
+
+    /* PANELS */
+    .panel{display:none;}
+    .panel.active{display:block;}
+
+    /* CARDS */
+    .card{background:var(--bg2);border:1px solid var(--glass-border);border-radius:14px;padding:20px;margin-bottom:16px;}
+    .card-title{font-family:'Cormorant Garamond',serif;font-size:18px;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid rgba(180,190,255,.07);}
+
+    /* FORM */
+    .form-group{margin-bottom:14px;}
+    .form-label{display:block;font-size:10px;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;margin-bottom:5px;}
+    .form-input,.form-select,.form-textarea{width:100%;background:rgba(140,150,195,.1);border:1px solid rgba(180,190,230,.16);border-radius:8px;color:var(--text);font-family:'Jost',sans-serif;font-size:13px;padding:10px 12px;outline:none;transition:border-color .2s;}
+    .form-input:focus,.form-select:focus,.form-textarea:focus{border-color:rgba(126,159,212,.5);}
+    .form-textarea{resize:vertical;min-height:120px;line-height:1.7;}
+    .form-select option{background:#1e2438;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .form-hint{font-size:10px;color:var(--text3);margin-top:4px;}
+
+    /* BUTTONS */
+    .btn{background:var(--glass);border:1px solid var(--glass-border);color:var(--text);font-family:'Jost',sans-serif;font-size:12px;padding:9px 18px;border-radius:24px;cursor:pointer;transition:all .2s;}
+    .btn:hover{background:rgba(140,150,195,.18);}
+    .btn-accent{background:rgba(126,159,212,.18);border-color:rgba(126,159,212,.4);color:var(--accent);}
+    .btn-accent:hover{background:rgba(126,159,212,.28);}
+    .btn-danger{background:rgba(212,126,126,.15);border-color:rgba(212,126,126,.4);color:var(--danger);}
+    .btn-success{background:rgba(126,212,160,.15);border-color:rgba(126,212,160,.4);color:var(--success);}
+    .btn-full{width:100%;padding:12px;border-radius:10px;font-size:13px;}
+    .btn-sm{padding:5px 12px;font-size:11px;}
+
+    /* IMAGE UPLOAD */
+    .img-upload{border:2px dashed rgba(180,190,230,.2);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:border-color .2s;position:relative;}
+    .img-upload:hover{border-color:rgba(126,159,212,.4);}
+    .img-upload input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+    .img-upload-text{font-size:12px;color:var(--text3);}
+    .img-preview{width:100%;border-radius:8px;margin-top:10px;display:none;}
+
+    /* LIST */
+    .histoire-item{background:rgba(140,150,195,.06);border:1px solid var(--glass-border);border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;}
+    .histoire-item-cover{width:40px;height:60px;border-radius:4px;object-fit:cover;background:rgba(126,159,212,.1);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;}
+    .histoire-item-info{flex:1;}
+    .histoire-item-title{font-size:14px;font-weight:500;margin-bottom:2px;}
+    .histoire-item-meta{font-size:11px;color:var(--text3);}
+    .histoire-item-status{font-size:10px;padding:2px 8px;border-radius:10px;flex-shrink:0;}
+    .status-publie{background:rgba(126,212,160,.15);color:var(--success);}
+    .status-brouillon{background:rgba(180,190,230,.1);color:var(--text3);}
+
+    /* ALERT */
+    .alert{padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:16px;display:none;}
+    .alert.show{display:block;}
+    .alert-success{background:rgba(126,212,160,.15);border:1px solid rgba(126,212,160,.3);color:var(--success);}
+    .alert-error{background:rgba(212,126,126,.15);border:1px solid rgba(212,126,126,.3);color:var(--danger);}
+
+    /* TAGS INPUT */
+    .tags-wrap{display:flex;flex-wrap:wrap;gap:6px;background:rgba(140,150,195,.1);border:1px solid rgba(180,190,230,.16);border-radius:8px;padding:8px;min-height:42px;cursor:text;}
+    .tag-chip{background:rgba(126,159,212,.15);border:1px solid rgba(126,159,212,.3);color:var(--accent);font-size:11px;padding:3px 10px;border-radius:12px;display:flex;align-items:center;gap:5px;}
+    .tag-chip button{background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;line-height:1;padding:0;}
+    .tags-wrap input{background:none;border:none;outline:none;color:var(--text);font-family:'Jost',sans-serif;font-size:13px;min-width:80px;flex:1;}
+
+    /* CHAPITRE LIST */
+    .chapitre-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(140,150,195,.06);border:1px solid var(--glass-border);border-radius:8px;margin-bottom:8px;}
+    .ch-num{font-size:11px;color:var(--text3);width:24px;flex-shrink:0;}
+    .ch-info{flex:1;}
+    .ch-title{font-size:13px;}
+    .ch-meta{font-size:10px;color:var(--text3);}
+
+    /* LOADING */
+    .loading{text-align:center;padding:40px;color:var(--text3);font-size:13px;}
+    .spinner{display:inline-block;width:20px;height:20px;border:2px solid rgba(126,159,212,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin-right:8px;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen">
+  <div class="auth-logo">✦ ASTROLABE</div>
+  <div class="auth-sub">ESPACE ADMINISTRATION</div>
+  <div class="auth-box">
+    <div class="form-group">
+      <label class="form-label">E-mail admin</label>
+      <input type="email" class="form-input" id="auth-email" placeholder="ton@mail.com" value="astrolabe.support@gmail.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Mot de passe</label>
+      <input type="password" class="form-input" id="auth-mdp" placeholder="••••••••">
+    </div>
+    <div id="auth-error" class="alert alert-error">E-mail ou mot de passe incorrect.</div>
+    <button class="btn btn-accent btn-full" onclick="login()" style="margin-top:8px">Connexion ✦</button>
+  </div>
+</div>
+
+<!-- ADMIN APP -->
+<div id="admin-app" style="display:none">
+  <div id="app">
+    <div class="admin-header">
+      <div>
+        <div class="admin-title">✦ Administration</div>
+        <div class="admin-user" id="admin-user-label"></div>
+      </div>
+      <button class="btn btn-sm" onclick="logout()">Déconnexion</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('histoires')">📚 Histoires</button>
+      <button class="tab" onclick="switchTab('nouvelle')">✦ Nouvelle histoire</button>
+      <button class="tab" onclick="switchTab('chapitre')">📝 Ajouter chapitre</button>
+    </div>
+
+    <!-- PANEL HISTOIRES -->
+    <div class="panel active" id="panel-histoires">
+      <div id="alert-histoires" class="alert"></div>
+      <div class="card">
+        <div class="card-title">Histoires publiées</div>
+        <div id="histoires-list"><div class="loading"><span class="spinner"></span>Chargement…</div></div>
+      </div>
+    </div>
+
+    <!-- PANEL NOUVELLE HISTOIRE -->
+    <div class="panel" id="panel-nouvelle">
+      <div id="alert-nouvelle" class="alert"></div>
+      <div class="card">
+        <div class="card-title">Nouvelle histoire</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Titre *</label>
+            <input type="text" class="form-input" id="n-titre" placeholder="Titre de l'histoire">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Auteur·ice</label>
+            <input type="text" class="form-input" id="n-auteur" placeholder="Nom de plume">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Résumé *</label>
+          <textarea class="form-textarea" id="n-resume" placeholder="Résumé de l'histoire…" style="min-height:80px"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Couverture (portrait 2:3)</label>
+            <div class="img-upload" id="cover-zone">
+              <input type="file" accept="image/*" onchange="previewImg(this,'cover-preview','cover-zone')">
+              <div class="img-upload-text">📎 Cliquer ou glisser une image</div>
+              <img id="cover-preview" class="img-preview">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Bannière (paysage 2:1)</label>
+            <div class="img-upload" id="banner-zone">
+              <input type="file" accept="image/*" onchange="previewImg(this,'banner-preview','banner-zone')">
+              <div class="img-upload-text">📎 Cliquer ou glisser une image</div>
+              <img id="banner-preview" class="img-preview">
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tags <span style="color:var(--text3);font-size:9px">(appuie sur Entrée pour ajouter)</span></label>
+          <div class="tags-wrap" id="tags-wrap" onclick="document.getElementById('tags-input').focus()">
+            <input type="text" id="tags-input" placeholder="Romance, Fantastique…" onkeydown="handleTagInput(event)">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Trigger warnings <span style="color:var(--text3);font-size:9px">(appuie sur Entrée pour ajouter)</span></label>
+          <div class="tags-wrap" id="tw-wrap" onclick="document.getElementById('tw-input').focus()">
+            <input type="text" id="tw-input" placeholder="Scènes spicy, Violence…" onkeydown="handleTWInput(event)">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Chapitres gratuits</label>
+            <input type="number" class="form-input" id="n-gratuit" value="8" min="0">
+            <div class="form-hint">Les X premiers chapitres sont gratuits</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Prix par chapitre (tickets)</label>
+            <input type="number" class="form-input" id="n-prix" value="1" min="1">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Contenu adulte</label>
+            <select class="form-select" id="n-adulte">
+              <option value="false">Non</option>
+              <option value="true">Oui</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Statut</label>
+            <select class="form-select" id="n-statut">
+              <option value="brouillon">Brouillon</option>
+              <option value="publie">Publié</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-accent btn-full" onclick="creerHistoire()" style="margin-top:8px">✦ Créer l'histoire</button>
+      </div>
+    </div>
+
+    <!-- PANEL CHAPITRE -->
+    <div class="panel" id="panel-chapitre">
+      <div id="alert-chapitre" class="alert"></div>
+      <div class="card">
+        <div class="card-title">Ajouter un chapitre</div>
+        <div class="form-group">
+          <label class="form-label">Histoire *</label>
+          <select class="form-select" id="ch-histoire">
+            <option value="">— Choisir une histoire —</option>
+          </select>
+        </div>
+        <div id="chapitres-existants" style="margin-bottom:16px;display:none">
+          <div style="font-size:10px;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Chapitres existants</div>
+          <div id="ch-list"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Numéro *</label>
+            <input type="number" class="form-input" id="ch-num" value="1" min="1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Titre *</label>
+            <input type="text" class="form-input" id="ch-titre" placeholder="Titre du chapitre">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contenu *</label>
+          <textarea class="form-textarea" id="ch-contenu" style="min-height:300px;font-size:13px;line-height:1.8" placeholder="Colle ici le texte du chapitre…&#10;&#10;Les dialogues commençant par — seront mis en valeur automatiquement.&#10;&#10;Sépare les paragraphes par une ligne vide."></textarea>
+          <div class="form-hint" id="ch-wordcount">0 mots</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Accès</label>
+          <select class="form-select" id="ch-gratuit">
+            <option value="false">🎟 Payant (tickets)</option>
+            <option value="true">✦ Gratuit</option>
+          </select>
+        </div>
+        <button class="btn btn-accent btn-full" onclick="ajouterChapitre()" style="margin-top:8px">✦ Publier le chapitre</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPA_URL='https://msownknywszovjnfekde.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zb3dua255d3N6b3ZqbmZla2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MDIxNDUsImV4cCI6MjA4ODk3ODE0NX0.kekcMQQowhhIazwYDhAa4OYWCnHp4-4I_g9RGkxTjy8';
+const ADMIN_EMAIL='astrolabe.support@gmail.com';
+const db=window.supabase.createClient(SUPA_URL,SUPA_KEY);
+
+let currentUser=null;
+let tags=[];
+let tws=[];
+let histoires=[];
+
+/* AUTH */
+async function login(){
+  const email=document.getElementById('auth-email').value.trim();
+  const mdp=document.getElementById('auth-mdp').value;
+  const errEl=document.getElementById('auth-error');
+  errEl.classList.remove('show');
+  if(email!==ADMIN_EMAIL){errEl.textContent='Accès réservé à l\'administratrice.';errEl.classList.add('show');return;}
+  const {data,error}=await db.auth.signInWithPassword({email,password:mdp});
+  if(error){errEl.textContent='E-mail ou mot de passe incorrect.';errEl.classList.add('show');return;}
+  currentUser=data.user;
+  showAdmin();
+}
+
+async function logout(){
+  await db.auth.signOut();
+  document.getElementById('admin-app').style.display='none';
+  document.getElementById('auth-screen').style.display='flex';
+}
+
+async function checkSession(){
+  const {data:{session}}=await db.auth.getSession();
+  if(session&&session.user.email===ADMIN_EMAIL){
+    currentUser=session.user;
+    showAdmin();
+  }
+}
+
+function showAdmin(){
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('admin-app').style.display='block';
+  document.getElementById('admin-user-label').textContent=currentUser.email;
+  loadHistoires();
+}
+
+/* TABS */
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('panel-'+tab).classList.add('active');
+  if(tab==='chapitre')loadHistoiresSelect();
+}
+
+/* ALERTS */
+function showAlert(panelId,msg,type='success'){
+  const el=document.getElementById('alert-'+panelId);
+  el.textContent=msg;el.className='alert alert-'+type+' show';
+  setTimeout(()=>el.classList.remove('show'),4000);
+}
+
+/* IMAGE PREVIEW */
+function previewImg(input,previewId,zoneId){
+  if(!input.files[0])return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=document.getElementById(previewId);
+    img.src=e.target.result;img.style.display='block';
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+/* UPLOAD IMAGE SUPABASE */
+async function uploadImage(file,folder){
+  const ext=file.name.split('.').pop();
+  const filename=`${folder}/${Date.now()}.${ext}`;
+  const {data,error}=await db.storage.from('images').upload(filename,file,{upsert:true});
+  if(error)throw error;
+  const {data:{publicUrl}}=db.storage.from('images').getPublicUrl(filename);
+  return publicUrl;
+}
+
+/* TAGS */
+function handleTagInput(e){
+  if(e.key==='Enter'||e.key===','){
+    e.preventDefault();
+    const val=e.target.value.trim().replace(',','');
+    if(val&&!tags.includes(val)){
+      tags.push(val);
+      renderTags();
+    }
+    e.target.value='';
+  }
+}
+function removeTag(i){tags.splice(i,1);renderTags();}
+function renderTags(){
+  const wrap=document.getElementById('tags-wrap');
+  const input=document.getElementById('tags-input');
+  wrap.innerHTML='';
+  tags.forEach((t,i)=>{
+    const chip=document.createElement('div');chip.className='tag-chip';
+    chip.innerHTML=`${t}<button onclick="removeTag(${i})">×</button>`;
+    wrap.appendChild(chip);
+  });
+  wrap.appendChild(input);
+}
+
+function handleTWInput(e){
+  if(e.key==='Enter'||e.key===','){
+    e.preventDefault();
+    const val=e.target.value.trim().replace(',','');
+    if(val&&!tws.includes(val)){
+      tws.push(val);
+      renderTWs();
+    }
+    e.target.value='';
+  }
+}
+function removeTW(i){tws.splice(i,1);renderTWs();}
+function renderTWs(){
+  const wrap=document.getElementById('tw-wrap');
+  const input=document.getElementById('tw-input');
+  wrap.innerHTML='';
+  tws.forEach((t,i)=>{
+    const chip=document.createElement('div');chip.className='tag-chip';
+    chip.innerHTML=`${t}<button onclick="removeTW(${i})">×</button>`;
+    wrap.appendChild(chip);
+  });
+  wrap.appendChild(input);
+}
+
+/* WORD COUNT */
+document.addEventListener('input',e=>{
+  if(e.target.id==='ch-contenu'){
+    const words=e.target.value.trim().split(/\s+/).filter(w=>w).length;
+    document.getElementById('ch-wordcount').textContent=words.toLocaleString('fr')+' mots';
+  }
+});
+
+/* CRÉER HISTOIRE */
+async function creerHistoire(){
+  const titre=document.getElementById('n-titre').value.trim();
+  const resume=document.getElementById('n-resume').value.trim();
+  if(!titre||!resume){showAlert('nouvelle','Le titre et le résumé sont obligatoires.','error');return;}
+  const btn=document.querySelector('#panel-nouvelle .btn-accent');
+  btn.textContent='Création…';btn.disabled=true;
+  try{
+    // Upload images
+    let coverUrl=null,bannerUrl=null;
+    const coverFile=document.querySelector('#cover-zone input').files[0];
+    const bannerFile=document.querySelector('#banner-zone input').files[0];
+    if(coverFile)coverUrl=await uploadImage(coverFile,'covers');
+    if(bannerFile)bannerUrl=await uploadImage(bannerFile,'banners');
+
+    // Créer l'histoire
+    const {data:histoire,error}=await db.from('histoires').insert({
+      titre,
+      resume,
+      cover_url:coverUrl,
+      banner_url:bannerUrl,
+      auteur_nom:document.getElementById('n-auteur').value.trim()||null,
+      gratuit_jusqu_au:parseInt(document.getElementById('n-gratuit').value)||8,
+      prix_ticket:parseInt(document.getElementById('n-prix').value)||1,
+      adulte:document.getElementById('n-adulte').value==='true',
+      statut:document.getElementById('n-statut').value,
+    }).select().single();
+    if(error)throw error;
+
+    // Tags
+    for(const tagNom of tags){
+      let {data:tag}=await db.from('tags').select('id').eq('nom',tagNom).single();
+      if(!tag){const {data:newTag}=await db.from('tags').insert({nom:tagNom}).select().single();tag=newTag;}
+      if(tag)await db.from('histoires_tags').insert({histoire_id:histoire.id,tag_id:tag.id});
+    }
+
+    // Trigger warnings
+    for(const tw of tws){
+      await db.from('trigger_warnings').insert({histoire_id:histoire.id,contenu:tw});
+    }
+
+    showAlert('nouvelle','Histoire créée avec succès ! ✦');
+    // Reset form
+    ['n-titre','n-auteur','n-resume'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('n-gratuit').value='8';document.getElementById('n-prix').value='1';
+    document.getElementById('n-adulte').value='false';document.getElementById('n-statut').value='brouillon';
+    tags=[];tws=[];renderTags();renderTWs();
+    ['cover-preview','banner-preview'].forEach(id=>{document.getElementById(id).style.display='none';});
+    loadHistoires();
+  }catch(e){
+    showAlert('nouvelle','Erreur : '+e.message,'error');
+  }finally{
+    btn.textContent='✦ Créer l\'histoire';btn.disabled=false;
+  }
+}
+
+/* LOAD HISTOIRES */
+async function loadHistoires(){
+  const {data,error}=await db.from('histoires').select('*').order('created_at',{ascending:false});
+  if(error){document.getElementById('histoires-list').innerHTML='<div class="loading">Erreur de chargement.</div>';return;}
+  histoires=data||[];
+  if(!histoires.length){
+    document.getElementById('histoires-list').innerHTML='<div class="loading">Aucune histoire pour l\'instant.</div>';
+    return;
+  }
+  document.getElementById('histoires-list').innerHTML=histoires.map(h=>`
+    <div class="histoire-item">
+      <div class="histoire-item-cover">${h.cover_url?`<img src="${h.cover_url}" style="width:100%;height:100%;object-fit:cover;border-radius:4px">`:'📖'}</div>
+      <div class="histoire-item-info">
+        <div class="histoire-item-title">${h.titre}</div>
+        <div class="histoire-item-meta">${h.auteur_nom?'par '+h.auteur_nom+' · ':''}<span id="ch-count-${h.id}">…</span> chapitre(s)</div>
+      </div>
+      <span class="histoire-item-status ${h.statut==='publie'?'status-publie':'status-brouillon'}">${h.statut==='publie'?'Publié':'Brouillon'}</span>
+      <button class="btn btn-sm btn-${h.statut==='publie'?'danger':'success'}" onclick="toggleStatut('${h.id}','${h.statut}')">${h.statut==='publie'?'Dépublier':'Publier'}</button>
+    </div>
+  `).join('');
+  // Charger le nb de chapitres
+  for(const h of histoires){
+    const {count}=await db.from('chapitres').select('*',{count:'exact',head:true}).eq('histoire_id',h.id);
+    const el=document.getElementById('ch-count-'+h.id);
+    if(el)el.textContent=count||0;
+  }
+}
+
+async function toggleStatut(id,statut){
+  const nouveau=statut==='publie'?'brouillon':'publie';
+  await db.from('histoires').update({statut:nouveau}).eq('id',id);
+  loadHistoires();
+}
+
+/* LOAD HISTOIRES SELECT */
+async function loadHistoiresSelect(){
+  const {data}=await db.from('histoires').select('id,titre').order('titre');
+  const sel=document.getElementById('ch-histoire');
+  sel.innerHTML='<option value="">— Choisir une histoire —</option>';
+  (data||[]).forEach(h=>{
+    const o=document.createElement('option');o.value=h.id;o.textContent=h.titre;sel.appendChild(o);
+  });
+  sel.onchange=()=>loadChapitresExistants(sel.value);
+}
+
+async function loadChapitresExistants(histoireId){
+  if(!histoireId){document.getElementById('chapitres-existants').style.display='none';return;}
+  const {data}=await db.from('chapitres').select('*').eq('histoire_id',histoireId).order('numero');
+  const section=document.getElementById('chapitres-existants');
+  const list=document.getElementById('ch-list');
+  if(!data||!data.length){section.style.display='none';
+    document.getElementById('ch-num').value=1;return;}
+  section.style.display='block';
+  list.innerHTML=data.map(ch=>`
+    <div class="chapitre-item">
+      <div class="ch-num">${ch.numero}</div>
+      <div class="ch-info">
+        <div class="ch-title">${ch.titre}</div>
+        <div class="ch-meta">${ch.gratuit?'Gratuit':'Payant'} · ${ch.contenu?ch.contenu.split(' ').length.toLocaleString('fr')+' mots':'vide'}</div>
+      </div>
+      <button class="btn btn-sm btn-danger" onclick="supprimerChapitre('${ch.id}','${histoireId}')">Suppr.</button>
+    </div>
+  `).join('');
+  document.getElementById('ch-num').value=(Math.max(...data.map(c=>c.numero))+1)||1;
+}
+
+/* AJOUTER CHAPITRE */
+async function ajouterChapitre(){
+  const histoireId=document.getElementById('ch-histoire').value;
+  const num=parseInt(document.getElementById('ch-num').value);
+  const titre=document.getElementById('ch-titre').value.trim();
+  const contenu=document.getElementById('ch-contenu').value.trim();
+  const gratuit=document.getElementById('ch-gratuit').value==='true';
+  if(!histoireId||!titre||!contenu){showAlert('chapitre','L\'histoire, le titre et le contenu sont obligatoires.','error');return;}
+  const btn=document.querySelector('#panel-chapitre .btn-accent');
+  btn.textContent='Publication…';btn.disabled=true;
+  try{
+    const {error}=await db.from('chapitres').insert({histoire_id:histoireId,numero:num,titre,contenu,gratuit});
+    if(error)throw error;
+    showAlert('chapitre','Chapitre publié avec succès ! ✦');
+    document.getElementById('ch-titre').value='';
+    document.getElementById('ch-contenu').value='';
+    document.getElementById('ch-wordcount').textContent='0 mots';
+    loadChapitresExistants(histoireId);
+  }catch(e){
+    showAlert('chapitre','Erreur : '+e.message,'error');
+  }finally{
+    btn.textContent='✦ Publier le chapitre';btn.disabled=false;
+  }
+}
+
+async function supprimerChapitre(id,histoireId){
+  if(!confirm('Supprimer ce chapitre ?'))return;
+  await db.from('chapitres').delete().eq('id',id);
+  loadChapitresExistants(histoireId);
+  showAlert('chapitre','Chapitre supprimé.');
+}
+
+checkSession();
+</script>
+</body>
+</html>
