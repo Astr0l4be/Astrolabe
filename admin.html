@@ -432,7 +432,7 @@ async function creerHistoire(){
       resume,
       cover_url:coverUrl,
       banner_url:bannerUrl,
-      auteur_nom:document.getElementById('n-auteur').value.trim()||null,
+      auteur_pseudo:document.getElementById('n-auteur').value.trim()||null,
       gratuit_jusqu_au:parseInt(document.getElementById('n-gratuit').value)||8,
       prix_ticket:parseInt(document.getElementById('n-prix').value)||1,
       adulte:document.getElementById('n-adulte').value==='true',
@@ -449,7 +449,7 @@ async function creerHistoire(){
 
     // Trigger warnings
     for(const tw of tws){
-      await db.from('trigger_warnings').insert({histoire_id:histoire.id,contenu:tw});
+      await db.from('trigger_warnings_histoires').insert({histoire_id:histoire.id,contenu:tw});
     }
 
     showAlert('nouvelle','Histoire créée avec succès ! ✦');
@@ -481,7 +481,7 @@ async function loadHistoires(){
       <div class="histoire-item-cover">${h.cover_url?`<img src="${h.cover_url}" style="width:100%;height:100%;object-fit:cover;border-radius:4px">`:'📖'}</div>
       <div class="histoire-item-info">
         <div class="histoire-item-title">${h.titre}</div>
-        <div class="histoire-item-meta">${h.auteur_nom?'par '+h.auteur_nom+' · ':''}<span id="ch-count-${h.id}">…</span> chapitre(s)</div>
+        <div class="histoire-item-meta">${h.auteur_pseudo?'par '+h.auteur_pseudo+' · ':''}<span id="ch-count-${h.id}">…</span> chapitre(s)</div>
       </div>
       <span class="histoire-item-status ${h.statut==='publie'?'status-publie':'status-brouillon'}">${h.statut==='publie'?'Publié':'Brouillon'}</span>
       <button class="btn btn-sm btn-${h.statut==='publie'?'danger':'success'}" onclick="toggleStatut('${h.id}','${h.statut}')">${h.statut==='publie'?'Dépublier':'Publier'}</button>
