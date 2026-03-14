@@ -957,6 +957,17 @@ const CH2=`Chapitre 2\nL'étrangère\n\nElle n'est pas d'ici. C'est tellement fl
 /* DONNÉES - chargées depuis Supabase */
 let BOOKS=[];
 
+function bookCardHTML(b){
+  const img=b.cover?`<img src="${b.cover}" alt="${b.title}" loading="lazy">`:'';
+  return`<div class="book-card ${b.color}" onclick="openHistoire('${b.id}')">${img}<div class="book-card-label">${b.title}</div></div>`;
+}
+
+function renderGrid(id,books){
+  const el=document.getElementById(id);if(!el)return;
+  const filtered=books.filter(b=>!b.adulte||compte.adulte===true);
+  el.innerHTML=filtered.map(b=>bookCardHTML(b)).join('');
+}
+
 async function loadHistoires(){
   const {data:histoires,error}=await db.from('histoires')
     .select('*')
@@ -1427,7 +1438,6 @@ async function checkSession(){
 }
 
 checkSession().catch(()=>{}).finally(()=>{
-  loadHistoires().catch(()=>{});
   setTimeout(()=>{
     const lastPage=sessionStorage.getItem('lastPage');
     if(lastPage&&lastPage!=='p-splash'&&document.getElementById(lastPage)){
@@ -1435,6 +1445,8 @@ checkSession().catch(()=>{}).finally(()=>{
     } else {
       go('p-main');
     }
+    // Charger les histoires après que la page soit visible
+    loadHistoires().catch(()=>{});
   },3200);
 });
 </script>
