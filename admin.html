@@ -265,7 +265,7 @@
           <label class="form-label">Bio courte</label>
           <textarea class="form-textarea" id="a-bio" placeholder="Quelques mots sur l'auteur·ice…" style="min-height:70px"></textarea>
         </div>
-        <button class="btn btn-accent btn-full" onclick="creerAuteur()" style="margin-top:8px">✦ Ajouter l'auteur·ice</button>
+        <button class="btn btn-accent btn-full" onclick="creerAuteur()" style="margin-top:8px">✦ Ajouter l\'auteur·ice</button>
       </div>
       <div class="card">
         <div class="card-title">Auteur·ices</div>
@@ -297,7 +297,7 @@
           <label class="form-label">Bio courte</label>
           <textarea class="form-textarea" id="a-bio" placeholder="Quelques mots sur l'auteur·ice…" style="min-height:70px"></textarea>
         </div>
-        <button class="btn btn-accent btn-full" onclick="creerAuteur()" style="margin-top:8px">✦ Ajouter l'auteur·ice</button>
+        <button class="btn btn-accent btn-full" onclick="creerAuteur()" style="margin-top:8px">✦ Ajouter l\'auteur·ice</button>
       </div>
       <div class="card">
         <div class="card-title">Auteur·ices</div>
@@ -682,7 +682,7 @@ async function loadAuteursSelect(){
 async function loadAuteurs(){
   const {data}=await db.from('auteurs').select('*').order('pseudo');
   const list=document.getElementById('auteurs-list');
-  if(!data||!data.length){list.innerHTML='<div class="loading">Aucun·e auteur·ice pour l'instant.</div>';return;}
+  if(!data||!data.length){list.innerHTML='<div class="loading">Aucun·e auteur·ice pour l\'instant.</div>';return;}
   // Pour chaque auteur, compter ses histoires
   const {data:hists}=await db.from('histoires').select('auteur_pseudo');
   list.innerHTML=data.map(a=>{
@@ -715,7 +715,7 @@ async function creerAuteur(){
     loadAuteurs();loadAuteursSelect();
   }catch(e){
     showAlert('auteurs','Erreur : '+e.message,'error');
-  }finally{btn.textContent='✦ Ajouter l'auteur·ice';btn.disabled=false;}
+  }finally{btn.textContent='✦ Ajouter l\'auteur·ice';btn.disabled=false;}
 }
 
 async function supprimerAuteur(id){
@@ -760,7 +760,7 @@ function toggleSuggestion(val,type){
 
 
 /* AUTEURS */
-let auteurs=[];
+
 
 async function loadAuteursSelect(){
   const {data}=await db.from('auteurs').select('id,pseudo').order('pseudo');
@@ -776,7 +776,7 @@ async function loadAuteursSelect(){
 async function loadAuteurs(){
   const {data}=await db.from('auteurs').select('*').order('pseudo');
   const list=document.getElementById('auteurs-list');
-  if(!data||!data.length){list.innerHTML='<div class="loading">Aucun·e auteur·ice pour l'instant.</div>';return;}
+  if(!data||!data.length){list.innerHTML='<div class="loading">Aucun·e auteur·ice pour l\'instant.</div>';return;}
   const {data:hists}=await db.from('histoires').select('auteur_pseudo');
   list.innerHTML=data.map(a=>{
     const nbH=(hists||[]).filter(h=>h.auteur_pseudo===a.pseudo).length;
@@ -807,7 +807,7 @@ async function creerAuteur(){
     document.getElementById('a-bio').value='';
     loadAuteurs();loadAuteursSelect();
   }catch(e){showAlert('auteurs','Erreur : '+e.message,'error');}
-  finally{btn.textContent='✦ Ajouter l'auteur·ice';btn.disabled=false;}
+  finally{btn.textContent='✦ Ajouter l\'auteur·ice';btn.disabled=false;}
 }
 
 async function supprimerAuteur(id){
