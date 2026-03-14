@@ -149,6 +149,7 @@
             <button class="btn btn-sm filter-btn active" onclick="filterHistoires('all',this)">Toutes</button>
             <button class="btn btn-sm filter-btn" onclick="filterHistoires('publie',this)" style="background:rgba(126,212,160,.1);border-color:rgba(126,212,160,.3);color:var(--success)">Publiées</button>
             <button class="btn btn-sm filter-btn" onclick="filterHistoires('brouillon',this)">Brouillons</button>
+            <button class="btn btn-sm filter-btn" onclick="filterHistoires('corbeille',this)" style="background:rgba(212,126,126,.1);border-color:rgba(212,126,126,.3);color:var(--danger)">🗑 Corbeille</button>
           </div>
         </div>
         <div id="histoires-list"><div class="loading"><span class="spinner"></span>Chargement…</div></div>
@@ -281,33 +282,7 @@
     </div>
 
     <!-- PANEL AUTEURS -->
-    <div class="panel" id="panel-auteurs">
-      <div id="alert-auteurs" class="alert"></div>
-      <div class="card" style="margin-bottom:16px">
-        <div class="card-title">Nouvel·le auteur·ice</div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Nom de plume *</label>
-            <input type="text" class="form-input" id="a-pseudo" placeholder="Nom affiché sur le site">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Vrai nom (privé)</label>
-            <input type="text" class="form-input" id="a-nom" placeholder="Non visible par les lecteurs">
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Bio courte</label>
-          <textarea class="form-textarea" id="a-bio" placeholder="Quelques mots sur l'auteur·ice…" style="min-height:70px"></textarea>
-        </div>
-        <button class="btn btn-accent btn-full" onclick="creerAuteur()" style="margin-top:8px">✦ Ajouter l\'auteur·ice</button>
-      </div>
-      <div class="card">
-        <div class="card-title">Auteur·ices</div>
-        <div id="auteurs-list"><div class="loading"><span class="spinner"></span>Chargement…</div></div>
-      </div>
-    </div>
-
-    <!-- PANEL CHAPITRE -->
+        <!-- PANEL CHAPITRE -->
     <div class="panel" id="panel-chapitre">
       <div id="alert-chapitre" class="alert"></div>
       <div class="card">
@@ -408,7 +383,7 @@ function switchTab(tab){
   event.target.classList.add('active');
   document.getElementById('panel-'+tab).classList.add('active');
   if(tab==='chapitre')loadHistoiresSelect();
-  if(tab==='auteurs')loadAuteurs();
+  if(tab==='auteurs'){loadAuteurs();}
 }
 
 /* ALERTS */
@@ -780,18 +755,71 @@ async function loadAuteurs(){
   const {data}=await db.from('auteurs').select('*').order('pseudo');
   const list=document.getElementById('auteurs-list');
   if(!data||!data.length){list.innerHTML='<div class="loading">Aucun·e auteur·ice pour l\'instant.</div>';return;}
-  const {data:hists}=await db.from('histoires').select('auteur_pseudo');
+  const {data:hists}=await db.from('histoires').select('auteur_pseudo,titre,statut');
   list.innerHTML=data.map(a=>{
     const nbH=(hists||[]).filter(h=>h.auteur_pseudo===a.pseudo).length;
-    return`<div class="histoire-item">
+    return`<div class="histoire-item" style="cursor:pointer" onclick="showAuteurDetail('${a.id}')">
+      <div class="histoire-item-cover" style="font-size:20px;background:rgba(167,143,212,.1)">✍</div>
       <div class="histoire-item-info">
         <div class="histoire-item-title">${a.pseudo}</div>
         <div class="histoire-item-meta">${a.nom_reel?'('+a.nom_reel+') · ':''}<strong>${nbH}</strong> histoire(s)</div>
-        ${a.bio?`<div class="histoire-item-meta" style="margin-top:4px;font-style:italic">${a.bio}</div>`:''}
       </div>
-      <button class="btn btn-sm btn-danger" onclick="supprimerAuteur('${a.id}')">Suppr.</button>
+      <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();supprimerAuteur('${a.id}')">Suppr.</button>
     </div>`;
   }).join('');
+}
+
+async function showAuteurDetail(id){
+  const {data:a}=await db.from('auteurs').select('*').eq('id',id).single();
+  if(!a)return;
+  const {data:hists}=await db.from('histoires').select('id,titre,statut,created_at').eq('auteur_pseudo',a.pseudo).order('created_at',{ascending:false});
+  const nbPubliees=(hists||[]).filter(h=>h.statut==='publie').length;
+  const {data:chaps}=await db.from('chapitres').select('id,histoire_id');
+  const nbChaps=(chaps||[]).filter(ch=>(hists||[]).some(h=>h.id===ch.histoire_id)).length;
+
+  // Masquer la liste, afficher le détail
+  document.querySelector('#panel-auteurs .card:last-child').style.display='none';
+  let detailEl=document.getElementById('auteur-detail');
+  if(!detailEl){
+    detailEl=document.createElement('div');
+    detailEl.id='auteur-detail';
+    document.getElementById('panel-auteurs').appendChild(detailEl);
+  }
+  detailEl.style.display='block';
+  detailEl.innerHTML=`
+    <button class="btn btn-sm" onclick="document.getElementById('auteur-detail').style.display='none';document.querySelector('#panel-auteurs .card:last-child').style.display='block'" style="margin-bottom:12px">← Retour</button>
+    <div class="card">
+      <div style="text-align:center;padding:8px 0 16px">
+        <div style="font-size:40px;margin-bottom:8px">✍</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:22px;margin-bottom:4px">${a.pseudo}</div>
+        ${a.nom_reel?`<div style="font-size:12px;color:var(--text3)">${a.nom_reel}</div>`:''}
+        ${a.bio?`<p style="font-size:12px;color:var(--text2);line-height:1.7;margin-top:10px;font-style:italic">${a.bio}</p>`:''}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px">
+        <div style="background:rgba(126,159,212,.08);border:1px solid rgba(126,159,212,.2);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:22px;font-weight:600;color:var(--accent)">${(hists||[]).length}</div>
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px">Histoires</div>
+        </div>
+        <div style="background:rgba(126,212,160,.06);border:1px solid rgba(126,212,160,.2);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:22px;font-weight:600;color:var(--success)">${nbPubliees}</div>
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px">Publiées</div>
+        </div>
+        <div style="background:rgba(167,143,212,.06);border:1px solid rgba(167,143,212,.2);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:22px;font-weight:600;color:var(--accent2)">${nbChaps}</div>
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px">Chapitres</div>
+        </div>
+      </div>
+      ${(hists||[]).length?`
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Histoires</div>
+        ${(hists||[]).map(h=>`
+          <div class="histoire-item">
+            <div class="histoire-item-info">
+              <div class="histoire-item-title">${h.titre}</div>
+            </div>
+            <span class="histoire-item-status ${h.statut==='publie'?'status-publie':'status-brouillon'}">${h.statut==='publie'?'Publié':'Brouillon'}</span>
+          </div>`).join('')}`:'<div style="font-size:12px;color:var(--text3)">Aucune histoire pour l\'instant.</div>'}
+    </div>
+  `;
 }
 
 async function creerAuteur(){
