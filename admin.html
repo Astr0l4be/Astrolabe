@@ -348,9 +348,9 @@ function previewImg(input,previewId,zoneId){
 async function uploadImage(file,folder){
   const ext=file.name.split('.').pop();
   const filename=`${folder}/${Date.now()}.${ext}`;
-  const {data,error}=await db.storage.from('images').upload(filename,file,{upsert:true});
+  const {data,error}=await db.storage.from('Images').upload(filename,file,{upsert:true});
   if(error)throw error;
-  const {data:{publicUrl}}=db.storage.from('images').getPublicUrl(filename);
+  const {data:{publicUrl}}=db.storage.from('Images').getPublicUrl(filename);
   return publicUrl;
 }
 
