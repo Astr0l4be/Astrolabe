@@ -229,17 +229,19 @@
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Contenu adulte</label>
-            <select class="form-select" id="n-adulte">
-              <option value="false">Non</option>
-              <option value="true">Oui</option>
-            </select>
+            <div style="display:flex;gap:8px">
+              <button type="button" class="btn btn-accent" id="adulte-non" onclick="setAdulte(false)" style="flex:1">Non</button>
+              <button type="button" class="btn" id="adulte-oui" onclick="setAdulte(true)" style="flex:1">Oui</button>
+            </div>
+            <input type="hidden" id="n-adulte" value="false">
           </div>
           <div class="form-group">
             <label class="form-label">Statut</label>
-            <select class="form-select" id="n-statut">
-              <option value="brouillon">Brouillon</option>
-              <option value="publie">Publié</option>
-            </select>
+            <div style="display:flex;gap:8px">
+              <button type="button" class="btn btn-accent" id="statut-brouillon" onclick="setStatut('brouillon')" style="flex:1">Brouillon</button>
+              <button type="button" class="btn" id="statut-publie" onclick="setStatut('publie')" style="flex:1">Publié</button>
+            </div>
+            <input type="hidden" id="n-statut" value="brouillon">
           </div>
         </div>
         <button class="btn btn-accent btn-full" onclick="creerHistoire()" style="margin-top:8px">✦ Créer l'histoire</button>
@@ -337,10 +339,11 @@
         </div>
         <div class="form-group">
           <label class="form-label">Accès</label>
-          <select class="form-select" id="ch-gratuit">
-            <option value="false">🎟 Payant (tickets)</option>
-            <option value="true">✦ Gratuit</option>
-          </select>
+          <div style="display:flex;gap:8px">
+            <button type="button" class="btn btn-accent" id="gratuit-gratuit" onclick="setGratuit(true)" style="flex:1">✦ Gratuit</button>
+            <button type="button" class="btn" id="gratuit-payant" onclick="setGratuit(false)" style="flex:1">🎟 Payant</button>
+          </div>
+          <input type="hidden" id="ch-gratuit" value="true">
         </div>
         <button class="btn btn-accent btn-full" onclick="ajouterChapitre()" style="margin-top:8px">✦ Publier le chapitre</button>
       </div>
@@ -529,7 +532,7 @@ async function creerHistoire(){
       gratuit_jusqu_au:parseInt(document.getElementById('n-gratuit').value)||8,
       prix_ticket:parseInt(document.getElementById('n-prix').value)||1,
       adulte:document.getElementById('n-adulte').value==='true',
-      statut:document.getElementById('n-statut').value,
+      statut:document.getElementById('n-statut').value||'brouillon',
     }).select().single();
     if(error)throw error;
 
@@ -549,7 +552,7 @@ async function creerHistoire(){
     // Reset form
     ['n-titre','n-auteur','n-resume'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('n-gratuit').value='8';document.getElementById('n-prix').value='1';
-    document.getElementById('n-adulte').value='false';document.getElementById('n-statut').value='brouillon';
+    setAdulte(false);setStatut('brouillon');
     tags=[];tws=[];renderTags();renderTWs();
     document.querySelectorAll('[id^="sug-"]').forEach(b=>b.classList.remove('btn-accent'));
     ['cover-preview','banner-preview'].forEach(id=>{document.getElementById(id).style.display='none';});
@@ -613,7 +616,7 @@ async function loadChapitresExistants(histoireId){
   const list=document.getElementById('ch-list');
   if(!data||!data.length){section.style.display='none';
     document.getElementById('ch-num').value=1;
-    document.getElementById('ch-gratuit').value='true';return;}
+    setGratuit(true);return;}
   section.style.display='block';
   list.innerHTML=data.map(ch=>`
     <div class="chapitre-item">
@@ -630,7 +633,7 @@ async function loadChapitresExistants(histoireId){
   // Auto-sélectionner gratuit/payant selon le numéro et le seuil de l'histoire
   const histoire=histoires.find(h=>h.id===histoireId);
   const seuil=histoire?.gratuit_jusqu_au||8;
-  document.getElementById('ch-gratuit').value=nextNum<=seuil?'true':'false';
+  setGratuit(nextNum<=seuil);
 }
 
 /* AJOUTER CHAPITRE */
@@ -639,7 +642,7 @@ async function ajouterChapitre(){
   const num=parseInt(document.getElementById('ch-num').value);
   const titre=document.getElementById('ch-titre').value.trim();
   const contenu=document.getElementById('ch-contenu').value.trim();
-  const gratuit=document.getElementById('ch-gratuit').value==='true';
+  const gratuit=document.getElementById('ch-gratuit').value==='true'||document.getElementById('ch-gratuit').value===true;
   if(!histoireId||!titre||!contenu){showAlert('chapitre','L\'histoire, le titre et le contenu sont obligatoires.','error');return;}
   const btn=document.querySelector('#panel-chapitre .btn-accent');
   btn.textContent='Publication…';btn.disabled=true;
@@ -839,6 +842,40 @@ function toggleSuggestion(val,type){
   if(arr.includes(val)){arr.splice(arr.indexOf(val),1);if(btn)btn.classList.remove('btn-accent');}
   else{arr.push(val);if(btn)btn.classList.add('btn-accent');}
   type==='tag'?renderTags():renderTWs();
+}
+
+/* TOGGLE BUTTONS */
+function setAdulte(val){
+  document.getElementById('n-adulte').value=val;
+  document.getElementById('adulte-non').className='btn'+(val?'':' btn-accent');
+  document.getElementById('adulte-oui').className='btn'+(val?' btn-accent':'');
+}
+function setStatut(val){
+  document.getElementById('n-statut').value=val;
+  document.getElementById('statut-brouillon').className='btn'+(val==='brouillon'?' btn-accent':'');
+  document.getElementById('statut-publie').className='btn'+(val==='publie'?' btn-accent':'');
+}
+function setGratuit(val){
+  document.getElementById('ch-gratuit').value=val;
+  document.getElementById('gratuit-gratuit').className='btn'+(val?' btn-accent':'');
+  document.getElementById('gratuit-payant').className='btn'+(val?'':' btn-accent');
+}
+
+/* TOGGLE BUTTONS */
+function setAdulte(val){
+  document.getElementById('n-adulte').value=String(val);
+  document.getElementById('adulte-non').className='btn'+(val?'':' btn-accent');
+  document.getElementById('adulte-oui').className='btn'+(val?' btn-accent':'');
+}
+function setStatut(val){
+  document.getElementById('n-statut').value=val;
+  document.getElementById('statut-brouillon').className='btn'+(val==='brouillon'?' btn-accent':'');
+  document.getElementById('statut-publie').className='btn'+(val==='publie'?' btn-accent':'');
+}
+function setGratuit(val){
+  document.getElementById('ch-gratuit').value=String(val);
+  document.getElementById('gratuit-gratuit').className='btn'+(val?' btn-accent':'');
+  document.getElementById('gratuit-payant').className='btn'+(val?'':' btn-accent');
 }
 
 checkSession();
