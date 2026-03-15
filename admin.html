@@ -240,12 +240,16 @@
               <div class="tags-wrap" id="edit-tags-wrap" onclick="document.getElementById('edit-tags-input').focus()">
                 <input type="text" id="edit-tags-input" placeholder="Ajouter un tag…" onkeydown="handleEditTagInput(event)">
               </div>
+              <div id="edit-tags-suggestions-label" style="font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:10px;margin-bottom:5px;display:none">Suggestions</div>
+              <div id="edit-tags-suggestions" style="display:flex;flex-wrap:wrap;gap:6px"></div>
             </div>
             <div class="form-group">
               <label class="form-label">Trigger warnings</label>
               <div class="tags-wrap" id="edit-tw-wrap" onclick="document.getElementById('edit-tw-input').focus()">
                 <input type="text" id="edit-tw-input" placeholder="Ajouter un TW…" onkeydown="handleEditTwInput(event)">
               </div>
+              <div id="edit-tw-suggestions-label" style="font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:10px;margin-bottom:5px;display:none">Suggestions</div>
+              <div id="edit-tw-suggestions" style="display:flex;flex-wrap:wrap;gap:6px"></div>
             </div>
             <div class="form-row">
               <div class="form-group">
@@ -385,8 +389,8 @@
           <div class="form-group">
             <label class="form-label">Contenu adulte</label>
             <div style="display:flex;gap:8px">
-              <button type="button" class="btn btn-accent" id="adulte-non" onclick="setAdulte(false)" style="flex:1">Non</button>
-              <button type="button" class="btn" id="adulte-oui" onclick="setAdulte(true)" style="flex:1">Oui</button>
+              <button type="button" class="btn btn-accent" id="adulte-non" onclick="setAdulte(false)" style="flex:1;width:auto;padding:9px 18px">Non</button>
+              <button type="button" class="btn" id="adulte-oui" onclick="setAdulte(true)" style="flex:1;width:auto;padding:9px 18px">Oui</button>
             </div>
             <input type="hidden" id="n-adulte" value="false">
           </div>
@@ -1059,6 +1063,9 @@ async function showHistoireDetail(id){
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn btn-full ${h.statut==='publie'?'btn-danger':'btn-success'}" onclick="toggleStatut('${h.id}','${h.statut}')" style="flex:1">${h.statut==='publie'?'Dépublier':'Publier'}</button>
     </div>
+    <div style="margin-top:10px">
+      <button class="btn btn-full btn-danger" onclick="supprimerDefinitivementDepuisFiche('${h.id}')" style="opacity:.7;font-size:11px">🗑 Supprimer définitivement</button>
+    </div>
   `;
 }
 
@@ -1126,10 +1133,30 @@ function renderEditTws(){
   wrap.appendChild(input);
 }
 function handleEditTagInput(e){
-  if(e.key==='Enter'||e.key===','){e.preventDefault();const v=e.target.value.trim().replace(',','');if(v&&!_editTags.includes(v)){_editTags.push(v);renderEditTags();}e.target.value='';}
+  if(e.key==='Enter'||e.key===','){
+    e.preventDefault();
+    const v=e.target.value.trim().replace(',','');
+    if(v&&!_editTags.includes(v)){
+      _editTags.push(v);renderEditTags();
+      const btn=document.getElementById('edit-sug-tag-'+v.replace(/\s/g,'-'));
+      if(btn)btn.classList.add('btn-accent');
+    }
+    e.target.value='';
+    setTimeout(()=>document.getElementById('edit-tags-input').focus(),0);
+  }
 }
 function handleEditTwInput(e){
-  if(e.key==='Enter'||e.key===','){e.preventDefault();const v=e.target.value.trim().replace(',','');if(v&&!_editTws.includes(v)){_editTws.push(v);renderEditTws();}e.target.value='';}
+  if(e.key==='Enter'||e.key===','){
+    e.preventDefault();
+    const v=e.target.value.trim().replace(',','');
+    if(v&&!_editTws.includes(v)){
+      _editTws.push(v);renderEditTws();
+      const btn=document.getElementById('edit-sug-tw-'+v.replace(/\s/g,'-'));
+      if(btn)btn.classList.add('btn-accent');
+    }
+    e.target.value='';
+    setTimeout(()=>document.getElementById('edit-tw-input').focus(),0);
+  }
 }
 
 async function sauvegarderHistoire(){
@@ -1402,30 +1429,80 @@ async function supprimerChapitre(id,histoireId){
   showAlert('chapitre','Chapitre supprimé.');
 }
 
+async function supprimerDefinitivementDepuisFiche(id){
+  if(!confirm('Supprimer définitivement cette histoire et tous ses chapitres ? Cette action est irréversible.'))return;
+  await db.from('trigger_warnings_histoires').delete().eq('histoire_id',id);
+  await db.from('histoires_tags').delete().eq('histoire_id',id);
+  await db.from('chapitres').delete().eq('histoire_id',id);
+  await db.from('histoires').delete().eq('id',id);
+  await loadHistoires();
+  document.getElementById('histoire-detail').style.display='none';
+  document.getElementById('histoires-card').style.display='block';
+  renderHistoiresList();
+}
+
 /* SUGGESTIONS TAGS & TW */
 async function loadTagsSuggestions(){
   const {data}=await db.from('tags').select('nom').order('nom');
+  // Suggestions création
   const container=document.getElementById('tags-suggestions');
   const label=document.getElementById('tags-suggestions-label');
-  if(!container)return;
-  if(!data||!data.length){if(label)label.style.display='none';container.innerHTML='';return;}
-  if(label)label.style.display='block';
-  container.innerHTML=(data||[]).map(t=>`
-    <button class="btn btn-sm ${tags.includes(t.nom)?'btn-accent':''}" style="font-size:11px" onclick="toggleSuggestion('${t.nom}','tag')" id="sug-tag-${t.nom.replace(/\s/g,'-')}">✦ ${t.nom}</button>
-  `).join('');
+  if(container){
+    if(!data||!data.length){if(label)label.style.display='none';container.innerHTML='';}
+    else{
+      if(label)label.style.display='block';
+      container.innerHTML=(data||[]).map(t=>`<button class="btn btn-sm ${tags.includes(t.nom)?'btn-accent':''}" style="font-size:11px" onclick="toggleSuggestion('${t.nom}','tag')" id="sug-tag-${t.nom.replace(/\s/g,'-')}">✦ ${t.nom}</button>`).join('');
+    }
+  }
+  // Suggestions édition
+  const containerEdit=document.getElementById('edit-tags-suggestions');
+  const labelEdit=document.getElementById('edit-tags-suggestions-label');
+  if(containerEdit){
+    if(!data||!data.length){if(labelEdit)labelEdit.style.display='none';containerEdit.innerHTML='';}
+    else{
+      if(labelEdit)labelEdit.style.display='block';
+      containerEdit.innerHTML=(data||[]).map(t=>`<button class="btn btn-sm ${_editTags.includes(t.nom)?'btn-accent':''}" style="font-size:11px" onclick="toggleEditSuggestion('${t.nom}','tag')" id="edit-sug-tag-${t.nom.replace(/\s/g,'-')}">✦ ${t.nom}</button>`).join('');
+    }
+  }
 }
 
 async function loadTWSuggestions(){
   const {data}=await db.from('trigger_warnings_histoires').select('contenu');
   const uniq=[...new Set((data||[]).map(t=>t.contenu))];
+  // Suggestions création
   const container=document.getElementById('tw-suggestions');
   const label=document.getElementById('tw-suggestions-label');
-  if(!container)return;
-  if(!uniq.length){if(label)label.style.display='none';container.innerHTML='';return;}
-  if(label)label.style.display='block';
-  container.innerHTML=uniq.map(t=>`
-    <button class="btn btn-sm ${tws.includes(t)?'btn-accent':''}" style="font-size:11px;background:rgba(167,143,212,.1);border-color:rgba(167,143,212,.25);color:var(--accent2)" onclick="toggleSuggestion('${t}','tw')" id="sug-tw-${t.replace(/\s/g,'-')}">✦ ${t}</button>
-  `).join('');
+  if(container){
+    if(!uniq.length){if(label)label.style.display='none';container.innerHTML='';}
+    else{
+      if(label)label.style.display='block';
+      container.innerHTML=uniq.map(t=>`<button class="btn btn-sm ${tws.includes(t)?'btn-accent':''}" style="font-size:11px;background:rgba(167,143,212,.1);border-color:rgba(167,143,212,.25);color:var(--accent2)" onclick="toggleSuggestion('${t}','tw')" id="sug-tw-${t.replace(/\s/g,'-')}">✦ ${t}</button>`).join('');
+    }
+  }
+  // Suggestions édition
+  const containerEdit=document.getElementById('edit-tw-suggestions');
+  const labelEdit=document.getElementById('edit-tw-suggestions-label');
+  if(containerEdit){
+    if(!uniq.length){if(labelEdit)labelEdit.style.display='none';containerEdit.innerHTML='';}
+    else{
+      if(labelEdit)labelEdit.style.display='block';
+      containerEdit.innerHTML=uniq.map(t=>`<button class="btn btn-sm ${_editTws.includes(t)?'btn-accent':''}" style="font-size:11px;background:rgba(167,143,212,.1);border-color:rgba(167,143,212,.25);color:var(--accent2)" onclick="toggleEditSuggestion('${t}','tw')" id="edit-sug-tw-${t.replace(/\s/g,'-')}">✦ ${t}</button>`).join('');
+    }
+  }
+}
+
+function toggleEditSuggestion(val,type){
+  const arr=type==='tag'?_editTags:_editTws;
+  const btnId='edit-sug-'+type+'-'+val.replace(/\s/g,'-');
+  const btn=document.getElementById(btnId);
+  if(arr.includes(val)){
+    arr.splice(arr.indexOf(val),1);
+    if(btn)btn.classList.remove('btn-accent');
+  } else {
+    arr.push(val);
+    if(btn)btn.classList.add('btn-accent');
+  }
+  type==='tag'?renderEditTags():renderEditTws();
 }
 
 function toggleSuggestion(val,type){
