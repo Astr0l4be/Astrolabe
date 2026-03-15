@@ -539,6 +539,51 @@
           <div style="font-size:10px;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Chapitres existants</div>
           <div id="ch-list"></div>
         </div>
+
+        <!-- FORMULAIRE ÉDITION CHAPITRE -->
+        <div id="edit-chapitre-form" style="display:none;margin-bottom:16px">
+          <div style="font-size:10px;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Modifier le chapitre</div>
+          <div class="card">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Numéro</label>
+                <input type="number" class="form-input" id="edit-chap-num" min="1">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Titre *</label>
+                <input type="text" class="form-input" id="edit-chap-titre">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Contenu *</label>
+              <div class="editor-wrap">
+                <div class="editor-toolbar">
+                  <button type="button" class="tb-btn" onclick="fmt('edit-chap-contenu','bold')"><b>G</b></button>
+                  <button type="button" class="tb-btn" onclick="fmt('edit-chap-contenu','italic')"><i>I</i></button>
+                  <div class="tb-sep"></div>
+                  <button type="button" class="tb-btn" onclick="align('edit-chap-contenu','left')">⬤◁</button>
+                  <button type="button" class="tb-btn" onclick="align('edit-chap-contenu','center')">◁⬤▷</button>
+                  <button type="button" class="tb-btn" onclick="align('edit-chap-contenu','right')">▷⬤</button>
+                  <button type="button" class="tb-btn" onclick="align('edit-chap-contenu','justify')">▤</button>
+                </div>
+                <textarea class="form-textarea" id="edit-chap-contenu" style="min-height:300px;font-size:13px;line-height:1.8"></textarea>
+              </div>
+              <div class="form-hint" id="edit-chap-wordcount">0 mots</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Accès</label>
+              <div style="display:flex;gap:8px">
+                <button type="button" class="btn" id="edit-chap-gratuit" onclick="setEditChapGratuit(true)" style="flex:1">✦ Gratuit</button>
+                <button type="button" class="btn" id="edit-chap-payant" onclick="setEditChapGratuit(false)" style="flex:1">🎟 Payant</button>
+              </div>
+              <input type="hidden" id="edit-chap-gratuit-val" value="true">
+            </div>
+            <div style="display:flex;gap:10px;margin-top:8px">
+              <button class="btn btn-full" onclick="fermerEditionChapitre()" style="flex:1">Annuler</button>
+              <button class="btn btn-full btn-accent" id="edit-chap-save-btn" onclick="sauvegarderChapitre()" style="flex:2">✦ Sauvegarder</button>
+            </div>
+          </div>
+        </div>
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Numéro *</label>
@@ -963,7 +1008,7 @@ async function showHistoireDetail(id){
     ${h.resume?`<div style="margin-bottom:14px"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Résumé</div><p style="font-size:12px;color:var(--text2);line-height:1.7">${h.resume}</p></div>`:''}
     <div style="margin-bottom:16px">
       <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Chapitres</div>
-      ${(chaps||[]).map(ch=>`<div class="chapitre-item"><div class="ch-num">${ch.numero}</div><div class="ch-info"><div class="ch-title">${ch.titre}</div><div class="ch-meta">${ch.gratuit?'Gratuit':'Payant'} · ${ch.contenu?ch.contenu.trim().split(' ').length.toLocaleString('fr')+' mots':'vide'}</div></div><button class="btn btn-sm btn-danger" onclick="supprimerChapitre('${ch.id}','${h.id}').then(()=>showHistoireDetail('${h.id}'))">Suppr.</button></div>`).join('')||'<p style="font-size:12px;color:var(--text3)">Aucun chapitre.</p>'}
+      ${(chaps||[]).map((ch,i)=>`<div class="chapitre-item"><div class="ch-num">${ch.numero}</div><div class="ch-info"><div class="ch-title">${ch.titre}</div><div class="ch-meta">${ch.gratuit?'Gratuit':'Payant'} · ${ch.contenu?ch.contenu.trim().split(' ').length.toLocaleString('fr')+' mots':'vide'}</div></div><div style="display:flex;gap:4px"><button class="btn btn-sm" onclick="deplacerChapitre('${ch.id}','${h.id}',-1)" ${i===0?'disabled style="opacity:.3"':''}>▲</button><button class="btn btn-sm" onclick="deplacerChapitre('${ch.id}','${h.id}',1)" ${i===(chaps.length-1)?'disabled style="opacity:.3"':''}>▼</button><button class="btn btn-sm btn-accent" onclick="ouvrirEditionChapitreDepuisFiche('${ch.id}','${h.id}')">✏️</button><button class="btn btn-sm btn-danger" onclick="supprimerChapitreEtRecharger('${ch.id}','${h.id}')">Suppr.</button></div></div>`).join('')||'<p style="font-size:12px;color:var(--text3)">Aucun chapitre.</p>'}
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn btn-full ${h.statut==='publie'?'btn-danger':'btn-success'}" onclick="toggleStatut('${h.id}','${h.statut}')" style="flex:1">${h.statut==='publie'?'Dépublier':'Publier'}</button>
@@ -1152,26 +1197,92 @@ async function loadChapitresExistants(histoireId){
   const {data}=await db.from('chapitres').select('*').eq('histoire_id',histoireId).order('numero');
   const section=document.getElementById('chapitres-existants');
   const list=document.getElementById('ch-list');
-  if(!data||!data.length){section.style.display='none';
+  if(!data||!data.length){
+    section.style.display='none';
     document.getElementById('ch-num').value=1;
-    setGratuit(true);return;}
+    setGratuit(true);return;
+  }
   section.style.display='block';
-  list.innerHTML=data.map(ch=>`
-    <div class="chapitre-item">
+  list.innerHTML=data.map((ch,i)=>`
+    <div class="chapitre-item" id="chitem-${ch.id}">
       <div class="ch-num">${ch.numero}</div>
       <div class="ch-info">
         <div class="ch-title">${ch.titre}</div>
         <div class="ch-meta">${ch.gratuit?'Gratuit':'Payant'} · ${ch.contenu?ch.contenu.split(' ').length.toLocaleString('fr')+' mots':'vide'}</div>
       </div>
-      <button class="btn btn-sm btn-danger" onclick="supprimerChapitre('${ch.id}','${histoireId}')">Suppr.</button>
+      <div style="display:flex;gap:4px;align-items:center">
+        <button class="btn btn-sm" onclick="deplacerChapitre('${ch.id}','${histoireId}',-1)" ${i===0?'disabled style="opacity:.3"':''} title="Monter">▲</button>
+        <button class="btn btn-sm" onclick="deplacerChapitre('${ch.id}','${histoireId}',1)" ${i===data.length-1?'disabled style="opacity:.3"':''} title="Descendre">▼</button>
+        <button class="btn btn-sm btn-accent" onclick="ouvrirEditionChapitre('${ch.id}','${histoireId}')">✏️</button>
+        <button class="btn btn-sm btn-danger" onclick="supprimerChapitre('${ch.id}','${histoireId}')">Suppr.</button>
+      </div>
     </div>
   `).join('');
   const nextNum=(Math.max(...data.map(c=>c.numero))+1)||1;
   document.getElementById('ch-num').value=nextNum;
-  // Auto-sélectionner gratuit/payant selon le numéro et le seuil de l'histoire
   const histoire=histoires.find(h=>h.id===histoireId);
   const seuil=histoire?.gratuit_jusqu_au||8;
   setGratuit(nextNum<=seuil);
+}
+
+/* DÉPLACER CHAPITRE */
+async function deplacerChapitre(id, histoireId, direction){
+  const {data}=await db.from('chapitres').select('*').eq('histoire_id',histoireId).order('numero');
+  const idx=data.findIndex(c=>c.id===id);
+  const swapIdx=idx+direction;
+  if(swapIdx<0||swapIdx>=data.length)return;
+  const numA=data[idx].numero;
+  const numB=data[swapIdx].numero;
+  await db.from('chapitres').update({numero:numB}).eq('id',data[idx].id);
+  await db.from('chapitres').update({numero:numA}).eq('id',data[swapIdx].id);
+  loadChapitresExistants(histoireId);
+}
+
+/* ÉDITION CHAPITRE */
+let _editChapId=null;let _editChapHistoireId=null;
+async function ouvrirEditionChapitre(id, histoireId){
+  _editChapId=id;_editChapHistoireId=histoireId;
+  const {data:ch}=await db.from('chapitres').select('*').eq('id',id).single();
+  if(!ch)return;
+  document.getElementById('edit-chap-num').value=ch.numero;
+  document.getElementById('edit-chap-titre').value=ch.titre||'';
+  document.getElementById('edit-chap-contenu').value=ch.contenu||'';
+  document.getElementById('edit-chap-wordcount').textContent=(ch.contenu?ch.contenu.trim().split(/\s+/).filter(w=>w).length.toLocaleString('fr'):0)+' mots';
+  document.getElementById('edit-chap-gratuit-val').value=String(ch.gratuit);
+  document.getElementById('edit-chap-gratuit').className='btn'+(ch.gratuit?' btn-accent':'');
+  document.getElementById('edit-chap-payant').className='btn'+(ch.gratuit?'':' btn-accent');
+  document.getElementById('chapitres-existants').style.display='none';
+  document.getElementById('edit-chapitre-form').style.display='block';
+}
+
+function fermerEditionChapitre(){
+  document.getElementById('edit-chapitre-form').style.display='none';
+  document.getElementById('chapitres-existants').style.display='block';
+  _editChapId=null;
+}
+
+function setEditChapGratuit(val){
+  document.getElementById('edit-chap-gratuit-val').value=String(val);
+  document.getElementById('edit-chap-gratuit').className='btn'+(val?' btn-accent':'');
+  document.getElementById('edit-chap-payant').className='btn'+(val?'':' btn-accent');
+}
+
+async function sauvegarderChapitre(){
+  if(!_editChapId)return;
+  const titre=document.getElementById('edit-chap-titre').value.trim();
+  const contenu=document.getElementById('edit-chap-contenu').value.trim();
+  const numero=parseInt(document.getElementById('edit-chap-num').value);
+  const gratuit=document.getElementById('edit-chap-gratuit-val').value==='true';
+  if(!titre||!contenu){showAlert('chapitre','Le titre et le contenu sont obligatoires.','error');return;}
+  const btn=document.getElementById('edit-chap-save-btn');
+  btn.textContent='Sauvegarde…';btn.disabled=true;
+  try{
+    await db.from('chapitres').update({titre,contenu,numero,gratuit}).eq('id',_editChapId);
+    showAlert('chapitre','Chapitre modifié avec succès ! ✦');
+    fermerEditionChapitre();
+    loadChapitresExistants(_editChapHistoireId);
+  }catch(e){showAlert('chapitre','Erreur : '+e.message,'error');}
+  finally{btn.textContent='✦ Sauvegarder';btn.disabled=false;}
 }
 
 /* AJOUTER CHAPITRE */
@@ -1197,6 +1308,45 @@ async function ajouterChapitre(){
   }finally{
     btn.textContent='✦ Publier le chapitre';btn.disabled=false;
   }
+}
+
+async function ouvrirEditionChapitreDepuisFiche(id, histoireId){
+  _editChapId=id;_editChapHistoireId=histoireId;
+  const {data:ch}=await db.from('chapitres').select('*').eq('id',id).single();
+  if(!ch)return;
+  // Basculer vers l'onglet chapitre
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelector('.tab[onclick*="\'chapitre\'"]').classList.add('active');
+  document.getElementById('panel-chapitre').classList.add('active');
+  document.getElementById('histoire-detail').style.display='none';
+  document.getElementById('histoires-card').style.display='block';
+  // Pré-remplir
+  await loadHistoiresSelect();
+  selectHistoire(histoireId, histoires.find(h=>h.id===histoireId)?.titre||'');
+  document.getElementById('edit-chap-num').value=ch.numero;
+  document.getElementById('edit-chap-titre').value=ch.titre||'';
+  document.getElementById('edit-chap-contenu').value=ch.contenu||'';
+  document.getElementById('edit-chap-wordcount').textContent=(ch.contenu?ch.contenu.trim().split(/\s+/).filter(w=>w).length.toLocaleString('fr'):0)+' mots';
+  document.getElementById('edit-chap-gratuit-val').value=String(ch.gratuit);
+  document.getElementById('edit-chap-gratuit').className='btn'+(ch.gratuit?' btn-accent':'');
+  document.getElementById('edit-chap-payant').className='btn'+(ch.gratuit?'':' btn-accent');
+  document.getElementById('chapitres-existants').style.display='none';
+  document.getElementById('edit-chapitre-form').style.display='block';
+}
+
+// Compteur mots édition chapitre
+document.addEventListener('input',e=>{
+  if(e.target.id==='edit-chap-contenu'){
+    const words=e.target.value.trim().split(/\s+/).filter(w=>w).length;
+    document.getElementById('edit-chap-wordcount').textContent=words.toLocaleString('fr')+' mots';
+  }
+});
+
+async function supprimerChapitreEtRecharger(id,histoireId){
+  if(!confirm('Supprimer ce chapitre ?'))return;
+  await db.from('chapitres').delete().eq('id',id);
+  showHistoireDetail(histoireId);
 }
 
 async function supprimerChapitre(id,histoireId){
