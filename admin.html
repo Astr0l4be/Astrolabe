@@ -446,7 +446,8 @@ function switchTab(tab){
   event.target.classList.add('active');
   document.getElementById('panel-'+tab).classList.add('active');
   if(tab==='chapitre')loadHistoiresSelect();
-  if(tab==='auteurs'){loadAuteurs();}
+  if(tab==='auteurs')loadAuteurs();
+  if(tab==='nouvelle')loadAuteursSelect();
   if(tab==='nouvel-auteur'){
     document.getElementById('a-pseudo').value='';
     document.getElementById('a-nom').value='';
