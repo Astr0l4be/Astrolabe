@@ -784,8 +784,10 @@ function selectHistoire(val,label){
 }
 
 document.addEventListener('click',e=>{
-  const wrap=document.getElementById('histoire-select-wrap');
-  if(wrap&&!wrap.contains(e.target))document.getElementById('histoire-select-list').style.display='none';
+  const wrapH=document.getElementById('histoire-select-wrap');
+  if(wrapH&&!wrapH.contains(e.target))document.getElementById('histoire-select-list').style.display='none';
+  const wrapA=document.getElementById('auteur-select-wrap');
+  if(wrapA&&!wrapA.contains(e.target))document.getElementById('auteur-select-list').style.display='none';
 });
 
 async function loadChapitresExistants(histoireId){
@@ -960,11 +962,7 @@ function selectAuteur(val,label){
   if(val){const sel=Array.from(document.querySelectorAll('.custom-select-option')).find(o=>o.textContent===label);if(sel)sel.classList.add('selected');}
 }
 
-// Fermer le dropdown si on clique ailleurs
-document.addEventListener('click',e=>{
-  const wrap=document.getElementById('auteur-select-wrap');
-  if(wrap&&!wrap.contains(e.target))document.getElementById('auteur-select-list').style.display='none';
-});
+
 
 async function loadAuteurs(){
   const {data}=await db.from('auteurs').select('*').order('pseudo');
