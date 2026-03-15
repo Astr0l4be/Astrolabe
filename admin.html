@@ -351,9 +351,14 @@
         <div class="card-title">Ajouter un chapitre</div>
         <div class="form-group">
           <label class="form-label">Histoire *</label>
-          <select class="form-select" id="ch-histoire">
-            <option value="">— Choisir une histoire —</option>
-          </select>
+          <div class="custom-select-wrap" id="histoire-select-wrap">
+            <div class="custom-select-box" id="histoire-select-box" onclick="toggleHistoireDropdown()">
+              <span id="histoire-select-label" style="color:var(--text3)">— Choisir une histoire —</span>
+              <span style="color:var(--text3);font-size:10px">▾</span>
+            </div>
+            <div class="custom-select-list" id="histoire-select-list" style="display:none"></div>
+          </div>
+          <input type="hidden" id="ch-histoire" value="">
         </div>
         <div id="chapitres-existants" style="margin-bottom:16px;display:none">
           <div style="font-size:10px;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Chapitres existants</div>
@@ -756,14 +761,32 @@ async function toggleStatut(id,statut){
 
 /* LOAD HISTOIRES SELECT */
 async function loadHistoiresSelect(){
-  const {data}=await db.from('histoires').select('id,titre').order('titre');
-  const sel=document.getElementById('ch-histoire');
-  sel.innerHTML='<option value="">— Choisir une histoire —</option>';
-  (data||[]).forEach(h=>{
-    const o=document.createElement('option');o.value=h.id;o.textContent=h.titre;sel.appendChild(o);
-  });
-  sel.onchange=()=>loadChapitresExistants(sel.value);
+  const {data}=await db.from('histoires').select('id,titre').neq('corbeille',true).order('titre');
+  const list=document.getElementById('histoire-select-list');
+  if(!list)return;
+  list.innerHTML=`<div class="custom-select-option" onclick="selectHistoire('','— Choisir une histoire —')">— Choisir une histoire —</div>`
+    +(data||[]).map(h=>`<div class="custom-select-option" onclick="selectHistoire('${h.id}','${h.titre}')">${h.titre}</div>`).join('');
 }
+
+function toggleHistoireDropdown(){
+  const list=document.getElementById('histoire-select-list');
+  list.style.display=list.style.display==='none'?'block':'none';
+}
+
+function selectHistoire(val,label){
+  document.getElementById('ch-histoire').value=val;
+  const labelEl=document.getElementById('histoire-select-label');
+  labelEl.textContent=label;
+  labelEl.style.color=val?'var(--text)':'var(--text3)';
+  document.getElementById('histoire-select-list').style.display='none';
+  if(val)loadChapitresExistants(val);
+  else document.getElementById('chapitres-existants').style.display='none';
+}
+
+document.addEventListener('click',e=>{
+  const wrap=document.getElementById('histoire-select-wrap');
+  if(wrap&&!wrap.contains(e.target))document.getElementById('histoire-select-list').style.display='none';
+});
 
 async function loadChapitresExistants(histoireId){
   if(!histoireId){document.getElementById('chapitres-existants').style.display='none';return;}
