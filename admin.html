@@ -1221,6 +1221,13 @@ function toggleSuggestion(val,type){
 
 
 
+let currentAuteurId=null;
+function fermerAuteurDetail(){
+  document.getElementById('auteur-detail').style.display='none';
+  document.getElementById('auteurs-card').style.display='block';
+  currentAuteurId=null;
+}
+
 async function showAuteurDetail(id){
   currentAuteurId=id;
   const {data:a}=await db.from('auteurs').select('*').eq('id',id).single();
@@ -1372,60 +1379,8 @@ async function loadAuteurs(){
   }).join('');
 }
 
-let currentAuteurId=null;
-async function showAuteurDetail(id){
-  currentAuteurId=id;
-  const {data:a}=await db.from('auteurs').select('*').eq('id',id).single();
-  if(!a)return;
-  const {data:hists}=await db.from('histoires').select('id,titre,statut,cover_url').eq('auteur_pseudo',a.pseudo).order('created_at',{ascending:false});
-  const {data:allChaps}=await db.from('chapitres').select('id,histoire_id,contenu');
-  const histIds=(hists||[]).map(h=>h.id);
-  const chapsAuteur=(allChaps||[]).filter(ch=>histIds.includes(ch.histoire_id));
-  const nbPubliees=(hists||[]).filter(h=>h.statut==='publie').length;
-  const totalMots=chapsAuteur.reduce((acc,ch)=>acc+(ch.contenu?ch.contenu.trim().split(' ').length:0),0);
 
-  document.getElementById('auteurs-card').style.display='none';
-  document.getElementById('auteur-detail').style.display='block';
-  document.getElementById('auteur-detail-card').innerHTML=`
-    <div style="text-align:center;padding:8px 0 20px">
-      ${a.photo_url
-        ?`<img src="${a.photo_url}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid rgba(167,143,212,.3);margin-bottom:10px">`
-        :`<div style="font-size:40px;margin-bottom:10px">✍</div>`}
-      <div style="font-family:'Cormorant Garamond',serif;font-size:24px;margin-bottom:4px">${a.pseudo}</div>
-      ${a.nom_reel?`<div style="font-size:12px;color:var(--text3);margin-bottom:8px">${a.nom_reel}</div>`:''}
-      ${a.bio?`<p style="font-size:12px;color:var(--text2);line-height:1.7;font-style:italic;max-width:360px;margin:0 auto">${a.bio}</p>`:''}
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px">
-      <div style="background:rgba(126,159,212,.08);border:1px solid rgba(126,159,212,.2);border-radius:10px;padding:12px;text-align:center">
-        <div style="font-size:22px;font-weight:600;color:var(--accent)">${(hists||[]).length}</div>
-        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px">Histoires</div>
-      </div>
-      <div style="background:rgba(126,212,160,.06);border:1px solid rgba(126,212,160,.2);border-radius:10px;padding:12px;text-align:center">
-        <div style="font-size:22px;font-weight:600;color:var(--success)">${nbPubliees}</div>
-        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px">Publiées</div>
-      </div>
-      <div style="background:rgba(167,143,212,.06);border:1px solid rgba(167,143,212,.2);border-radius:10px;padding:12px;text-align:center">
-        <div style="font-size:22px;font-weight:600;color:var(--accent2)">${totalMots.toLocaleString('fr')}</div>
-        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px">Mots</div>
-      </div>
-    </div>
-    ${(hists||[]).length?`
-      <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Histoires</div>
-      ${(hists||[]).map(h=>`
-        <div class="histoire-item">
-          <div class="histoire-item-cover">${h.cover_url?`<img src="${h.cover_url}" style="width:100%;height:100%;object-fit:cover;border-radius:4px">`:'📖'}</div>
-          <div class="histoire-item-info"><div class="histoire-item-title">${h.titre}</div></div>
-          <span class="histoire-item-status ${h.statut==='publie'?'status-publie':'status-brouillon'}">${h.statut==='publie'?'Publié':'Brouillon'}</span>
-        </div>`).join('')}`
-    :'<p style="font-size:12px;color:var(--text3)">Aucune histoire pour l\'instant.</p>'}
-  `;
-}
 
-function fermerAuteurDetail(){
-  document.getElementById('auteur-detail').style.display='none';
-  document.getElementById('auteurs-card').style.display='block';
-  currentAuteurId=null;
-}
 
 let _auteurASupprimer=null;
 function ouvrirPopupSupprimerAuteur(){
