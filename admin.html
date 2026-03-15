@@ -969,11 +969,13 @@ async function showHistoireDetail(id){
   const totalMots=(chaps||[]).reduce((acc,ch)=>acc+(ch.contenu?ch.contenu.trim().split(' ').length:0),0);
   document.getElementById('histoires-card').style.display='none';
   document.getElementById('histoire-detail').style.display='block';
-  document.querySelector('#histoire-detail .btn-sm').onclick=()=>{
-    document.getElementById('histoire-detail').style.display='none';
-    document.getElementById('histoires-card').style.display='block';
-    renderHistoiresList();
-  };
+  if(!_retourAuteurId){
+    document.querySelector('#histoire-detail .btn-sm').onclick=()=>{
+      document.getElementById('histoire-detail').style.display='none';
+      document.getElementById('histoires-card').style.display='block';
+      renderHistoiresList();
+    };
+  }
   document.getElementById('detail-card').innerHTML=`
     <div style="display:flex;gap:16px;margin-bottom:20px;align-items:flex-start">
       ${h.cover_url?`<img src="${h.cover_url}" style="width:72px;aspect-ratio:2/3;object-fit:cover;border-radius:6px;flex-shrink:0">`:'<div style="width:72px;aspect-ratio:2/3;background:rgba(126,159,212,.1);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">📖</div>'}
@@ -1480,23 +1482,20 @@ async function showAuteurDetail(id){
 let _retourAuteurId=null;
 async function ouvrirHistoireDepuisAuteur(histoireId, auteurId){
   _retourAuteurId=auteurId;
-  // Charger l'histoire dans histoires si pas déjà là
-  if(!histoires.find(h=>h.id===histoireId)){
-    await loadHistoires();
-  }
+  await loadHistoires();
   document.getElementById('auteur-detail').style.display='none';
   document.getElementById('auteurs-card').style.display='none';
-  document.getElementById('histoire-detail').style.display='block';
   document.getElementById('histoires-card').style.display='none';
-  // Modifier le bouton retour pour revenir à l'auteur
+  document.getElementById('histoire-detail').style.display='block';
+  // Bouton retour → revenir à la fiche auteur
   document.querySelector('#histoire-detail .btn-sm').onclick=()=>{
     document.getElementById('histoire-detail').style.display='none';
-    document.getElementById('histoires-card').style.display='none';
     document.getElementById('auteurs-card').style.display='none';
+    document.getElementById('histoires-card').style.display='none';
     document.getElementById('auteur-detail').style.display='block';
     _retourAuteurId=null;
   };
-  showHistoireDetail(histoireId);
+  await showHistoireDetail(histoireId);
 }
 
 
