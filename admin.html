@@ -181,6 +181,106 @@
           <button class="btn btn-sm" onclick="document.getElementById('histoire-detail').style.display='none';document.getElementById('histoires-card').style.display='block';renderHistoiresList()">← Retour</button>
         </div>
         <div class="card" id="detail-card"></div>
+        <!-- FORMULAIRE ÉDITION -->
+        <div id="edit-histoire-form" style="display:none">
+          <div class="card">
+            <div class="card-title">Modifier l'histoire</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Titre *</label>
+                <input type="text" class="form-input" id="edit-titre">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Auteur·ice</label>
+                <div class="custom-select-wrap" id="auteur-edit-wrap">
+                  <div class="custom-select-box" onclick="toggleAuteurEditDropdown()">
+                    <span id="auteur-edit-label" style="color:var(--text3)">— Choisir —</span>
+                    <span style="color:var(--text3);font-size:10px">▾</span>
+                  </div>
+                  <div class="custom-select-list" id="auteur-edit-list" style="display:none"></div>
+                </div>
+                <input type="hidden" id="n-auteur-edit" value="">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Résumé</label>
+              <div class="editor-wrap">
+                <div class="editor-toolbar">
+                  <button type="button" class="tb-btn" onclick="fmt('edit-resume','bold')"><b>G</b></button>
+                  <button type="button" class="tb-btn" onclick="fmt('edit-resume','italic')"><i>I</i></button>
+                  <div class="tb-sep"></div>
+                  <button type="button" class="tb-btn" onclick="align('edit-resume','left')">⬤◁</button>
+                  <button type="button" class="tb-btn" onclick="align('edit-resume','center')">◁⬤▷</button>
+                  <button type="button" class="tb-btn" onclick="align('edit-resume','right')">▷⬤</button>
+                  <button type="button" class="tb-btn" onclick="align('edit-resume','justify')">▤</button>
+                </div>
+                <textarea class="form-textarea" id="edit-resume" style="min-height:80px"></textarea>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Couverture (portrait 2:3)</label>
+                <div class="img-upload" id="edit-cover-zone">
+                  <input type="file" accept="image/*" id="edit-cover-input" onchange="previewImg(this,'edit-cover-preview','edit-cover-zone')">
+                  <div class="img-upload-text">📎 Cliquer ou glisser</div>
+                  <img id="edit-cover-preview" class="img-preview">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Bannière (paysage 2:1)</label>
+                <div class="img-upload" id="edit-banner-zone">
+                  <input type="file" accept="image/*" id="edit-banner-input" onchange="previewImg(this,'edit-banner-preview','edit-banner-zone')">
+                  <div class="img-upload-text">📎 Cliquer ou glisser</div>
+                  <img id="edit-banner-preview" class="img-preview">
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Tags</label>
+              <div class="tags-wrap" id="edit-tags-wrap" onclick="document.getElementById('edit-tags-input').focus()">
+                <input type="text" id="edit-tags-input" placeholder="Ajouter un tag…" onkeydown="handleEditTagInput(event)">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Trigger warnings</label>
+              <div class="tags-wrap" id="edit-tw-wrap" onclick="document.getElementById('edit-tw-input').focus()">
+                <input type="text" id="edit-tw-input" placeholder="Ajouter un TW…" onkeydown="handleEditTwInput(event)">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Chapitres gratuits</label>
+                <input type="number" class="form-input" id="edit-gratuit" min="0">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Prix par chapitre</label>
+                <input type="number" class="form-input" id="edit-prix" min="1">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Contenu adulte</label>
+                <div style="display:flex;gap:8px">
+                  <button type="button" class="btn" id="edit-adulte-non" onclick="setEditAdulte(false)" style="flex:1">Non</button>
+                  <button type="button" class="btn" id="edit-adulte-oui" onclick="setEditAdulte(true)" style="flex:1">Oui</button>
+                </div>
+                <input type="hidden" id="edit-adulte-val" value="false">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Statut</label>
+                <div style="display:flex;gap:8px">
+                  <button type="button" class="btn" id="edit-statut-brouillon" onclick="setEditStatut('brouillon')" style="flex:1">Brouillon</button>
+                  <button type="button" class="btn" id="edit-statut-publie" onclick="setEditStatut('publie')" style="flex:1">Publié</button>
+                </div>
+                <input type="hidden" id="edit-statut-val" value="brouillon">
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:8px">
+              <button class="btn btn-full" onclick="fermerEditionHistoire()" style="flex:1">Annuler</button>
+              <button class="btn btn-full btn-accent" id="edit-save-btn" onclick="sauvegarderHistoire()" style="flex:2">✦ Sauvegarder</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -779,11 +879,16 @@ async function showHistoireDetail(id){
     <div style="display:flex;gap:16px;margin-bottom:20px;align-items:flex-start">
       ${h.cover_url?`<img src="${h.cover_url}" style="width:72px;aspect-ratio:2/3;object-fit:cover;border-radius:6px;flex-shrink:0">`:'<div style="width:72px;aspect-ratio:2/3;background:rgba(126,159,212,.1);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">📖</div>'}
       <div style="flex:1">
-        <div style="font-family:Cormorant Garamond,serif;font-size:20px;margin-bottom:4px">${h.titre}</div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+          <div style="font-family:Cormorant Garamond,serif;font-size:20px;margin-bottom:4px">${h.titre}</div>
+          <div style="display:flex;gap:6px;flex-shrink:0">
+            <button onclick="ouvrirEditionHistoire('${h.id}')" title="Modifier" style="background:rgba(126,159,212,.12);border:1px solid rgba(126,159,212,.3);color:var(--accent);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">✏️</button>
+            <button onclick="ouvrirPopupCorbeille()" title="Corbeille" style="background:rgba(212,126,126,.12);border:1px solid rgba(212,126,126,.3);color:var(--danger);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">🗑</button>
+          </div>
+        </div>
         ${h.auteur_pseudo?`<div style="font-size:12px;color:var(--text3);margin-bottom:6px">par ${h.auteur_pseudo}</div>`:''}
         <span class="histoire-item-status ${h.statut==='publie'?'status-publie':'status-brouillon'}">${h.statut==='publie'?'Publié':'Brouillon'}</span>
       </div>
-      <button onclick="ouvrirPopupCorbeille()" title="Mettre à la corbeille" style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--danger);opacity:.7;padding:4px;flex-shrink:0" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.7'">🗑</button>
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px">
       <div style="background:rgba(126,159,212,.08);border:1px solid rgba(126,159,212,.2);border-radius:10px;padding:12px;text-align:center">
@@ -810,6 +915,142 @@ async function showHistoireDetail(id){
       <button class="btn btn-full ${h.statut==='publie'?'btn-danger':'btn-success'}" onclick="toggleStatut('${h.id}','${h.statut}')" style="flex:1">${h.statut==='publie'?'Dépublier':'Publier'}</button>
     </div>
   `;
+}
+
+/* ÉDITION HISTOIRE */
+let _editTags=[];let _editTws=[];
+async function ouvrirEditionHistoire(id){
+  const h=histoires.find(x=>x.id===id);if(!h)return;
+  const {data:htags}=await db.from('histoires_tags').select('tags(nom)').eq('histoire_id',id);
+  const {data:htws}=await db.from('trigger_warnings_histoires').select('contenu').eq('histoire_id',id);
+  _editTags=(htags||[]).map(t=>t.tags?.nom).filter(Boolean);
+  _editTws=(htws||[]).map(t=>t.contenu);
+
+  document.getElementById('detail-card').style.display='none';
+  const editDiv=document.getElementById('edit-histoire-form');
+  editDiv.style.display='block';
+
+  // Pré-remplir
+  document.getElementById('edit-titre').value=h.titre||'';
+  document.getElementById('edit-resume').value=h.resume||'';
+  document.getElementById('edit-gratuit').value=h.gratuit_jusqu_au||8;
+  document.getElementById('edit-prix').value=h.prix_ticket||1;
+  document.getElementById('edit-adulte-val').value=String(h.adulte||false);
+  document.getElementById('edit-statut-val').value=h.statut||'brouillon';
+  document.getElementById('edit-adulte-non').className='btn'+(h.adulte?'':' btn-accent');
+  document.getElementById('edit-adulte-oui').className='btn'+(h.adulte?' btn-accent':'');
+  document.getElementById('edit-statut-brouillon').className='btn'+(h.statut==='brouillon'?' btn-accent':'');
+  document.getElementById('edit-statut-publie').className='btn'+(h.statut==='publie'?' btn-accent':'');
+
+  // Auteur dropdown
+  await loadAuteursSelect();
+  document.getElementById('n-auteur-edit').value=h.auteur_pseudo||'';
+  document.getElementById('auteur-edit-label').textContent=h.auteur_pseudo||'— Choisir un·e auteur·ice —';
+  document.getElementById('auteur-edit-label').style.color=h.auteur_pseudo?'var(--text)':'var(--text3)';
+
+  renderEditTags();renderEditTws();
+  await loadTagsSuggestions('edit');
+  await loadTWSuggestions('edit');
+}
+
+function fermerEditionHistoire(){
+  document.getElementById('edit-histoire-form').style.display='none';
+  document.getElementById('detail-card').style.display='block';
+}
+
+function renderEditTags(){
+  const wrap=document.getElementById('edit-tags-wrap');
+  const input=document.getElementById('edit-tags-input');
+  wrap.innerHTML='';
+  _editTags.forEach((t,i)=>{
+    const chip=document.createElement('div');chip.className='tag-chip';
+    chip.innerHTML=`${t}<button onclick="_editTags.splice(${i},1);renderEditTags()">×</button>`;
+    wrap.appendChild(chip);
+  });
+  wrap.appendChild(input);
+}
+function renderEditTws(){
+  const wrap=document.getElementById('edit-tw-wrap');
+  const input=document.getElementById('edit-tw-input');
+  wrap.innerHTML='';
+  _editTws.forEach((t,i)=>{
+    const chip=document.createElement('div');chip.className='tag-chip';
+    chip.innerHTML=`${t}<button onclick="_editTws.splice(${i},1);renderEditTws()">×</button>`;
+    wrap.appendChild(chip);
+  });
+  wrap.appendChild(input);
+}
+function handleEditTagInput(e){
+  if(e.key==='Enter'||e.key===','){e.preventDefault();const v=e.target.value.trim().replace(',','');if(v&&!_editTags.includes(v)){_editTags.push(v);renderEditTags();}e.target.value='';}
+}
+function handleEditTwInput(e){
+  if(e.key==='Enter'||e.key===','){e.preventDefault();const v=e.target.value.trim().replace(',','');if(v&&!_editTws.includes(v)){_editTws.push(v);renderEditTws();}e.target.value='';}
+}
+
+async function sauvegarderHistoire(){
+  const id=currentDetailId;
+  const titre=document.getElementById('edit-titre').value.trim();
+  const resume=document.getElementById('edit-resume').value.trim();
+  if(!titre){alert('Le titre est obligatoire.');return;}
+  const btn=document.getElementById('edit-save-btn');
+  btn.textContent='Sauvegarde…';btn.disabled=true;
+  try{
+    // Images
+    let coverUrl=histoires.find(x=>x.id===id)?.cover_url||null;
+    let bannerUrl=histoires.find(x=>x.id===id)?.banner_url||null;
+    const coverFile=document.getElementById('edit-cover-input').files[0];
+    const bannerFile=document.getElementById('edit-banner-input').files[0];
+    if(coverFile)coverUrl=await uploadImage(coverFile,'covers');
+    if(bannerFile)bannerUrl=await uploadImage(bannerFile,'banners');
+
+    await db.from('histoires').update({
+      titre,resume,cover_url:coverUrl,banner_url:bannerUrl,
+      auteur_pseudo:document.getElementById('n-auteur-edit').value||null,
+      gratuit_jusqu_au:parseInt(document.getElementById('edit-gratuit').value)||8,
+      prix_ticket:parseInt(document.getElementById('edit-prix').value)||1,
+      adulte:document.getElementById('edit-adulte-val').value==='true',
+      statut:document.getElementById('edit-statut-val').value,
+    }).eq('id',id);
+
+    // Tags — supprimer et recréer
+    await db.from('histoires_tags').delete().eq('histoire_id',id);
+    for(const tagNom of _editTags){
+      let {data:tag}=await db.from('tags').select('id').eq('nom',tagNom).single();
+      if(!tag){const {data:nt}=await db.from('tags').insert({nom:tagNom}).select().single();tag=nt;}
+      if(tag)await db.from('histoires_tags').insert({histoire_id:id,tag_id:tag.id});
+    }
+    // TW — supprimer et recréer
+    await db.from('trigger_warnings_histoires').delete().eq('histoire_id',id);
+    for(const tw of _editTws){
+      await db.from('trigger_warnings_histoires').insert({histoire_id:id,contenu:tw});
+    }
+
+    await loadHistoires();
+    fermerEditionHistoire();
+    showHistoireDetail(id);
+  }catch(e){alert('Erreur : '+e.message);}
+  finally{btn.textContent='✦ Sauvegarder';btn.disabled=false;}
+}
+
+function setEditAdulte(val){
+  document.getElementById('edit-adulte-val').value=String(val);
+  document.getElementById('edit-adulte-non').className='btn'+(val?'':' btn-accent');
+  document.getElementById('edit-adulte-oui').className='btn'+(val?' btn-accent':'');
+}
+function setEditStatut(val){
+  document.getElementById('edit-statut-val').value=val;
+  document.getElementById('edit-statut-brouillon').className='btn'+(val==='brouillon'?' btn-accent':'');
+  document.getElementById('edit-statut-publie').className='btn'+(val==='publie'?' btn-accent':'');
+}
+function toggleAuteurEditDropdown(){
+  const list=document.getElementById('auteur-edit-list');
+  list.style.display=list.style.display==='none'?'block':'none';
+}
+function selectAuteurEdit(val,label){
+  document.getElementById('n-auteur-edit').value=val;
+  document.getElementById('auteur-edit-label').textContent=label||'— Choisir un·e auteur·ice —';
+  document.getElementById('auteur-edit-label').style.color=val?'var(--text)':'var(--text3)';
+  document.getElementById('auteur-edit-list').style.display='none';
 }
 
 async function toggleStatut(id,statut){
@@ -848,6 +1089,8 @@ document.addEventListener('click',e=>{
   if(wrapH&&!wrapH.contains(e.target))document.getElementById('histoire-select-list').style.display='none';
   const wrapA=document.getElementById('auteur-select-wrap');
   if(wrapA&&!wrapA.contains(e.target))document.getElementById('auteur-select-list').style.display='none';
+  const wrapE=document.getElementById('auteur-edit-wrap');
+  if(wrapE&&!wrapE.contains(e.target))document.getElementById('auteur-edit-list').style.display='none';
 });
 
 async function loadChapitresExistants(histoireId){
@@ -1002,10 +1245,18 @@ async function showAuteurDetail(id){
 async function loadAuteursSelect(){
   const {data}=await db.from('auteurs').select('id,pseudo').order('pseudo');
   auteurs=data||[];
+  // Dropdown création
   const list=document.getElementById('auteur-select-list');
-  if(!list)return;
-  list.innerHTML=`<div class="custom-select-option" onclick="selectAuteur('','— Choisir un·e auteur·ice —')">— Choisir un·e auteur·ice —</div>`
-    +auteurs.map(a=>`<div class="custom-select-option" onclick="selectAuteur('${a.pseudo}','${a.pseudo}')">${a.pseudo}</div>`).join('');
+  if(list){
+    list.innerHTML=`<div class="custom-select-option" onclick="selectAuteur('','— Choisir un·e auteur·ice —')">— Choisir un·e auteur·ice —</div>`
+      +auteurs.map(a=>`<div class="custom-select-option" onclick="selectAuteur('${a.pseudo}','${a.pseudo}')">${a.pseudo}</div>`).join('');
+  }
+  // Dropdown édition
+  const listEdit=document.getElementById('auteur-edit-list');
+  if(listEdit){
+    listEdit.innerHTML=`<div class="custom-select-option" onclick="selectAuteurEdit('','')">— Aucun —</div>`
+      +auteurs.map(a=>`<div class="custom-select-option" onclick="selectAuteurEdit('${a.pseudo}','${a.pseudo}')">${a.pseudo}</div>`).join('');
+  }
 }
 
 function toggleAuteurDropdown(){
