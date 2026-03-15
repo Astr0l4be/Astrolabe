@@ -355,18 +355,20 @@
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Tags <span style="color:var(--text3);font-size:9px">(appuie sur Entrée pour ajouter)</span></label>
+          <label class="form-label">Tags <span style="color:var(--text3);font-size:9px">(Entrée pour ajouter)</span></label>
           <div class="tags-wrap" id="tags-wrap" onclick="document.getElementById('tags-input').focus()">
             <input type="text" id="tags-input" placeholder="Romance, Fantastique…" onkeydown="handleTagInput(event)">
           </div>
-          <div id="tags-suggestions" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
+          <div id="tags-suggestions-label" style="font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:10px;margin-bottom:5px;display:none">Suggestions</div>
+          <div id="tags-suggestions" style="display:flex;flex-wrap:wrap;gap:6px"></div>
         </div>
         <div class="form-group">
-          <label class="form-label">Trigger warnings <span style="color:var(--text3);font-size:9px">(appuie sur Entrée pour ajouter)</span></label>
+          <label class="form-label">Trigger warnings <span style="color:var(--text3);font-size:9px">(Entrée pour ajouter)</span></label>
           <div class="tags-wrap" id="tw-wrap" onclick="document.getElementById('tw-input').focus()">
             <input type="text" id="tw-input" placeholder="Scènes spicy, Violence…" onkeydown="handleTWInput(event)">
           </div>
-          <div id="tw-suggestions" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
+          <div id="tw-suggestions-label" style="font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:10px;margin-bottom:5px;display:none">Suggestions</div>
+          <div id="tw-suggestions" style="display:flex;flex-wrap:wrap;gap:6px"></div>
         </div>
         <div class="form-row">
           <div class="form-group">
@@ -778,8 +780,12 @@ function handleTagInput(e){
     if(val&&!tags.includes(val)){
       tags.push(val);
       renderTags();
+      // Mettre à jour les suggestions pour refléter le tag ajouté
+      const btn=document.getElementById('sug-tag-'+val.replace(/\s/g,'-'));
+      if(btn)btn.classList.add('btn-accent');
     }
     e.target.value='';
+    setTimeout(()=>document.getElementById('tags-input').focus(),0);
   }
 }
 function removeTag(i){tags.splice(i,1);renderTags();}
@@ -802,8 +808,11 @@ function handleTWInput(e){
     if(val&&!tws.includes(val)){
       tws.push(val);
       renderTWs();
+      const btn=document.getElementById('sug-tw-'+val.replace(/\s/g,'-'));
+      if(btn)btn.classList.add('btn-accent');
     }
     e.target.value='';
+    setTimeout(()=>document.getElementById('tw-input').focus(),0);
   }
 }
 function removeTW(i){tws.splice(i,1);renderTWs();}
@@ -1397,9 +1406,12 @@ async function supprimerChapitre(id,histoireId){
 async function loadTagsSuggestions(){
   const {data}=await db.from('tags').select('nom').order('nom');
   const container=document.getElementById('tags-suggestions');
-  if(!container||!data)return;
+  const label=document.getElementById('tags-suggestions-label');
+  if(!container)return;
+  if(!data||!data.length){if(label)label.style.display='none';container.innerHTML='';return;}
+  if(label)label.style.display='block';
   container.innerHTML=(data||[]).map(t=>`
-    <button class="btn btn-sm" style="font-size:11px" onclick="toggleSuggestion('${t.nom}','tag')" id="sug-tag-${t.nom.replace(/\s/g,'-')}">${t.nom}</button>
+    <button class="btn btn-sm ${tags.includes(t.nom)?'btn-accent':''}" style="font-size:11px" onclick="toggleSuggestion('${t.nom}','tag')" id="sug-tag-${t.nom.replace(/\s/g,'-')}">✦ ${t.nom}</button>
   `).join('');
 }
 
@@ -1407,9 +1419,12 @@ async function loadTWSuggestions(){
   const {data}=await db.from('trigger_warnings_histoires').select('contenu');
   const uniq=[...new Set((data||[]).map(t=>t.contenu))];
   const container=document.getElementById('tw-suggestions');
+  const label=document.getElementById('tw-suggestions-label');
   if(!container)return;
+  if(!uniq.length){if(label)label.style.display='none';container.innerHTML='';return;}
+  if(label)label.style.display='block';
   container.innerHTML=uniq.map(t=>`
-    <button class="btn btn-sm" style="font-size:11px" onclick="toggleSuggestion('${t}','tw')" id="sug-tw-${t.replace(/\s/g,'-')}">${t}</button>
+    <button class="btn btn-sm ${tws.includes(t)?'btn-accent':''}" style="font-size:11px;background:rgba(167,143,212,.1);border-color:rgba(167,143,212,.25);color:var(--accent2)" onclick="toggleSuggestion('${t}','tw')" id="sug-tw-${t.replace(/\s/g,'-')}">✦ ${t}</button>
   `).join('');
 }
 
