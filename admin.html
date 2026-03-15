@@ -959,7 +959,12 @@ async function supprimerDefinitivement(id){
 let currentDetailId=null;
 async function showHistoireDetail(id){
   currentDetailId=id;
-  const h=histoires.find(x=>x.id===id);if(!h)return;
+  let h=histoires.find(x=>x.id===id);
+  if(!h){
+    const {data}=await db.from('histoires').select('*').eq('id',id).single();
+    if(!data)return;
+    h=data;
+  }
   const {data:chaps}=await db.from('chapitres').select('*').eq('histoire_id',id).order('numero');
   const {data:htags}=await db.from('histoires_tags').select('tags(nom)').eq('histoire_id',id);
   const {data:htws}=await db.from('trigger_warnings_histoires').select('contenu').eq('histoire_id',id);
