@@ -100,6 +100,15 @@
     .loading{text-align:center;padding:40px;color:var(--text3);font-size:13px;}
     .spinner{display:inline-block;width:20px;height:20px;border:2px solid rgba(126,159,212,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin-right:8px;}
     @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* CUSTOM SELECT */
+    .custom-select-wrap{position:relative;}
+    .custom-select-box{width:100%;background:rgba(140,150,195,.1);border:1px solid rgba(180,190,230,.16);border-radius:8px;color:var(--text);font-family:'Jost',sans-serif;font-size:13px;padding:10px 12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:border-color .2s;}
+    .custom-select-box:hover{border-color:rgba(126,159,212,.5);}
+    .custom-select-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#1e2438;border:1px solid rgba(180,190,230,.2);border-radius:8px;z-index:50;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.3);}
+    .custom-select-option{padding:10px 12px;font-size:13px;color:var(--text2);cursor:pointer;transition:color .15s,background .15s;}
+    .custom-select-option:hover{background:rgba(126,159,212,.08);color:var(--accent);}
+    .custom-select-option.selected{color:var(--accent);}
   </style>
 </head>
 <body>
@@ -190,9 +199,14 @@
           </div>
           <div class="form-group">
             <label class="form-label">Auteur·ice</label>
-            <select class="form-select" id="n-auteur">
-              <option value="">— Choisir un·e auteur·ice —</option>
-            </select>
+            <div class="custom-select-wrap" id="auteur-select-wrap">
+              <div class="custom-select-box" id="auteur-select-box" onclick="toggleAuteurDropdown()">
+                <span id="auteur-select-label">— Choisir un·e auteur·ice —</span>
+                <span style="color:var(--text3);font-size:10px">▾</span>
+              </div>
+              <div class="custom-select-list" id="auteur-select-list" style="display:none"></div>
+            </div>
+            <input type="hidden" id="n-auteur" value="">
           </div>
         </div>
         <div class="form-group">
@@ -902,13 +916,31 @@ async function showAuteurDetail(id){
 async function loadAuteursSelect(){
   const {data}=await db.from('auteurs').select('id,pseudo').order('pseudo');
   auteurs=data||[];
-  const sel=document.getElementById('n-auteur');
-  if(!sel)return;
-  sel.innerHTML='<option value="">— Choisir un·e auteur·ice —</option>';
-  auteurs.forEach(a=>{
-    const o=document.createElement('option');o.value=a.pseudo;o.textContent=a.pseudo;sel.appendChild(o);
-  });
+  const list=document.getElementById('auteur-select-list');
+  if(!list)return;
+  list.innerHTML=`<div class="custom-select-option" onclick="selectAuteur('','— Choisir un·e auteur·ice —')">— Choisir un·e auteur·ice —</div>`
+    +auteurs.map(a=>`<div class="custom-select-option" onclick="selectAuteur('${a.pseudo}','${a.pseudo}')">${a.pseudo}</div>`).join('');
 }
+
+function toggleAuteurDropdown(){
+  const list=document.getElementById('auteur-select-list');
+  list.style.display=list.style.display==='none'?'block':'none';
+}
+
+function selectAuteur(val,label){
+  document.getElementById('n-auteur').value=val;
+  document.getElementById('auteur-select-label').textContent=label;
+  document.getElementById('auteur-select-label').style.color=val?'var(--text)':'var(--text3)';
+  document.getElementById('auteur-select-list').style.display='none';
+  document.querySelectorAll('.custom-select-option').forEach(o=>o.classList.remove('selected'));
+  if(val){const sel=Array.from(document.querySelectorAll('.custom-select-option')).find(o=>o.textContent===label);if(sel)sel.classList.add('selected');}
+}
+
+// Fermer le dropdown si on clique ailleurs
+document.addEventListener('click',e=>{
+  const wrap=document.getElementById('auteur-select-wrap');
+  if(wrap&&!wrap.contains(e.target))document.getElementById('auteur-select-list').style.display='none';
+});
 
 async function loadAuteurs(){
   const {data}=await db.from('auteurs').select('*').order('pseudo');
