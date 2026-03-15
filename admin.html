@@ -142,7 +142,7 @@
     <!-- PANEL HISTOIRES -->
     <div class="panel active" id="panel-histoires">
       <div id="alert-histoires" class="alert"></div>
-      <div class="card">
+      <div class="card" id="histoires-card">
         <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
           <span>Toutes les histoires</span>
           <div style="display:flex;gap:8px">
@@ -156,7 +156,7 @@
       </div>
       <!-- DETAIL HISTOIRE (caché par défaut) -->
       <div id="histoire-detail" style="display:none">
-        <button class="btn btn-sm" onclick="document.getElementById('histoire-detail').style.display='none';document.querySelector('.card').style.display='block'" style="margin-bottom:12px">← Retour</button>
+        <button class="btn btn-sm" onclick="document.getElementById('histoire-detail').style.display='none';document.getElementById('histoires-card').style.display='block'" style="margin-bottom:12px">← Retour</button>
         <div class="card" id="detail-card"></div>
       </div>
     </div>
