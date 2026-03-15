@@ -595,7 +595,15 @@ function renderHistoiresList(){
 async function mettreEnCorbeille(id){
   if(!confirm('Mettre cette histoire à la corbeille ?'))return;
   await db.from('histoires').update({corbeille:true}).eq('id',id);
-  loadHistoires();
+  await loadHistoires();
+}
+
+async function corbeilleDepuisDetail(id){
+  if(!confirm('Mettre cette histoire à la corbeille ?'))return;
+  await db.from('histoires').update({corbeille:true}).eq('id',id);
+  await loadHistoires();
+  document.getElementById('histoire-detail').style.display='none';
+  document.getElementById('histoires-card').style.display='block';
 }
 
 async function restaurerHistoire(id){
@@ -660,7 +668,7 @@ async function showHistoireDetail(id){
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn btn-full ${h.statut==='publie'?'btn-danger':'btn-success'}" onclick="toggleStatut('${h.id}','${h.statut}')" style="flex:1">${h.statut==='publie'?'Dépublier':'Publier'}</button>
-      <button class="btn btn-danger" onclick="mettreEnCorbeille('${h.id}');document.getElementById('histoire-detail').style.display='none';document.getElementById('histoires-card').style.display='block'" style="flex:0 0 auto">🗑 Corbeille</button>
+      <button class="btn btn-danger" onclick="corbeilleDepuisDetail('${h.id}')" style="flex:0 0 auto">🗑 Corbeille</button>
     </div>
   `;
 }
