@@ -158,6 +158,7 @@
       <button class="tab" onclick="switchTab('chapitre')">📝 Ajouter chapitre</button>
       <button class="tab" onclick="switchTab('auteurs')">✍ Auteur·ices</button>
       <button class="tab" onclick="switchTab('nouvel-auteur')">✦ Nouvel·le auteur·ice</button>
+      <button class="tab" onclick="switchTab('tags')">🏷 Tags & TW</button>
     </div>
 
     <!-- PANEL HISTOIRES -->
@@ -628,6 +629,26 @@
       </div>
     </div>
 
+    <!-- PANEL TAGS & TW -->
+    <div class="panel" id="panel-tags">
+      <div id="alert-tags" class="alert"></div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Ajouter un tag</div>
+        <div style="display:flex;gap:10px">
+          <input type="text" class="form-input" id="new-tag-input" placeholder="Nom du tag…" onkeydown="if(event.key==='Enter')ajouterTag()" style="flex:1">
+          <button class="btn btn-accent" onclick="ajouterTag()">✦ Ajouter</button>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Tags existants</div>
+        <div id="tags-gestion-list"><div class="loading"><span class="spinner"></span>Chargement…</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Trigger warnings existants</div>
+        <div id="tw-gestion-list"><div class="loading"><span class="spinner"></span>Chargement…</div></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -700,7 +721,7 @@ function switchTab(tab){
     _retourAuteurId=null;
     loadAuteurs();
   }
-  if(tab==='chapitre')loadHistoiresSelect();
+  if(tab==='tags'){loadTagsGestion();loadTWsGestion();}
   if(tab==='nouvelle')loadAuteursSelect();
   if(tab==='nouvel-auteur'){
     document.getElementById('a-pseudo').value='';
@@ -1439,6 +1460,60 @@ async function supprimerDefinitivementDepuisFiche(id){
   document.getElementById('histoire-detail').style.display='none';
   document.getElementById('histoires-card').style.display='block';
   renderHistoiresList();
+}
+
+/* GESTION TAGS & TW */
+async function loadTagsGestion(){
+  const {data}=await db.from('tags').select('id,nom').order('nom');
+  const list=document.getElementById('tags-gestion-list');
+  if(!list)return;
+  if(!data||!data.length){list.innerHTML='<div style="font-size:12px;color:var(--text3)">Aucun tag pour l\'instant.</div>';return;}
+  list.innerHTML=data.map(t=>`
+    <div class="histoire-item" style="padding:10px 14px">
+      <div class="histoire-item-info"><div class="histoire-item-title" style="font-size:13px">✦ ${t.nom}</div></div>
+      <button class="btn btn-sm btn-danger" onclick="supprimerTag('${t.id}','${t.nom.replace(/'/g,"\\'")}')">Suppr.</button>
+    </div>`).join('');
+}
+
+async function loadTWsGestion(){
+  const {data}=await db.from('trigger_warnings_histoires').select('contenu');
+  const list=document.getElementById('tw-gestion-list');
+  if(!list)return;
+  const uniq=[...new Set((data||[]).map(t=>t.contenu))].sort();
+  if(!uniq.length){list.innerHTML='<div style="font-size:12px;color:var(--text3)">Aucun trigger warning pour l\'instant.</div>';return;}
+  list.innerHTML=uniq.map(t=>`
+    <div class="histoire-item" style="padding:10px 14px">
+      <div class="histoire-item-info"><div class="histoire-item-title" style="font-size:13px;color:var(--accent2)">✦ ${t}</div></div>
+      <button class="btn btn-sm btn-danger" onclick="supprimerTW('${t.replace(/'/g,"\\'")}')">Suppr.</button>
+    </div>`).join('');
+}
+
+async function ajouterTag(){
+  const nom=document.getElementById('new-tag-input').value.trim();
+  if(!nom){showAlert('tags','Le nom du tag est obligatoire.','error');return;}
+  const {error}=await db.from('tags').insert({nom});
+  if(error){showAlert('tags','Erreur : '+error.message,'error');return;}
+  document.getElementById('new-tag-input').value='';
+  showAlert('tags','Tag ajouté ! ✦');
+  loadTagsGestion();
+  loadTagsSuggestions();
+}
+
+async function supprimerTag(id,nom){
+  if(!confirm(`Supprimer le tag "${nom}" ? Il sera retiré de toutes les histoires.`))return;
+  await db.from('histoires_tags').delete().eq('tag_id',id);
+  await db.from('tags').delete().eq('id',id);
+  loadTagsGestion();
+  loadTagsSuggestions();
+  showAlert('tags','Tag supprimé.');
+}
+
+async function supprimerTW(contenu){
+  if(!confirm(`Supprimer le trigger warning "${contenu}" de toutes les histoires ?`))return;
+  await db.from('trigger_warnings_histoires').delete().eq('contenu',contenu);
+  loadTWsGestion();
+  loadTWSuggestions();
+  showAlert('tags','Trigger warning supprimé.');
 }
 
 /* SUGGESTIONS TAGS & TW */
