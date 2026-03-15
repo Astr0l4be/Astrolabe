@@ -618,6 +618,14 @@
           <div class="form-hint" id="ch-wordcount">0 mots</div>
         </div>
         <div class="form-group">
+          <label class="form-label">Trigger warnings <span style="color:var(--text3);font-size:9px">(spécifiques à ce chapitre — Entrée pour ajouter)</span></label>
+          <div class="tags-wrap" id="ch-tw-wrap" onclick="document.getElementById('ch-tw-input').focus()">
+            <input type="text" id="ch-tw-input" placeholder="Scènes spicy, Violence…" onkeydown="handleChTwInput(event)">
+          </div>
+          <div id="ch-tw-suggestions-label" style="font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:10px;margin-bottom:5px;display:none">Suggestions</div>
+          <div id="ch-tw-suggestions" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+        </div>
+        <div class="form-group">
           <label class="form-label">Accès</label>
           <div style="display:flex;gap:8px">
             <button type="button" class="btn btn-accent" id="gratuit-gratuit" onclick="setGratuit(true)" style="flex:1">✦ Gratuit</button>
@@ -632,6 +640,8 @@
     <!-- PANEL TAGS & TW -->
     <div class="panel" id="panel-tags">
       <div id="alert-tags" class="alert"></div>
+
+      <!-- Ajouter un tag -->
       <div class="card" style="margin-bottom:16px">
         <div class="card-title">Ajouter un tag</div>
         <div style="display:flex;gap:10px">
@@ -639,13 +649,36 @@
           <button class="btn btn-accent" onclick="ajouterTag()">✦ Ajouter</button>
         </div>
       </div>
+
+      <!-- Tags -->
       <div class="card" style="margin-bottom:16px">
-        <div class="card-title">Tags existants</div>
+        <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+          <span>Tags existants</span>
+          <button class="btn btn-sm btn-danger" id="btn-suppr-tags" style="display:none" onclick="ouvrirPopupSupprMultiple('tag')">🗑 Supprimer la sélection</button>
+        </div>
         <div id="tags-gestion-list"><div class="loading"><span class="spinner"></span>Chargement…</div></div>
       </div>
+
+      <!-- TW -->
       <div class="card">
-        <div class="card-title">Trigger warnings existants</div>
+        <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+          <span>Trigger warnings existants</span>
+          <button class="btn btn-sm btn-danger" id="btn-suppr-tws" style="display:none" onclick="ouvrirPopupSupprMultiple('tw')">🗑 Supprimer la sélection</button>
+        </div>
         <div id="tw-gestion-list"><div class="loading"><span class="spinner"></span>Chargement…</div></div>
+      </div>
+    </div>
+
+    <!-- POP-UP SUPPRESSION MULTIPLE -->
+    <div id="popup-suppr-multiple" style="display:none;position:fixed;inset:0;background:rgba(10,12,25,.7);z-index:100;align-items:center;justify-content:center">
+      <div style="background:#1e2438;border:1px solid rgba(180,190,230,.2);border-radius:18px;padding:28px 24px;width:320px;text-align:center">
+        <div style="font-size:32px;margin-bottom:12px">🗑</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:20px;margin-bottom:10px" id="popup-suppr-titre">Supprimer la sélection ?</div>
+        <p style="font-size:12px;color:#9aa2c8;line-height:1.7;margin-bottom:22px" id="popup-suppr-desc">Cette action est irréversible.</p>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-full" onclick="fermerPopupSupprMultiple()">Annuler</button>
+          <button class="btn btn-full btn-danger" onclick="confirmerSupprMultiple()">Oui, supprimer</button>
+        </div>
       </div>
     </div>
 
@@ -1273,7 +1306,7 @@ function selectHistoire(val,label){
   labelEl.textContent=label;
   labelEl.style.color=val?'var(--text)':'var(--text3)';
   document.getElementById('histoire-select-list').style.display='none';
-  if(val)loadChapitresExistants(val);
+  if(val){loadChapitresExistants(val);setTimeout(loadChTwSuggestions,500);}
   else document.getElementById('chapitres-existants').style.display='none';
 }
 
@@ -1392,10 +1425,21 @@ async function ajouterChapitre(){
   try{
     const {error}=await db.from('chapitres').insert({histoire_id:histoireId,numero:num,titre,contenu,gratuit});
     if(error)throw error;
+    // Ajouter les TW du chapitre à l'histoire si pas déjà présents
+    if(chTws.length>0){
+      const {data:existants}=await db.from('trigger_warnings_histoires').select('contenu').eq('histoire_id',histoireId);
+      const existantsVals=(existants||[]).map(t=>t.contenu);
+      for(const tw of chTws){
+        if(!existantsVals.includes(tw)){
+          await db.from('trigger_warnings_histoires').insert({histoire_id:histoireId,contenu:tw});
+        }
+      }
+    }
     showAlert('chapitre','Chapitre publié avec succès ! ✦');
     document.getElementById('ch-titre').value='';
     document.getElementById('ch-contenu').value='';
     document.getElementById('ch-wordcount').textContent='0 mots';
+    chTws=[];renderChTws();
     loadChapitresExistants(histoireId);
   }catch(e){
     showAlert('chapitre','Erreur : '+e.message,'error');
@@ -1463,15 +1507,21 @@ async function supprimerDefinitivementDepuisFiche(id){
 }
 
 /* GESTION TAGS & TW */
+let _selectedTags=new Set();
+let _selectedTWs=new Set();
+let _supprType=null;
+
 async function loadTagsGestion(){
   const {data}=await db.from('tags').select('id,nom').order('nom');
   const list=document.getElementById('tags-gestion-list');
   if(!list)return;
+  _selectedTags.clear();
+  document.getElementById('btn-suppr-tags').style.display='none';
   if(!data||!data.length){list.innerHTML='<div style="font-size:12px;color:var(--text3)">Aucun tag pour l\'instant.</div>';return;}
   list.innerHTML=data.map(t=>`
-    <div class="histoire-item" style="padding:10px 14px">
+    <div class="histoire-item" style="padding:10px 14px;gap:10px">
+      <input type="checkbox" id="ck-tag-${t.id}" onchange="toggleSelectTag('${t.id}')" style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent);flex-shrink:0">
       <div class="histoire-item-info"><div class="histoire-item-title" style="font-size:13px">✦ ${t.nom}</div></div>
-      <button class="btn btn-sm btn-danger" onclick="supprimerTag('${t.id}','${t.nom.replace(/'/g,"\\'")}')">Suppr.</button>
     </div>`).join('');
 }
 
@@ -1479,13 +1529,60 @@ async function loadTWsGestion(){
   const {data}=await db.from('trigger_warnings_histoires').select('contenu');
   const list=document.getElementById('tw-gestion-list');
   if(!list)return;
+  _selectedTWs.clear();
+  document.getElementById('btn-suppr-tws').style.display='none';
   const uniq=[...new Set((data||[]).map(t=>t.contenu))].sort();
   if(!uniq.length){list.innerHTML='<div style="font-size:12px;color:var(--text3)">Aucun trigger warning pour l\'instant.</div>';return;}
   list.innerHTML=uniq.map(t=>`
-    <div class="histoire-item" style="padding:10px 14px">
+    <div class="histoire-item" style="padding:10px 14px;gap:10px">
+      <input type="checkbox" id="ck-tw-${t.replace(/\s/g,'-')}" onchange="toggleSelectTW('${t.replace(/'/g,"\\'")}')" style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent2);flex-shrink:0">
       <div class="histoire-item-info"><div class="histoire-item-title" style="font-size:13px;color:var(--accent2)">✦ ${t}</div></div>
-      <button class="btn btn-sm btn-danger" onclick="supprimerTW('${t.replace(/'/g,"\\'")}')">Suppr.</button>
     </div>`).join('');
+}
+
+function toggleSelectTag(id){
+  if(_selectedTags.has(id))_selectedTags.delete(id);
+  else _selectedTags.add(id);
+  document.getElementById('btn-suppr-tags').style.display=_selectedTags.size>0?'inline-flex':'none';
+}
+function toggleSelectTW(val){
+  if(_selectedTWs.has(val))_selectedTWs.delete(val);
+  else _selectedTWs.add(val);
+  document.getElementById('btn-suppr-tws').style.display=_selectedTWs.size>0?'inline-flex':'none';
+}
+
+function ouvrirPopupSupprMultiple(type){
+  _supprType=type;
+  const n=type==='tag'?_selectedTags.size:_selectedTWs.size;
+  document.getElementById('popup-suppr-titre').textContent=`Supprimer ${n} ${type==='tag'?'tag(s)':'trigger warning(s)'} ?`;
+  document.getElementById('popup-suppr-desc').textContent='Cette action est irréversible. '+(type==='tag'?'Les tags seront retirés de toutes les histoires.':'Les TW seront retirés de toutes les histoires et chapitres.');
+  document.getElementById('popup-suppr-multiple').style.display='flex';
+}
+function fermerPopupSupprMultiple(){
+  document.getElementById('popup-suppr-multiple').style.display='none';
+  _supprType=null;
+}
+async function confirmerSupprMultiple(){
+  if(_supprType==='tag'){
+    for(const id of _selectedTags){
+      await db.from('histoires_tags').delete().eq('tag_id',id);
+      await db.from('tags').delete().eq('id',id);
+    }
+    _selectedTags.clear();
+    loadTagsGestion();
+    loadTagsSuggestions();
+    showAlert('tags',`Tags supprimés ! ✦`);
+  } else {
+    for(const val of _selectedTWs){
+      await db.from('trigger_warnings_histoires').delete().eq('contenu',val);
+      await db.from('chapitres').update({tw:null}).eq('tw',val).catch(()=>{});
+    }
+    _selectedTWs.clear();
+    loadTWsGestion();
+    loadTWSuggestions();
+    showAlert('tags',`Trigger warnings supprimés ! ✦`);
+  }
+  fermerPopupSupprMultiple();
 }
 
 async function ajouterTag(){
@@ -1499,21 +1596,46 @@ async function ajouterTag(){
   loadTagsSuggestions();
 }
 
-async function supprimerTag(id,nom){
-  if(!confirm(`Supprimer le tag "${nom}" ? Il sera retiré de toutes les histoires.`))return;
-  await db.from('histoires_tags').delete().eq('tag_id',id);
-  await db.from('tags').delete().eq('id',id);
-  loadTagsGestion();
-  loadTagsSuggestions();
-  showAlert('tags','Tag supprimé.');
+/* TW CHAPITRE */
+let chTws=[];
+function handleChTwInput(e){
+  if(e.key==='Enter'||e.key===','){
+    e.preventDefault();
+    const v=e.target.value.trim().replace(',','');
+    if(v&&!chTws.includes(v)){chTws.push(v);renderChTws();}
+    e.target.value='';
+    setTimeout(()=>document.getElementById('ch-tw-input').focus(),0);
+  }
 }
-
-async function supprimerTW(contenu){
-  if(!confirm(`Supprimer le trigger warning "${contenu}" de toutes les histoires ?`))return;
-  await db.from('trigger_warnings_histoires').delete().eq('contenu',contenu);
-  loadTWsGestion();
-  loadTWSuggestions();
-  showAlert('tags','Trigger warning supprimé.');
+function renderChTws(){
+  const wrap=document.getElementById('ch-tw-wrap');
+  const input=document.getElementById('ch-tw-input');
+  wrap.innerHTML='';
+  chTws.forEach((t,i)=>{
+    const chip=document.createElement('div');chip.className='tag-chip';
+    chip.style.cssText='background:rgba(167,143,212,.15);border-color:rgba(167,143,212,.3);color:var(--accent2)';
+    chip.innerHTML=`${t}<button onclick="chTws.splice(${i},1);renderChTws()">×</button>`;
+    wrap.appendChild(chip);
+  });
+  wrap.appendChild(input);
+}
+function loadChTwSuggestions(){
+  const {data:existants}=db.from('trigger_warnings_histoires').select('contenu');
+  // On utilise les TW déjà chargés dans loadTWSuggestions
+  const container=document.getElementById('ch-tw-suggestions');
+  const label=document.getElementById('ch-tw-suggestions-label');
+  if(!container)return;
+  // Récupérer depuis le DOM des suggestions existantes
+  const existing=[...document.querySelectorAll('#tw-suggestions .btn-sm')].map(b=>b.textContent.replace('✦ ','').trim());
+  if(!existing.length){if(label)label.style.display='none';return;}
+  if(label)label.style.display='block';
+  container.innerHTML=existing.map(t=>`<button class="btn btn-sm ${chTws.includes(t)?'btn-accent':''}" style="font-size:11px;background:rgba(167,143,212,.1);border-color:rgba(167,143,212,.25);color:var(--accent2)" onclick="toggleChTwSuggestion('${t.replace(/'/g,"\\'")}')">✦ ${t}</button>`).join('');
+}
+function toggleChTwSuggestion(val){
+  if(chTws.includes(val)){chTws.splice(chTws.indexOf(val),1);}
+  else{chTws.push(val);}
+  renderChTws();
+  loadChTwSuggestions();
 }
 
 /* SUGGESTIONS TAGS & TW */
