@@ -548,23 +548,69 @@ async function loadHistoires(){
     document.getElementById('histoires-list').innerHTML='<div class="loading">Aucune histoire pour l\'instant.</div>';
     return;
   }
+  // Charger nb chapitres
+  for(const h of histoires){
+    const {count}=await db.from('chapitres').select('*',{count:'exact',head:true}).eq('histoire_id',h.id);
+    h._chapCount=count||0;
+  }
   document.getElementById('histoires-list').innerHTML=histoires.map(h=>`
-    <div class="histoire-item">
+    <div class="histoire-item" style="cursor:pointer" onclick="showHistoireDetail('${h.id}')">
       <div class="histoire-item-cover">${h.cover_url?`<img src="${h.cover_url}" style="width:100%;height:100%;object-fit:cover;border-radius:4px">`:'📖'}</div>
       <div class="histoire-item-info">
         <div class="histoire-item-title">${h.titre}</div>
-        <div class="histoire-item-meta">${h.auteur_pseudo?'par '+h.auteur_pseudo+' · ':''}<span id="ch-count-${h.id}">…</span> chapitre(s)</div>
+        <div class="histoire-item-meta">${h.auteur_pseudo?'par '+h.auteur_pseudo+' · ':''}<strong>${h._chapCount}</strong> chapitre(s)</div>
       </div>
       <span class="histoire-item-status ${h.statut==='publie'?'status-publie':'status-brouillon'}">${h.statut==='publie'?'Publié':'Brouillon'}</span>
-      <button class="btn btn-sm btn-${h.statut==='publie'?'danger':'success'}" onclick="toggleStatut('${h.id}','${h.statut}')">${h.statut==='publie'?'Dépublier':'Publier'}</button>
+      <button class="btn btn-sm btn-${h.statut==='publie'?'danger':'success'}" onclick="event.stopPropagation();toggleStatut('${h.id}','${h.statut}')">${h.statut==='publie'?'Dépublier':'Publier'}</button>
     </div>
   `).join('');
-  // Charger le nb de chapitres
-  for(const h of histoires){
-    const {count}=await db.from('chapitres').select('*',{count:'exact',head:true}).eq('histoire_id',h.id);
-    const el=document.getElementById('ch-count-'+h.id);
-    if(el)el.textContent=count||0;
-  }
+}
+
+async function showHistoireDetail(id){
+  const h=histoires.find(x=>x.id===id);if(!h)return;
+  const {data:chaps}=await db.from('chapitres').select('*').eq('histoire_id',id).order('numero');
+  const {data:htags}=await db.from('histoires_tags').select('tags(nom)').eq('histoire_id',id);
+  const {data:htws}=await db.from('trigger_warnings_histoires').select('contenu').eq('histoire_id',id);
+  const tags=(htags||[]).map(t=>t.tags?.nom).filter(Boolean);
+  const tws=(htws||[]).map(t=>t.contenu);
+  const gratuits=(chaps||[]).filter(c=>c.gratuit).length;
+  const totalMots=(chaps||[]).reduce((acc,ch)=>acc+(ch.contenu?ch.contenu.trim().split(' ').length:0),0);
+  document.getElementById('histoires-card').style.display='none';
+  document.getElementById('histoire-detail').style.display='block';
+  document.getElementById('detail-card').innerHTML=`
+    <div style="display:flex;gap:16px;margin-bottom:20px;align-items:flex-start">
+      ${h.cover_url?`<img src="${h.cover_url}" style="width:72px;aspect-ratio:2/3;object-fit:cover;border-radius:6px;flex-shrink:0">`:'<div style="width:72px;aspect-ratio:2/3;background:rgba(126,159,212,.1);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">📖</div>'}
+      <div style="flex:1">
+        <div style="font-family:Cormorant Garamond,serif;font-size:20px;margin-bottom:4px">${h.titre}</div>
+        ${h.auteur_pseudo?`<div style="font-size:12px;color:var(--text3);margin-bottom:6px">par ${h.auteur_pseudo}</div>`:''}
+        <span class="histoire-item-status ${h.statut==='publie'?'status-publie':'status-brouillon'}">${h.statut==='publie'?'Publié':'Brouillon'}</span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px">
+      <div style="background:rgba(126,159,212,.08);border:1px solid rgba(126,159,212,.2);border-radius:10px;padding:12px;text-align:center">
+        <div style="font-size:22px;font-weight:600;color:var(--accent)">${(chaps||[]).length}</div>
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px">Chapitres</div>
+      </div>
+      <div style="background:rgba(126,212,160,.06);border:1px solid rgba(126,212,160,.2);border-radius:10px;padding:12px;text-align:center">
+        <div style="font-size:22px;font-weight:600;color:var(--success)">${gratuits}</div>
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px">Gratuits</div>
+      </div>
+      <div style="background:rgba(167,143,212,.06);border:1px solid rgba(167,143,212,.2);border-radius:10px;padding:12px;text-align:center">
+        <div style="font-size:22px;font-weight:600;color:var(--accent2)">${totalMots.toLocaleString('fr')}</div>
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px">Mots</div>
+      </div>
+    </div>
+    ${tags.length?`<div style="margin-bottom:14px"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Tags</div><div style="display:flex;flex-wrap:wrap;gap:6px">${tags.map(t=>`<span class="tag-chip">${t}</span>`).join('')}</div></div>`:''}
+    ${tws.length?`<div style="margin-bottom:14px"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Trigger warnings</div><div style="display:flex;flex-wrap:wrap;gap:6px">${tws.map(t=>`<span class="tag-chip" style="background:rgba(167,143,212,.15);border-color:rgba(167,143,212,.3);color:var(--accent2)">${t}</span>`).join('')}</div></div>`:''}
+    ${h.resume?`<div style="margin-bottom:14px"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Résumé</div><p style="font-size:12px;color:var(--text2);line-height:1.7">${h.resume}</p></div>`:''}
+    <div style="margin-bottom:16px">
+      <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Chapitres</div>
+      ${(chaps||[]).map(ch=>`<div class="chapitre-item"><div class="ch-num">${ch.numero}</div><div class="ch-info"><div class="ch-title">${ch.titre}</div><div class="ch-meta">${ch.gratuit?'Gratuit':'Payant'} · ${ch.contenu?ch.contenu.trim().split(' ').length.toLocaleString('fr')+' mots':'vide'}</div></div><button class="btn btn-sm btn-danger" onclick="supprimerChapitre('${ch.id}','${h.id}').then(()=>showHistoireDetail('${h.id}'))">Suppr.</button></div>`).join('')||'<p style="font-size:12px;color:var(--text3)">Aucun chapitre.</p>'}
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-full ${h.statut==='publie'?'btn-danger':'btn-success'}" onclick="toggleStatut('${h.id}','${h.statut}')">${h.statut==='publie'?'Dépublier':'Publier'}</button>
+    </div>
+  `;
 }
 
 async function toggleStatut(id,statut){
