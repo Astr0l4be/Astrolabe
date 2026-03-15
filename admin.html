@@ -1500,15 +1500,22 @@ let _retourAuteurId=null;
 async function ouvrirHistoireDepuisAuteur(histoireId, auteurId){
   _retourAuteurId=auteurId;
   await loadHistoires();
-  document.getElementById('auteur-detail').style.display='none';
-  document.getElementById('auteurs-card').style.display='none';
+  // Basculer sur le panel histoires pour que histoire-detail soit visible
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelector('.tab[onclick*="\'histoires\'"]').classList.add('active');
+  document.getElementById('panel-histoires').classList.add('active');
   document.getElementById('histoires-card').style.display='none';
   document.getElementById('histoire-detail').style.display='block';
   // Bouton retour → revenir à la fiche auteur
   document.querySelector('#histoire-detail .btn-sm').onclick=()=>{
     document.getElementById('histoire-detail').style.display='none';
-    document.getElementById('auteurs-card').style.display='none';
     document.getElementById('histoires-card').style.display='none';
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    document.querySelector('.tab[onclick*="\'auteurs\'"]').classList.add('active');
+    document.getElementById('panel-auteurs').classList.add('active');
+    document.getElementById('auteurs-card').style.display='none';
     document.getElementById('auteur-detail').style.display='block';
     _retourAuteurId=null;
   };
