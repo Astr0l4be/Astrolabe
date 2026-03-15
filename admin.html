@@ -755,6 +755,7 @@ function switchTab(tab){
     loadAuteurs();
   }
   if(tab==='tags'){loadTagsGestion();loadTWsGestion();}
+  if(tab==='chapitre'){chTws=[];renderChTws();loadHistoiresSelect();}
   if(tab==='nouvelle')loadAuteursSelect();
   if(tab==='nouvel-auteur'){
     document.getElementById('a-pseudo').value='';
