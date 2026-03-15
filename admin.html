@@ -156,8 +156,24 @@
       </div>
       <!-- DETAIL HISTOIRE (caché par défaut) -->
       <div id="histoire-detail" style="display:none">
-        <button class="btn btn-sm" onclick="document.getElementById('histoire-detail').style.display='none';document.getElementById('histoires-card').style.display='block'" style="margin-bottom:12px">← Retour</button>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <button class="btn btn-sm" onclick="document.getElementById('histoire-detail').style.display='none';document.getElementById('histoires-card').style.display='block'">← Retour</button>
+          <button class="btn btn-sm btn-danger" onclick="ouvrirPopupCorbeille()" title="Mettre à la corbeille" style="width:34px;height:34px;padding:0;border-radius:50%;font-size:15px;display:flex;align-items:center;justify-content:center">🗑</button>
+        </div>
         <div class="card" id="detail-card"></div>
+      </div>
+    </div>
+
+    <!-- POP-UP CORBEILLE -->
+    <div id="popup-corbeille" style="display:none;position:fixed;inset:0;background:rgba(10,12,25,.7);z-index:100;align-items:center;justify-content:center">
+      <div style="background:#1e2438;border:1px solid rgba(180,190,230,.2);border-radius:18px;padding:28px 24px;width:300px;text-align:center">
+        <div style="font-size:32px;margin-bottom:12px">🗑</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:20px;margin-bottom:10px">Mettre à la corbeille ?</div>
+        <p style="font-size:12px;color:#9aa2c8;line-height:1.7;margin-bottom:22px">L'histoire sera déplacée dans la corbeille. Tu pourras la restaurer à tout moment.</p>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-full" onclick="fermerPopupCorbeille()">Annuler</button>
+          <button class="btn btn-full btn-danger" onclick="confirmerCorbeille()">Oui, mettre à la corbeille</button>
+        </div>
       </div>
     </div>
 
@@ -585,22 +601,26 @@ function renderHistoiresList(){
       ${isCorbeille
         ?`<button class="btn btn-sm btn-success" onclick="event.stopPropagation();restaurerHistoire('${h.id}')">Restaurer</button>
            <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();supprimerDefinitivement('${h.id}')">Suppr. déf.</button>`
-        :`<button class="btn btn-sm btn-${h.statut==='publie'?'danger':'success'}" onclick="event.stopPropagation();toggleStatut('${h.id}','${h.statut}')">${h.statut==='publie'?'Dépublier':'Publier'}</button>
-           <button class="btn btn-sm" style="background:rgba(212,126,126,.1);border-color:rgba(212,126,126,.3);color:var(--danger)" onclick="event.stopPropagation();mettreEnCorbeille('${h.id}')">🗑</button>`
+        :`<button class="btn btn-sm btn-${h.statut==='publie'?'danger':'success'}" onclick="event.stopPropagation();toggleStatut('${h.id}','${h.statut}')">${h.statut==='publie'?'Dépublier':'Publier'}</button>`
       }
     </div>
   `).join('');
 }
 
-async function mettreEnCorbeille(id){
-  if(!confirm('Mettre cette histoire à la corbeille ?'))return;
-  await db.from('histoires').update({corbeille:true}).eq('id',id);
-  await loadHistoires();
+let _corbeilleId=null;
+function ouvrirPopupCorbeille(){
+  _corbeilleId=currentDetailId;
+  const p=document.getElementById('popup-corbeille');
+  p.style.display='flex';
 }
-
-async function corbeilleDepuisDetail(id){
-  if(!confirm('Mettre cette histoire à la corbeille ?'))return;
-  await db.from('histoires').update({corbeille:true}).eq('id',id);
+function fermerPopupCorbeille(){
+  document.getElementById('popup-corbeille').style.display='none';
+  _corbeilleId=null;
+}
+async function confirmerCorbeille(){
+  if(!_corbeilleId)return;
+  await db.from('histoires').update({corbeille:true}).eq('id',_corbeilleId);
+  fermerPopupCorbeille();
   await loadHistoires();
   document.getElementById('histoire-detail').style.display='none';
   document.getElementById('histoires-card').style.display='block';
@@ -620,7 +640,9 @@ async function supprimerDefinitivement(id){
   loadHistoires();
 }
 
+let currentDetailId=null;
 async function showHistoireDetail(id){
+  currentDetailId=id;
   const h=histoires.find(x=>x.id===id);if(!h)return;
   const {data:chaps}=await db.from('chapitres').select('*').eq('histoire_id',id).order('numero');
   const {data:htags}=await db.from('histoires_tags').select('tags(nom)').eq('histoire_id',id);
@@ -668,7 +690,6 @@ async function showHistoireDetail(id){
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn btn-full ${h.statut==='publie'?'btn-danger':'btn-success'}" onclick="toggleStatut('${h.id}','${h.statut}')" style="flex:1">${h.statut==='publie'?'Dépublier':'Publier'}</button>
-      <button class="btn btn-danger" onclick="corbeilleDepuisDetail('${h.id}')" style="flex:0 0 auto">🗑 Corbeille</button>
     </div>
   `;
 }
