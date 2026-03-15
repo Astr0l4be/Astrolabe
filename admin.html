@@ -101,6 +101,16 @@
     .spinner{display:inline-block;width:20px;height:20px;border:2px solid rgba(126,159,212,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin-right:8px;}
     @keyframes spin{to{transform:rotate(360deg)}}
 
+    /* TOOLBAR */
+    .editor-wrap{border:1px solid rgba(180,190,230,.16);border-radius:8px;overflow:hidden;}
+    .editor-toolbar{display:flex;gap:4px;padding:6px 8px;background:rgba(140,150,195,.08);border-bottom:1px solid rgba(180,190,230,.1);flex-wrap:wrap;}
+    .tb-btn{background:none;border:1px solid transparent;color:var(--text2);font-family:'Jost',sans-serif;font-size:12px;padding:4px 8px;border-radius:5px;cursor:pointer;transition:all .15s;line-height:1;}
+    .tb-btn:hover{background:rgba(126,159,212,.12);border-color:rgba(126,159,212,.3);color:var(--accent);}
+    .tb-btn.active{background:rgba(126,159,212,.2);border-color:rgba(126,159,212,.4);color:var(--accent);}
+    .tb-sep{width:1px;background:rgba(180,190,230,.15);margin:2px 4px;}
+    .editor-wrap textarea{border:none;border-radius:0;}
+    .editor-wrap textarea:focus{border-color:transparent;}
+
     /* CUSTOM SELECT */
     .custom-select-wrap{position:relative;}
     .custom-select-box{width:100%;background:rgba(140,150,195,.1);border:1px solid rgba(180,190,230,.16);border-radius:8px;color:var(--text);font-family:'Jost',sans-serif;font-size:13px;padding:10px 12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:border-color .2s;}
@@ -211,7 +221,18 @@
         </div>
         <div class="form-group">
           <label class="form-label">Résumé *</label>
-          <textarea class="form-textarea" id="n-resume" placeholder="Résumé de l'histoire…" style="min-height:80px"></textarea>
+          <div class="editor-wrap">
+            <div class="editor-toolbar">
+              <button type="button" class="tb-btn" onclick="fmt('n-resume','bold')" title="Gras"><b>G</b></button>
+              <button type="button" class="tb-btn" onclick="fmt('n-resume','italic')" title="Italique"><i>I</i></button>
+              <div class="tb-sep"></div>
+              <button type="button" class="tb-btn" onclick="align('n-resume','left')" title="Gauche">⬤◁</button>
+              <button type="button" class="tb-btn" onclick="align('n-resume','center')" title="Centré">◁⬤▷</button>
+              <button type="button" class="tb-btn" onclick="align('n-resume','right')" title="Droite">▷⬤</button>
+              <button type="button" class="tb-btn" onclick="align('n-resume','justify')" title="Justifié">▤</button>
+            </div>
+            <textarea class="form-textarea" id="n-resume" placeholder="Résumé de l'histoire…" style="min-height:80px"></textarea>
+          </div>
         </div>
         <div class="form-row">
           <div class="form-group">
@@ -376,7 +397,18 @@
         </div>
         <div class="form-group">
           <label class="form-label">Contenu *</label>
-          <textarea class="form-textarea" id="ch-contenu" style="min-height:300px;font-size:13px;line-height:1.8" placeholder="Colle ici le texte du chapitre…&#10;&#10;Les dialogues commençant par — seront mis en valeur automatiquement.&#10;&#10;Sépare les paragraphes par une ligne vide."></textarea>
+          <div class="editor-wrap">
+            <div class="editor-toolbar">
+              <button type="button" class="tb-btn" onclick="fmt('ch-contenu','bold')" title="Gras"><b>G</b></button>
+              <button type="button" class="tb-btn" onclick="fmt('ch-contenu','italic')" title="Italique"><i>I</i></button>
+              <div class="tb-sep"></div>
+              <button type="button" class="tb-btn" onclick="align('ch-contenu','left')" title="Gauche">⬤◁</button>
+              <button type="button" class="tb-btn" onclick="align('ch-contenu','center')" title="Centré">◁⬤▷</button>
+              <button type="button" class="tb-btn" onclick="align('ch-contenu','right')" title="Droite">▷⬤</button>
+              <button type="button" class="tb-btn" onclick="align('ch-contenu','justify')" title="Justifié">▤</button>
+            </div>
+            <textarea class="form-textarea" id="ch-contenu" style="min-height:300px;font-size:13px;line-height:1.8" placeholder="Colle ici le texte du chapitre…&#10;&#10;Les dialogues commençant par — seront mis en valeur automatiquement.&#10;&#10;Sépare les paragraphes par une ligne vide."></textarea>
+          </div>
           <div class="form-hint" id="ch-wordcount">0 mots</div>
         </div>
         <div class="form-group">
@@ -487,6 +519,34 @@ function removeImg(type){
   document.getElementById(type+'-remove').style.display='none';
   const input=document.getElementById(type+'-input');
   input.value='';
+}
+
+/* ÉDITEUR TEXTE */
+function fmt(id,type){
+  const ta=document.getElementById(id);
+  const start=ta.selectionStart,end=ta.selectionEnd;
+  const sel=ta.value.substring(start,end);
+  if(!sel)return;
+  const tag=type==='bold'?'strong':'em';
+  const wrapped=`<${tag}>${sel}</${tag}>`;
+  ta.value=ta.value.substring(0,start)+wrapped+ta.value.substring(end);
+  ta.focus();
+  ta.setSelectionRange(start+wrapped.length,start+wrapped.length);
+}
+
+function align(id,direction){
+  const ta=document.getElementById(id);
+  const val=ta.value;
+  const pos=ta.selectionStart;
+  const before=val.lastIndexOf('\n\n',pos);
+  const after=val.indexOf('\n\n',pos);
+  const pStart=before===-1?0:before+2;
+  const pEnd=after===-1?val.length:after;
+  const para=val.substring(pStart,pEnd);
+  const clean=para.replace(/<div[^>]*style="[^"]*text-align[^"]*"[^>]*>([\s\S]*?)<\/div>/g,'$1').trim();
+  const wrapped=direction==='left'?clean:`<div style="text-align:${direction}">${clean}</div>`;
+  ta.value=val.substring(0,pStart)+wrapped+val.substring(pEnd);
+  ta.focus();
 }
 
 /* UPLOAD IMAGE SUPABASE */
