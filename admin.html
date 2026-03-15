@@ -1003,6 +1003,24 @@ async function showHistoireDetail(id){
         <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px">Mots</div>
       </div>
     </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px">
+      <div style="background:rgba(140,150,195,.06);border:1px solid var(--glass-border);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-size:18px;font-weight:600;color:var(--text)">0</div>
+        <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-top:2px">👁 Vues</div>
+      </div>
+      <div style="background:rgba(140,150,195,.06);border:1px solid var(--glass-border);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-size:18px;font-weight:600;color:var(--text)">0</div>
+        <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-top:2px">♡ J'aime</div>
+      </div>
+      <div style="background:rgba(140,150,195,.06);border:1px solid var(--glass-border);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-size:18px;font-weight:600;color:var(--text)">0</div>
+        <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-top:2px">💬 Commentaires</div>
+      </div>
+      <div style="background:rgba(140,150,195,.06);border:1px solid var(--glass-border);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-size:18px;font-weight:600;color:var(--text)">0</div>
+        <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-top:2px">⭐ Notes</div>
+      </div>
+    </div>
     ${tags.length?`<div style="margin-bottom:14px"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Tags</div><div style="display:flex;flex-wrap:wrap;gap:6px">${tags.map(t=>`<span class="tag-chip">${t}</span>`).join('')}</div></div>`:''}
     ${tws.length?`<div style="margin-bottom:14px"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Trigger warnings</div><div style="display:flex;flex-wrap:wrap;gap:6px">${tws.map(t=>`<span class="tag-chip" style="background:rgba(167,143,212,.15);border-color:rgba(167,143,212,.3);color:var(--accent2)">${t}</span>`).join('')}</div></div>`:''}
     ${h.resume?`<div style="margin-bottom:14px"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Résumé</div><p style="font-size:12px;color:var(--text2);line-height:1.7">${h.resume}</p></div>`:''}
@@ -1441,16 +1459,47 @@ async function showAuteurDetail(id){
     ${(hists||[]).length?`
       <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Histoires</div>
       ${(hists||[]).map(h=>`
-        <div class="histoire-item">
+        <div class="histoire-item" style="cursor:pointer" onclick="ouvrirHistoireDepuisAuteur('${h.id}','${a.id}')">
           <div class="histoire-item-cover">${h.cover_url?`<img src="${h.cover_url}" style="width:100%;height:100%;object-fit:cover;border-radius:4px">`:'📖'}</div>
-          <div class="histoire-item-info"><div class="histoire-item-title">${h.titre}</div></div>
+          <div class="histoire-item-info">
+            <div class="histoire-item-title">${h.titre}</div>
+            <div class="histoire-item-meta" style="display:flex;gap:10px;margin-top:4px">
+              <span title="Chapitres">📖 ${(allChaps||[]).filter(ch=>ch.histoire_id===h.id).length}</span>
+              <span title="Vues">👁 0</span>
+              <span title="J'aime">♡ 0</span>
+              <span title="Commentaires">💬 0</span>
+            </div>
+          </div>
           <span class="histoire-item-status ${h.statut==='publie'?'status-publie':'status-brouillon'}">${h.statut==='publie'?'Publié':'Brouillon'}</span>
         </div>`).join('')}`
     :'<p style="font-size:12px;color:var(--text3)">Aucune histoire pour l\'instant.</p>'}
   `;
 }
 
-/* ÉDITION AUTEUR */
+/* NAVIGATION AUTEUR → HISTOIRE */
+let _retourAuteurId=null;
+async function ouvrirHistoireDepuisAuteur(histoireId, auteurId){
+  _retourAuteurId=auteurId;
+  // Charger l'histoire dans histoires si pas déjà là
+  if(!histoires.find(h=>h.id===histoireId)){
+    await loadHistoires();
+  }
+  document.getElementById('auteur-detail').style.display='none';
+  document.getElementById('auteurs-card').style.display='none';
+  document.getElementById('histoire-detail').style.display='block';
+  document.getElementById('histoires-card').style.display='none';
+  // Modifier le bouton retour pour revenir à l'auteur
+  document.querySelector('#histoire-detail .btn-sm').onclick=()=>{
+    document.getElementById('histoire-detail').style.display='none';
+    document.getElementById('histoires-card').style.display='none';
+    document.getElementById('auteurs-card').style.display='none';
+    document.getElementById('auteur-detail').style.display='block';
+    _retourAuteurId=null;
+  };
+  showHistoireDetail(histoireId);
+}
+
+
 async function ouvrirEditionAuteur(id){
   const {data:a}=await db.from('auteurs').select('*').eq('id',id).single();
   if(!a)return;
