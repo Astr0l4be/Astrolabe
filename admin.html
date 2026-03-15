@@ -1292,7 +1292,7 @@ async function loadHistoiresSelect(){
   const list=document.getElementById('histoire-select-list');
   if(!list)return;
   list.innerHTML=`<div class="custom-select-option" onclick="selectHistoire('','— Choisir une histoire —')">— Choisir une histoire —</div>`
-    +(data||[]).map(h=>`<div class="custom-select-option" onclick="selectHistoire('${h.id}','${h.titre}')">${h.titre}</div>`).join('');
+    +(data||[]).map(h=>`<div class="custom-select-option" onclick="selectHistoire('${h.id}',this.textContent)">${h.titre}</div>`).join('');
 }
 
 function toggleHistoireDropdown(){
@@ -1868,13 +1868,13 @@ async function loadAuteursSelect(){
   const list=document.getElementById('auteur-select-list');
   if(list){
     list.innerHTML=`<div class="custom-select-option" onclick="selectAuteur('','— Choisir un·e auteur·ice —')">— Choisir un·e auteur·ice —</div>`
-      +auteurs.map(a=>`<div class="custom-select-option" onclick="selectAuteur('${a.pseudo}','${a.pseudo}')">${a.pseudo}</div>`).join('');
+      +auteurs.map(a=>`<div class="custom-select-option" onclick="selectAuteur('${a.pseudo}',this.textContent)">${a.pseudo}</div>`).join('');
   }
   // Dropdown édition
   const listEdit=document.getElementById('auteur-edit-list');
   if(listEdit){
     listEdit.innerHTML=`<div class="custom-select-option" onclick="selectAuteurEdit('','')">— Aucun —</div>`
-      +auteurs.map(a=>`<div class="custom-select-option" onclick="selectAuteurEdit('${a.pseudo}','${a.pseudo}')">${a.pseudo}</div>`).join('');
+      +auteurs.map(a=>`<div class="custom-select-option" onclick="selectAuteurEdit('${a.pseudo}',this.textContent)">${a.pseudo}</div>`).join('');
   }
 }
 
