@@ -338,6 +338,7 @@ let currentUser=null;
 let tags=[];
 let tws=[];
 let histoires=[];
+let auteurs=[];
 
 /* AUTH */
 async function login(){
@@ -540,20 +541,40 @@ async function creerHistoire(){
 }
 
 /* LOAD HISTOIRES */
+let currentFilter='all';
+
 async function loadHistoires(){
   const {data,error}=await db.from('histoires').select('*').order('created_at',{ascending:false});
   if(error){document.getElementById('histoires-list').innerHTML='<div class="loading">Erreur de chargement.</div>';return;}
   histoires=data||[];
-  if(!histoires.length){
-    document.getElementById('histoires-list').innerHTML='<div class="loading">Aucune histoire pour l\'instant.</div>';
-    return;
-  }
   // Charger nb chapitres
   for(const h of histoires){
     const {count}=await db.from('chapitres').select('*',{count:'exact',head:true}).eq('histoire_id',h.id);
     h._chapCount=count||0;
   }
-  document.getElementById('histoires-list').innerHTML=histoires.map(h=>`
+  renderHistoiresList();
+}
+
+function filterHistoires(filtre,btn){
+  currentFilter=filtre;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renderHistoiresList();
+}
+
+function renderHistoiresList(){
+  let filtered=histoires;
+  if(currentFilter==='corbeille') filtered=histoires.filter(h=>h.corbeille===true);
+  else if(currentFilter==='publie') filtered=histoires.filter(h=>!h.corbeille&&h.statut==='publie');
+  else if(currentFilter==='brouillon') filtered=histoires.filter(h=>!h.corbeille&&h.statut==='brouillon');
+  else filtered=histoires.filter(h=>!h.corbeille);
+
+  if(!filtered.length){
+    document.getElementById('histoires-list').innerHTML='<div class="loading">Aucune histoire ici.</div>';
+    return;
+  }
+  const isCorbeille=currentFilter==='corbeille';
+  document.getElementById('histoires-list').innerHTML=filtered.map(h=>`
     <div class="histoire-item" style="cursor:pointer" onclick="showHistoireDetail('${h.id}')">
       <div class="histoire-item-cover">${h.cover_url?`<img src="${h.cover_url}" style="width:100%;height:100%;object-fit:cover;border-radius:4px">`:'📖'}</div>
       <div class="histoire-item-info">
@@ -561,9 +582,34 @@ async function loadHistoires(){
         <div class="histoire-item-meta">${h.auteur_pseudo?'par '+h.auteur_pseudo+' · ':''}<strong>${h._chapCount}</strong> chapitre(s)</div>
       </div>
       <span class="histoire-item-status ${h.statut==='publie'?'status-publie':'status-brouillon'}">${h.statut==='publie'?'Publié':'Brouillon'}</span>
-      <button class="btn btn-sm btn-${h.statut==='publie'?'danger':'success'}" onclick="event.stopPropagation();toggleStatut('${h.id}','${h.statut}')">${h.statut==='publie'?'Dépublier':'Publier'}</button>
+      ${isCorbeille
+        ?`<button class="btn btn-sm btn-success" onclick="event.stopPropagation();restaurerHistoire('${h.id}')">Restaurer</button>
+           <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();supprimerDefinitivement('${h.id}')">Suppr. déf.</button>`
+        :`<button class="btn btn-sm btn-${h.statut==='publie'?'danger':'success'}" onclick="event.stopPropagation();toggleStatut('${h.id}','${h.statut}')">${h.statut==='publie'?'Dépublier':'Publier'}</button>
+           <button class="btn btn-sm" style="background:rgba(212,126,126,.1);border-color:rgba(212,126,126,.3);color:var(--danger)" onclick="event.stopPropagation();mettreEnCorbeille('${h.id}')">🗑</button>`
+      }
     </div>
   `).join('');
+}
+
+async function mettreEnCorbeille(id){
+  if(!confirm('Mettre cette histoire à la corbeille ?'))return;
+  await db.from('histoires').update({corbeille:true}).eq('id',id);
+  loadHistoires();
+}
+
+async function restaurerHistoire(id){
+  await db.from('histoires').update({corbeille:false}).eq('id',id);
+  loadHistoires();
+}
+
+async function supprimerDefinitivement(id){
+  if(!confirm('Supprimer définitivement cette histoire et tous ses chapitres ? Cette action est irréversible.'))return;
+  await db.from('trigger_warnings_histoires').delete().eq('histoire_id',id);
+  await db.from('histoires_tags').delete().eq('histoire_id',id);
+  await db.from('chapitres').delete().eq('histoire_id',id);
+  await db.from('histoires').delete().eq('id',id);
+  loadHistoires();
 }
 
 async function showHistoireDetail(id){
@@ -577,6 +623,11 @@ async function showHistoireDetail(id){
   const totalMots=(chaps||[]).reduce((acc,ch)=>acc+(ch.contenu?ch.contenu.trim().split(' ').length:0),0);
   document.getElementById('histoires-card').style.display='none';
   document.getElementById('histoire-detail').style.display='block';
+  document.querySelector('#histoire-detail .btn-sm').onclick=()=>{
+    document.getElementById('histoire-detail').style.display='none';
+    document.getElementById('histoires-card').style.display='block';
+    renderHistoiresList();
+  };
   document.getElementById('detail-card').innerHTML=`
     <div style="display:flex;gap:16px;margin-bottom:20px;align-items:flex-start">
       ${h.cover_url?`<img src="${h.cover_url}" style="width:72px;aspect-ratio:2/3;object-fit:cover;border-radius:6px;flex-shrink:0">`:'<div style="width:72px;aspect-ratio:2/3;background:rgba(126,159,212,.1);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">📖</div>'}
@@ -607,8 +658,9 @@ async function showHistoireDetail(id){
       <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Chapitres</div>
       ${(chaps||[]).map(ch=>`<div class="chapitre-item"><div class="ch-num">${ch.numero}</div><div class="ch-info"><div class="ch-title">${ch.titre}</div><div class="ch-meta">${ch.gratuit?'Gratuit':'Payant'} · ${ch.contenu?ch.contenu.trim().split(' ').length.toLocaleString('fr')+' mots':'vide'}</div></div><button class="btn btn-sm btn-danger" onclick="supprimerChapitre('${ch.id}','${h.id}').then(()=>showHistoireDetail('${h.id}'))">Suppr.</button></div>`).join('')||'<p style="font-size:12px;color:var(--text3)">Aucun chapitre.</p>'}
     </div>
-    <div style="display:flex;gap:10px">
-      <button class="btn btn-full ${h.statut==='publie'?'btn-danger':'btn-success'}" onclick="toggleStatut('${h.id}','${h.statut}')">${h.statut==='publie'?'Dépublier':'Publier'}</button>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-full ${h.statut==='publie'?'btn-danger':'btn-success'}" onclick="toggleStatut('${h.id}','${h.statut}')" style="flex:1">${h.statut==='publie'?'Dépublier':'Publier'}</button>
+      <button class="btn btn-danger" onclick="mettreEnCorbeille('${h.id}');document.getElementById('histoire-detail').style.display='none';document.getElementById('histoires-card').style.display='block'" style="flex:0 0 auto">🗑 Corbeille</button>
     </div>
   `;
 }
@@ -616,7 +668,8 @@ async function showHistoireDetail(id){
 async function toggleStatut(id,statut){
   const nouveau=statut==='publie'?'brouillon':'publie';
   await db.from('histoires').update({statut:nouveau}).eq('id',id);
-  loadHistoires();
+  await loadHistoires();
+  showHistoireDetail(id);
 }
 
 /* LOAD HISTOIRES SELECT */
@@ -689,65 +742,6 @@ async function supprimerChapitre(id,histoireId){
   showAlert('chapitre','Chapitre supprimé.');
 }
 
-/* AUTEURS */
-let auteurs=[];
-
-async function loadAuteursSelect(){
-  const {data}=await db.from('auteurs').select('id,pseudo').order('pseudo');
-  auteurs=data||[];
-  const sel=document.getElementById('n-auteur');
-  if(!sel)return;
-  sel.innerHTML='<option value="">— Choisir un·e auteur·ice —</option>';
-  auteurs.forEach(a=>{
-    const o=document.createElement('option');o.value=a.pseudo;o.textContent=a.pseudo;sel.appendChild(o);
-  });
-}
-
-async function loadAuteurs(){
-  const {data}=await db.from('auteurs').select('*').order('pseudo');
-  const list=document.getElementById('auteurs-list');
-  if(!data||!data.length){list.innerHTML='<div class="loading">Aucun·e auteur·ice pour l\'instant.</div>';return;}
-  // Pour chaque auteur, compter ses histoires
-  const {data:hists}=await db.from('histoires').select('auteur_pseudo');
-  list.innerHTML=data.map(a=>{
-    const nbHistoires=(hists||[]).filter(h=>h.auteur_pseudo===a.pseudo).length;
-    return`<div class="histoire-item">
-      <div class="histoire-item-info">
-        <div class="histoire-item-title">${a.pseudo}</div>
-        <div class="histoire-item-meta">${a.nom_reel?'('+a.nom_reel+') · ':''}<strong>${nbHistoires}</strong> histoire(s)</div>
-        ${a.bio?`<div class="histoire-item-meta" style="margin-top:4px;font-style:italic">${a.bio}</div>`:''}
-      </div>
-      <button class="btn btn-sm btn-danger" onclick="supprimerAuteur('${a.id}')">Suppr.</button>
-    </div>`;
-  }).join('');
-}
-
-async function creerAuteur(){
-  const pseudo=document.getElementById('a-pseudo').value.trim();
-  const nom=document.getElementById('a-nom').value.trim();
-  const bio=document.getElementById('a-bio').value.trim();
-  if(!pseudo){showAlert('auteurs','Le nom de plume est obligatoire.','error');return;}
-  const btn=document.querySelector('#panel-auteurs .btn-accent');
-  btn.textContent='Création…';btn.disabled=true;
-  try{
-    const {error}=await db.from('auteurs').insert({pseudo,nom_reel:nom||null,bio:bio||null});
-    if(error)throw error;
-    showAlert('auteurs','Auteur·ice ajouté·e avec succès ! ✦');
-    document.getElementById('a-pseudo').value='';
-    document.getElementById('a-nom').value='';
-    document.getElementById('a-bio').value='';
-    loadAuteurs();loadAuteursSelect();
-  }catch(e){
-    showAlert('auteurs','Erreur : '+e.message,'error');
-  }finally{btn.textContent='✦ Ajouter l\'auteur·ice';btn.disabled=false;}
-}
-
-async function supprimerAuteur(id){
-  if(!confirm('Supprimer cet·te auteur·ice ?'))return;
-  await db.from('auteurs').delete().eq('id',id);
-  loadAuteurs();loadAuteursSelect();
-}
-
 /* SUGGESTIONS TAGS & TW */
 async function loadTagsSuggestions(){
   const {data}=await db.from('tags').select('nom').order('nom');
@@ -783,37 +777,7 @@ function toggleSuggestion(val,type){
 }
 
 
-/* AUTEURS */
 
-
-async function loadAuteursSelect(){
-  const {data}=await db.from('auteurs').select('id,pseudo').order('pseudo');
-  auteurs=data||[];
-  const sel=document.getElementById('n-auteur');
-  if(!sel)return;
-  sel.innerHTML='<option value="">— Choisir un·e auteur·ice —</option>';
-  auteurs.forEach(a=>{
-    const o=document.createElement('option');o.value=a.pseudo;o.textContent=a.pseudo;sel.appendChild(o);
-  });
-}
-
-async function loadAuteurs(){
-  const {data}=await db.from('auteurs').select('*').order('pseudo');
-  const list=document.getElementById('auteurs-list');
-  if(!data||!data.length){list.innerHTML='<div class="loading">Aucun·e auteur·ice pour l\'instant.</div>';return;}
-  const {data:hists}=await db.from('histoires').select('auteur_pseudo,titre,statut');
-  list.innerHTML=data.map(a=>{
-    const nbH=(hists||[]).filter(h=>h.auteur_pseudo===a.pseudo).length;
-    return`<div class="histoire-item" style="cursor:pointer" onclick="showAuteurDetail('${a.id}')">
-      <div class="histoire-item-cover" style="font-size:20px;background:rgba(167,143,212,.1)">✍</div>
-      <div class="histoire-item-info">
-        <div class="histoire-item-title">${a.pseudo}</div>
-        <div class="histoire-item-meta">${a.nom_reel?'('+a.nom_reel+') · ':''}<strong>${nbH}</strong> histoire(s)</div>
-      </div>
-      <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();supprimerAuteur('${a.id}')">Suppr.</button>
-    </div>`;
-  }).join('');
-}
 
 async function showAuteurDetail(id){
   const {data:a}=await db.from('auteurs').select('*').eq('id',id).single();
@@ -868,6 +832,35 @@ async function showAuteurDetail(id){
   `;
 }
 
+async function loadAuteursSelect(){
+  const {data}=await db.from('auteurs').select('id,pseudo').order('pseudo');
+  auteurs=data||[];
+  const sel=document.getElementById('n-auteur');
+  if(!sel)return;
+  sel.innerHTML='<option value="">— Choisir un·e auteur·ice —</option>';
+  auteurs.forEach(a=>{
+    const o=document.createElement('option');o.value=a.pseudo;o.textContent=a.pseudo;sel.appendChild(o);
+  });
+}
+
+async function loadAuteurs(){
+  const {data}=await db.from('auteurs').select('*').order('pseudo');
+  const list=document.getElementById('auteurs-list');
+  if(!data||!data.length){list.innerHTML='<div class="loading">Aucun·e auteur·ice pour l\'instant.</div>';return;}
+  const {data:hists}=await db.from('histoires').select('auteur_pseudo,titre,statut');
+  list.innerHTML=data.map(a=>{
+    const nbH=(hists||[]).filter(h=>h.auteur_pseudo===a.pseudo).length;
+    return`<div class="histoire-item" style="cursor:pointer" onclick="showAuteurDetail('${a.id}')">
+      <div class="histoire-item-cover" style="font-size:20px;background:rgba(167,143,212,.1)">✍</div>
+      <div class="histoire-item-info">
+        <div class="histoire-item-title">${a.pseudo}</div>
+        <div class="histoire-item-meta">${a.nom_reel?'('+a.nom_reel+') · ':''}<strong>${nbH}</strong> histoire(s)</div>
+      </div>
+      <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();supprimerAuteur('${a.id}')">Suppr.</button>
+    </div>`;
+  }).join('');
+}
+
 async function creerAuteur(){
   const pseudo=document.getElementById('a-pseudo').value.trim();
   const nom=document.getElementById('a-nom').value.trim();
@@ -891,48 +884,6 @@ async function supprimerAuteur(id){
   if(!confirm('Supprimer cet·te auteur·ice ?'))return;
   await db.from('auteurs').delete().eq('id',id);
   loadAuteurs();loadAuteursSelect();
-}
-
-/* SUGGESTIONS */
-async function loadTagsSuggestions(){
-  const {data}=await db.from('tags').select('nom').order('nom');
-  const container=document.getElementById('tags-suggestions');
-  if(!container)return;
-  container.innerHTML=(data||[]).map(t=>`<button class="btn btn-sm" style="font-size:11px" onclick="toggleSuggestion('${t.nom}','tag')" id="sug-tag-${t.nom.replace(/ /g,'-')}">${t.nom}</button>`).join('');
-}
-
-async function loadTWSuggestions(){
-  const {data}=await db.from('trigger_warnings_histoires').select('contenu');
-  const uniq=[...new Set((data||[]).map(t=>t.contenu))];
-  const container=document.getElementById('tw-suggestions');
-  if(!container)return;
-  container.innerHTML=uniq.map(t=>`<button class="btn btn-sm" style="font-size:11px" onclick="toggleSuggestion('${t}','tw')" id="sug-tw-${t.replace(/ /g,'-')}">${t}</button>`).join('');
-}
-
-function toggleSuggestion(val,type){
-  const arr=type==='tag'?tags:tws;
-  const btnId='sug-'+type+'-'+val.replace(/ /g,'-');
-  const btn=document.getElementById(btnId);
-  if(arr.includes(val)){arr.splice(arr.indexOf(val),1);if(btn)btn.classList.remove('btn-accent');}
-  else{arr.push(val);if(btn)btn.classList.add('btn-accent');}
-  type==='tag'?renderTags():renderTWs();
-}
-
-/* TOGGLE BUTTONS */
-function setAdulte(val){
-  document.getElementById('n-adulte').value=val;
-  document.getElementById('adulte-non').className='btn'+(val?'':' btn-accent');
-  document.getElementById('adulte-oui').className='btn'+(val?' btn-accent':'');
-}
-function setStatut(val){
-  document.getElementById('n-statut').value=val;
-  document.getElementById('statut-brouillon').className='btn'+(val==='brouillon'?' btn-accent':'');
-  document.getElementById('statut-publie').className='btn'+(val==='publie'?' btn-accent':'');
-}
-function setGratuit(val){
-  document.getElementById('ch-gratuit').value=val;
-  document.getElementById('gratuit-gratuit').className='btn'+(val?' btn-accent':'');
-  document.getElementById('gratuit-payant').className='btn'+(val?'':' btn-accent');
 }
 
 /* TOGGLE BUTTONS */
