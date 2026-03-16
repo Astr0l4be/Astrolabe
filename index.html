@@ -859,7 +859,7 @@
       <div class="modal-title" style="margin-bottom:16px">Paramètres de lecture</div>
       <!-- Onglets -->
       <div style="display:flex;gap:10px;margin-bottom:18px">
-        <button id="opt-btn-toutes" onclick="selectOptScope('toutes')" class="btn btn-full" style="font-size:11px">Pour toutes les histoires</button>
+        <button id="opt-btn-toutes" onclick="selectOptScope('toutes')" class="btn btn-full btn-accent" style="font-size:11px">Pour toutes les histoires</button>
         <button id="opt-btn-cette" onclick="selectOptScope('cette')" class="btn btn-full" style="font-size:11px">Pour cette histoire</button>
       </div>
       <!-- Paramètres communs -->
@@ -1473,18 +1473,25 @@ function saveOptions(){
     const togTWC=document.getElementById('toggle-tw-chapitre');if(togTWC)togTWC.checked=newTwrChapitre;
     savePrefs();
   } else {
-    // Sauvegarder uniquement pour cette histoire — NE touche PAS aux paramètres généraux
+    // Sauvegarder uniquement pour cette histoire — NE touche PAS aux variables globales
     optParHistoire[currentHistoireId]={
       modeJour:newModeJour,
       textesBlancs:newTextesBlancs,
       twrHistoire:newTwrHistoire,
       twrChapitre:newTwrChapitre
     };
-    // Appliquer immédiatement à la lecture en cours
-    toggleModeJour(newModeJour);
-    setTexte(newTextesBlancs?'blanc':'bleu');
+    // Appliquer visuellement sans modifier les variables globales
+    const lp=document.getElementById('p-lecture');
+    if(lp)lp.classList.toggle('mode-jour-lecture',newModeJour);
+    const lb=document.getElementById('lecture-body');
+    if(lb){
+      lb.classList.remove('texte-bleu','texte-blanc');
+      if(!newModeJour)lb.classList.add(newTextesBlancs?'texte-blanc':'texte-bleu');
+    }
+    document.querySelectorAll('.lecture-ch-num,.lecture-ch-title').forEach(el=>{
+      el.style.color=newModeJour?'#1a1510':newTextesBlancs?'#eef0fa':'var(--accent)';
+    });
   }
-  applyLectureMode();
   closeM('options-popup');
 }
 
