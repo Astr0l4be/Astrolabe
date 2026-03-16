@@ -1,37 +1,3 @@
-let prevPage='p-main';
-function openHistoire(id){
-  currentHistoireId=id;
-  const cur=document.querySelector('.page.active');if(cur)prevPage=cur.id;
-  const b=BOOKS.find(x=>x.id===id);if(!b)return;
-  // Bannière 2:1 (même format que l'accueil)
-  const bannerEl=document.getElementById('histoire-banner');
-  if(b.banner){bannerEl.innerHTML=`<img src="${b.banner}" alt="${b.title}" style="width:100%;height:100%;object-fit:cover;display:block;">`;}
-  else{bannerEl.innerHTML=`<div class="histoire-banner-bg ${b.color}">✦</div>`;}
-  document.getElementById('histoire-title').textContent=b.title;
-  document.getElementById('histoire-author').textContent=b.author?'par '+b.author:'';
-  document.getElementById('histoire-tags').innerHTML=b.tags.map(t=>`<span class="histoire-tag"># ${t}</span>`).join('');
-  document.getElementById('histoire-desc').innerHTML=b.desc;
-  const twBox=document.getElementById('tw-box');
-  const twRevealBtn=document.getElementById('tw-reveal-btn');
-  const twBoxReveal=document.getElementById('tw-box-reveal');
-  twBox.style.display='none';if(twBoxReveal)twBoxReveal.style.display='none';
-  if(twRevealBtn)twRevealBtn.style.display='none';
-  if(b.tw){
-    if(compte.twrHistoire!==false){twBox.style.display='block';document.getElementById('tw-text').textContent=b.tw;}
-    else{if(twRevealBtn){twRevealBtn.style.display='block';}if(document.getElementById('tw-text-reveal'))document.getElementById('tw-text-reveal').textContent=b.tw;}
-  }
-  const chapList=document.getElementById('chapitres-list');
-  chapList.innerHTML=b.chapitres.map(ch=>{
-    const libre=ch.gratuit||ch.num<=8;
-    return`<button class="btn-lire ${libre?'':'btn-lire-locked'}" onclick="openLecture('${b.id}',${ch.num})">
-      <span>Chapitre ${ch.num} · ${ch.titre}</span>
-      <span class="ch-badge ${libre?'':'ch-badge-ticket'}">${libre?'Gratuit':'🎟 1 ticket'}</span>
-    </button>`;
-  }).join('');
-  document.getElementById('histoire-back-btn').onclick=()=>go(prevPage);
-  go('p-histoire');
-}
-
 async function openLecture(bookId,chapNum){
   const b=BOOKS.find(x=>x.id===bookId);
   if(!b)return;
