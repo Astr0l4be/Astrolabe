@@ -777,31 +777,7 @@
     </div>
   </div>
 
-  <!-- POP-UP OPTIONS HISTOIRE -->
-  <div class="modal-overlay" id="options-popup" onclick="closeModal(event,'options-popup')" style="position:fixed;z-index:200">
-    <div class="modal-box">
-      <button class="modal-close" onclick="closeM('options-popup')">✕</button>
-      <div class="modal-title" style="margin-bottom:16px">Paramètres de lecture</div>
-      <div style="display:flex;gap:10px;margin-bottom:18px">
-        <button id="opt-btn-cette" onclick="selectOptScope('cette')" class="btn btn-full btn-accent" style="font-size:11px">Pour cette histoire</button>
-        <button id="opt-btn-toutes" onclick="selectOptScope('toutes')" class="btn btn-full" style="font-size:11px">Pour toutes les histoires</button>
-      </div>
-      <div class="toggle-row">
-        <span class="toggle-label">Mode lecture : <span id="opt-mode-label">Nuit</span></span>
-        <label class="tgl"><input type="checkbox" id="opt-mode-jour" onchange="document.getElementById('opt-mode-label').textContent=this.checked?'Jour':'Nuit';document.getElementById('opt-row-couleur').style.display=this.checked?'none':'flex'"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
-      </div>
-      <div id="opt-row-couleur" class="toggle-row" style="justify-content:space-between;align-items:center;margin-top:8px">
-        <span class="toggle-label">Couleur du texte</span>
-        <div style="display:flex;gap:8px">
-          <button id="opt-btn-bleu" onclick="setOptTexte('bleu')" style="background:rgba(126,159,212,.25);border:1.5px solid rgba(126,159,212,.6);color:var(--accent);font-family:'Jost',sans-serif;font-size:11px;padding:5px 14px;border-radius:20px;cursor:pointer;">Bleu</button>
-          <button id="opt-btn-blanc" onclick="setOptTexte('blanc')" style="background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);color:#eef0fa;font-family:'Jost',sans-serif;font-size:11px;padding:5px 14px;border-radius:20px;cursor:pointer;">Blanc</button>
-        </div>
-      </div>
-      <div class="toggle-row" style="margin-top:8px"><span class="toggle-label">TW par histoire</span><label class="tgl"><input type="checkbox" id="opt-tw-histoire" checked><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
-      <div class="toggle-row" style="margin-top:8px"><span class="toggle-label">TW par chapitre</span><label class="tgl"><input type="checkbox" id="opt-tw-chapitre"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
-      <button class="btn btn-full btn-accent" style="margin-top:20px" onclick="saveOptions()">Valider</button>
-    </div>
-  </div>
+
 
 
   <!-- POP-UP SUPPRESSION 1 -->
@@ -1487,10 +1463,9 @@ function saveOptions(){
   const newTextesBlancs=document.getElementById('opt-btn-blanc').dataset.sel==='1';
   const newTwrHistoire=document.getElementById('opt-tw-histoire').checked;
   const newTwrChapitre=document.getElementById('opt-tw-chapitre').checked;
-  const prefs={modeJour:newModeJour,textesBlancs:newTextesBlancs,twrHistoire:newTwrHistoire,twrChapitre:newTwrChapitre};
 
   if(optScope==='toutes'){
-    // Modifier les paramètres du compte ET appliquer immédiatement
+    // Modifier les paramètres généraux du compte — NE touche PAS aux prefs par histoire
     modeJour=newModeJour;textesBlancs=newTextesBlancs;
     compte.twrHistoire=newTwrHistoire;compte.twrChapitre=newTwrChapitre;
     toggleModeJour(newModeJour);setTexte(newTextesBlancs?'blanc':'bleu');
@@ -1498,11 +1473,16 @@ function saveOptions(){
     const togTWC=document.getElementById('toggle-tw-chapitre');if(togTWC)togTWC.checked=newTwrChapitre;
     savePrefs();
   } else {
-    // Sauvegarder uniquement pour cette histoire et appliquer
-    optParHistoire[currentHistoireId]=prefs;
+    // Sauvegarder uniquement pour cette histoire — NE touche PAS aux paramètres généraux
+    optParHistoire[currentHistoireId]={
+      modeJour:newModeJour,
+      textesBlancs:newTextesBlancs,
+      twrHistoire:newTwrHistoire,
+      twrChapitre:newTwrChapitre
+    };
+    // Appliquer immédiatement à la lecture en cours
     toggleModeJour(newModeJour);
     setTexte(newTextesBlancs?'blanc':'bleu');
-    // Les TW spécifiques seront utilisés à la prochaine ouverture du chapitre
   }
   applyLectureMode();
   closeM('options-popup');
