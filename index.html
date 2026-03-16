@@ -359,7 +359,7 @@
         <!-- MODE LECTURE -->
         <div class="toggle-row">
           <span class="toggle-label">Mode lecture : <span id="mode-lecture-label">Nuit</span></span>
-          <label class="tgl"><input type="checkbox" id="toggle-mode-jour" onchange="toggleModeJour(this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
+          <label class="tgl tgl-mode"><input type="checkbox" id="toggle-mode-jour" onchange="toggleModeJour(this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
         </div>
         <div class="toggle-row" id="row-couleur-texte" style="justify-content:space-between;align-items:center;">
           <span class="toggle-label">Couleur du texte en mode nuit</span>
@@ -617,7 +617,7 @@
       </div>
       <!-- Contenu onglet "cette histoire" -->
       <div id="opt-panel-cette">
-        <div class="toggle-row"><span class="toggle-label">Mode lecture : <span id="opt-c-mode-label">Nuit</span></span><label class="tgl"><input type="checkbox" id="opt-c-mode-jour" onchange="optCModeChange(this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+        <div class="toggle-row"><span class="toggle-label">Mode lecture : <span id="opt-c-mode-label">Nuit</span></span><label class="tgl tgl-mode"><input type="checkbox" id="opt-c-mode-jour" onchange="optCModeChange(this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
         <div id="opt-c-row-couleur" class="toggle-row" style="justify-content:space-between;align-items:center">
           <span class="toggle-label">Couleur du texte</span>
           <div style="display:flex;gap:8px">
@@ -633,7 +633,7 @@
       </div>
       <!-- Contenu onglet "toutes les histoires" -->
       <div id="opt-panel-toutes" style="display:none">
-        <div class="toggle-row"><span class="toggle-label">Mode lecture : <span id="opt-t-mode-label">Nuit</span></span><label class="tgl"><input type="checkbox" id="opt-t-mode-jour" onchange="optTModeChange(this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+        <div class="toggle-row"><span class="toggle-label">Mode lecture : <span id="opt-t-mode-label">Nuit</span></span><label class="tgl tgl-mode"><input type="checkbox" id="opt-t-mode-jour" onchange="optTModeChange(this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
         <div id="opt-t-row-couleur" class="toggle-row" style="justify-content:space-between;align-items:center">
           <span class="toggle-label">Couleur du texte</span>
           <div style="display:flex;gap:8px">
@@ -649,25 +649,12 @@
   </div>
 
   <!-- POP-UP RESET EN TRAVAUX -->
-  <!-- POP-UP RESET OPTIONS 1 — Confirmation -->
   <div class="modal-overlay" id="reset-options-popup" style="position:fixed;z-index:210">
     <div class="modal-box" style="text-align:center">
-      <div class="modal-title">Réinitialiser ?</div>
-      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Vous êtes sur le point de réinitialiser les paramètres particuliers à chaque histoire. Cette action est irréversible et toutes les histoires seront affichées avec les paramètres de votre compte.<br><br>Souhaitez-vous poursuivre ?</p>
-      <div style="display:flex;gap:10px">
-        <button class="btn btn-full btn-accent" onclick="confirmerResetOptions()">Oui</button>
-        <button class="btn btn-full" onclick="closeM('reset-options-popup');openModal('options-popup')">Non</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- POP-UP RESET OPTIONS 2 — Confirmation succès -->
-  <div class="modal-overlay" id="reset-options-popup2" style="position:fixed;z-index:210">
-    <div class="modal-box" style="text-align:center">
-      <div style="font-size:36px;margin-bottom:12px">✦</div>
-      <div class="modal-title">C'est fait !</div>
-      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Tous vos paramètres particuliers ont été réinitialisés. Désormais, toutes vos lectures s'afficheront avec les paramètres de votre compte.</p>
-      <button class="btn btn-full btn-accent" onclick="closeM('reset-options-popup2')">Ok</button>
+      <div style="font-size:36px;margin-bottom:12px">🚧</div>
+      <div class="modal-title">En travaux</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Cette fonctionnalité sera disponible prochainement.</p>
+      <button class="btn btn-full btn-accent" onclick="closeM('reset-options-popup');openModal('options-popup')">Ok</button>
     </div>
   </div>
 
