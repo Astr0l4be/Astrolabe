@@ -189,7 +189,13 @@
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label">Titre *</label>
-                <input type="text" class="form-input" id="edit-titre">
+                <div class="editor-wrap">
+                  <div class="editor-toolbar">
+                    <button type="button" class="tb-btn" onclick="fmt('edit-titre','bold')"><b>G</b></button>
+                    <button type="button" class="tb-btn" onclick="fmt('edit-titre','italic')"><i>I</i></button>
+                  </div>
+                  <input type="text" class="form-input" id="edit-titre" style="border:none;border-radius:0">
+                </div>
               </div>
               <div class="form-group">
                 <label class="form-label">Auteur·ice</label>
@@ -318,7 +324,13 @@
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Titre *</label>
-            <input type="text" class="form-input" id="n-titre" placeholder="Titre de l'histoire">
+            <div class="editor-wrap">
+              <div class="editor-toolbar">
+                <button type="button" class="tb-btn" onclick="fmt('n-titre','bold')"><b>G</b></button>
+                <button type="button" class="tb-btn" onclick="fmt('n-titre','italic')"><i>I</i></button>
+              </div>
+              <input type="text" class="form-input" id="n-titre" placeholder="Titre de l'histoire" style="border:none;border-radius:0">
+            </div>
           </div>
           <div class="form-group">
             <label class="form-label">Auteur·ice</label>
@@ -568,7 +580,7 @@
           <div style="font-size:10px;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Modifier le chapitre</div>
           <div class="card">
             <div class="form-row">
-              <div class="form-group">
+              <div class="form-group" style="display:flex;flex-direction:column;justify-content:flex-end">
                 <label class="form-label">Numéro</label>
                 <input type="number" class="form-input" id="edit-chap-num" min="1">
               </div>
@@ -595,7 +607,7 @@
                 </div>
               </div>
               <div class="form-group">
-                <label class="form-label">Auteur de la citation <span style="color:var(--text3);font-size:9px">(optionnel)</span></label>
+                <label class="form-label">Auteur <span style="color:var(--text3);font-size:9px">(optionnel)</span></label>
                 <div class="editor-wrap">
                   <div class="editor-toolbar">
                     <button type="button" class="tb-btn" onclick="fmt('edit-chap-citation-auteur','bold')"><b>G</b></button>
@@ -636,7 +648,7 @@
           </div>
         </div>
         <div class="form-row">
-          <div class="form-group">
+          <div class="form-group" style="display:flex;flex-direction:column;justify-content:flex-end">
             <label class="form-label">Numéro *</label>
             <input type="number" class="form-input" id="ch-num" value="1" min="1">
           </div>
@@ -663,7 +675,7 @@
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label">Auteur de la citation <span style="color:var(--text3);font-size:9px">(optionnel — gras gauche par défaut)</span></label>
+            <label class="form-label">Auteur <span style="color:var(--text3);font-size:9px">(optionnel — gras gauche par défaut)</span></label>
             <div class="editor-wrap">
               <div class="editor-toolbar">
                 <button type="button" class="tb-btn" onclick="fmt('ch-citation-auteur','bold')"><b>G</b></button>
@@ -866,9 +878,22 @@ function removeImg(type){
 }
 
 /* ÉDITEUR TEXTE */
+// Sauvegarde de la sélection pour les inputs (perdent le focus au clic bouton)
+let _savedSel={id:null,start:0,end:0};
+document.addEventListener('mousedown',e=>{
+  if(e.target.classList.contains('tb-btn')){
+    const active=document.activeElement;
+    if(active&&(active.tagName==='INPUT'||active.tagName==='TEXTAREA')){
+      _savedSel={id:active.id,start:active.selectionStart,end:active.selectionEnd};
+    }
+  }
+});
+
 function fmt(id,type){
   const ta=document.getElementById(id);
-  const start=ta.selectionStart,end=ta.selectionEnd;
+  // Utiliser la sélection sauvegardée si l'id correspond
+  const start=(_savedSel.id===id)?_savedSel.start:ta.selectionStart;
+  const end=(_savedSel.id===id)?_savedSel.end:ta.selectionEnd;
   const sel=ta.value.substring(start,end);
   if(!sel)return;
   const tag=type==='bold'?'strong':'em';
@@ -876,11 +901,13 @@ function fmt(id,type){
   ta.value=ta.value.substring(0,start)+wrapped+ta.value.substring(end);
   ta.focus();
   ta.setSelectionRange(start+wrapped.length,start+wrapped.length);
+  _savedSel={id:null,start:0,end:0};
 }
 
 function align(id,direction){
   const ta=document.getElementById(id);
-  const start=ta.selectionStart,end=ta.selectionEnd;
+  const start=(_savedSel.id===id)?_savedSel.start:ta.selectionStart;
+  const end=(_savedSel.id===id)?_savedSel.end:ta.selectionEnd;
   const sel=ta.value.substring(start,end);
   if(!sel)return;
   const clean=sel.replace(/<div[^>]*style="[^"]*text-align[^"]*"[^>]*>([\s\S]*?)<\/div>/g,'$1').trim();
@@ -888,6 +915,7 @@ function align(id,direction){
   ta.value=ta.value.substring(0,start)+wrapped+ta.value.substring(end);
   ta.focus();
   ta.setSelectionRange(start+wrapped.length,start+wrapped.length);
+  _savedSel={id:null,start:0,end:0};
 }
 
 /* UPLOAD IMAGE SUPABASE */
