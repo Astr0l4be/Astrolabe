@@ -205,16 +205,16 @@
     .lecture-nav{display:flex;gap:10px;padding:0 16px 40px;}
 
     /* CITATION */
-    .lecture-citation{margin:0 0 24px;padding:0 24px;border-left:2px solid rgba(167,143,212,.3);}
-    .lecture-citation-texte{font-style:italic;color:var(--text2);line-height:1.8;text-align:center;margin-bottom:6px;}
-    .lecture-citation-auteur{font-weight:600;color:var(--text);text-align:left;font-size:13px;}
+    .lecture-citation{margin:0 0 24px;padding:0;margin-left:1cm;margin-right:1cm;}
+    .lecture-citation-texte{font-style:italic;color:inherit;line-height:1.8;text-align:right;margin-bottom:4px;}
+    .lecture-citation-auteur{font-weight:600;color:inherit;text-align:right;font-size:13px;}
 
     /* SÉPARATEUR */
     .lecture-ch-sep{text-align:center;color:var(--text3);font-size:18px;margin:0 0 28px;letter-spacing:6px;}
 
     /* POV */
-    .lecture-pov{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;text-align:center;color:var(--text);margin:28px 0 20px;letter-spacing:2px;display:flex;align-items:center;justify-content:center;gap:12px;}
-    .lecture-pov::before,.lecture-pov::after{content:'✦';font-size:24px;opacity:.8;}
+    .lecture-pov{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;text-align:center;color:var(--text);margin:28px 0 20px;letter-spacing:2px;display:flex;align-items:center;justify-content:center;gap:12px;}
+    .lecture-pov::before,.lecture-pov::after{content:'✦';font-size:18px;opacity:.8;}
 
     /* IMAGE */
     .lecture-img-bloc{margin:20px 0;width:100%;}
