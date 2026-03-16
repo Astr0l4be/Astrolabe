@@ -72,25 +72,31 @@ async function finishInscription(){
 
 /* DATE NAISSANCE */
 const isMobile=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
-if(isMobile){
-  document.querySelector('.dob-mobile').style.display='flex';
-  const jourSel=document.getElementById('dob-jour');
-  const moisSel=document.getElementById('dob-mois');
-  const anneeSel=document.getElementById('dob-annee');
-  const moisNoms=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
-  for(let i=1;i<=31;i++){const o=document.createElement('option');o.value=i;o.textContent=i;if(i===1)o.selected=true;jourSel.appendChild(o);}
-  moisNoms.forEach((m,i)=>{const o=document.createElement('option');o.value=i+1;o.textContent=m;if(i===0)o.selected=true;moisSel.appendChild(o);});
-  const now2=new Date();const curYear=now2.getFullYear();
-  for(let y=curYear;y>=curYear-100;y--){const o=document.createElement('option');o.value=y;o.textContent=y;if(y===curYear-18)o.selected=true;anneeSel.appendChild(o);}
-} else {
-  const dobDate=document.getElementById('dob-date');
-  dobDate.style.display='block';
-  const now2=new Date();
-  const def=new Date(now2.getFullYear()-18,now2.getMonth(),now2.getDate());
-  dobDate.value=def.toISOString().split('T')[0];
-  dobDate.max=now2.toISOString().split('T')[0];
-  dobDate.min=new Date(now2.getFullYear()-100,now2.getMonth(),now2.getDate()).toISOString().split('T')[0];
+function initDobFields(){
+  if(isMobile){
+    const dobMobile=document.querySelector('.dob-mobile');
+    if(dobMobile)dobMobile.style.display='flex';
+    const jourSel=document.getElementById('dob-jour');
+    const moisSel=document.getElementById('dob-mois');
+    const anneeSel=document.getElementById('dob-annee');
+    if(!jourSel||!moisSel||!anneeSel)return;
+    const moisNoms=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+    for(let i=1;i<=31;i++){const o=document.createElement('option');o.value=i;o.textContent=i;if(i===1)o.selected=true;jourSel.appendChild(o);}
+    moisNoms.forEach((m,i)=>{const o=document.createElement('option');o.value=i+1;o.textContent=m;if(i===0)o.selected=true;moisSel.appendChild(o);});
+    const now2=new Date();const curYear=now2.getFullYear();
+    for(let y=curYear;y>=curYear-100;y--){const o=document.createElement('option');o.value=y;o.textContent=y;if(y===curYear-18)o.selected=true;anneeSel.appendChild(o);}
+  } else {
+    const dobDate=document.getElementById('dob-date');
+    if(!dobDate)return;
+    dobDate.style.display='block';
+    const now2=new Date();
+    const def=new Date(now2.getFullYear()-18,now2.getMonth(),now2.getDate());
+    dobDate.value=def.toISOString().split('T')[0];
+    dobDate.max=now2.toISOString().split('T')[0];
+    dobDate.min=new Date(now2.getFullYear()-100,now2.getMonth(),now2.getDate()).toISOString().split('T')[0];
+  }
 }
+document.addEventListener('DOMContentLoaded', initDobFields);
 
 /* CONNEXION */
 async function handleConnexion(){
