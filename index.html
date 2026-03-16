@@ -1284,6 +1284,7 @@ async function handleConnexion(){
     compte.adulte=profil.adulte||false;
     compte.twrHistoire=profil.trigger_warnings_histoire!==false;
     compte.twrChapitre=profil.trigger_warnings_chapitre===true;
+    compte.estAdulteAge=calcAge(profil.date_naissance)>=18;
     document.getElementById('compte-name').textContent=compte.pseudo;
     updateTicketsDisplay();syncCompteToggles();renderGrid('book-grid',BOOKS);
   }
@@ -1309,7 +1310,8 @@ function syncCompteToggles(){
   if(togTWH)togTWH.checked=compte.twrHistoire;
   if(togTWC)togTWC.checked=compte.twrChapitre;
   const rowAdulte=document.getElementById('row-adulte');
-  if(rowAdulte)rowAdulte.style.display=compte.age>=18?'flex':'none';
+  // Afficher le toggle adulte si l'utilisateur a 18 ans ou plus (calculé depuis date_naissance)
+  if(rowAdulte)rowAdulte.style.display=compte.estAdulteAge?'flex':'none';
 }
 
 function updateTopbar(){
@@ -1437,17 +1439,26 @@ async function supprimerCompteDefinitif(){
   }
 }
 
+/* CALCUL AGE */
+function calcAge(dateNaissance){
+  if(!dateNaissance)return 0;
+  const dob=new Date(dateNaissance);
+  const today=new Date();
+  let age=today.getFullYear()-dob.getFullYear();
+  if(today.getMonth()<dob.getMonth()||(today.getMonth()===dob.getMonth()&&today.getDate()<dob.getDate()))age--;
+  return age;
+}
+
 /* ANNIVERSAIRE 18 ANS */
 async function confirmerAdulte(choix){
   document.getElementById('anniversaire-popup').classList.remove('open');
   // Mémoriser que le popup a été vu pour ne plus le réafficher
   if(compte.userId) localStorage.setItem('adulte_popup_vu_'+compte.userId,'1');
-  if(choix&&compte.userId){
-    await db.from('profils').update({adulte:true}).eq('id',compte.userId);
-    compte.adulte=true;
-    syncCompteToggles();
-    renderGrid('book-grid',BOOKS);
-  }
+  // Mettre à jour le toggle et Supabase selon le choix (modifiable depuis Mon Compte ensuite)
+  compte.adulte=choix;
+  syncCompteToggles();
+  renderGrid('book-grid',BOOKS);
+  if(compte.userId) await db.from('profils').update({adulte:choix}).eq('id',compte.userId);
 }
 
 /* SESSION */
@@ -1461,17 +1472,12 @@ async function checkSession(){
       compte.adulte=profil.adulte||false;
       compte.twrHistoire=profil.trigger_warnings_histoire!==false;
       compte.twrChapitre=profil.trigger_warnings_chapitre===true;
+      compte.estAdulteAge=calcAge(profil.date_naissance)>=18;
       document.getElementById('compte-name').textContent=compte.pseudo;
       updateTicketsDisplay();syncCompteToggles();renderGrid('book-grid',BOOKS);updateTopbar();
-      // Vérifier si l'utilisateur vient d'avoir 18 ans
-      if(profil.date_naissance&&!profil.adulte&&!localStorage.getItem('adulte_popup_vu_'+session.user.id)){
-        const dob=new Date(profil.date_naissance);
-        const today=new Date();
-        let age=today.getFullYear()-dob.getFullYear();
-        if(today.getMonth()<dob.getMonth()||(today.getMonth()===dob.getMonth()&&today.getDate()<dob.getDate()))age--;
-        if(age>=18){
+      // Vérifier si l'utilisateur vient d'avoir 18 ans et n'a pas encore vu le popup
+      if(profil.date_naissance&&!profil.adulte&&compte.estAdulteAge&&!localStorage.getItem('adulte_popup_vu_'+session.user.id)){
           setTimeout(()=>document.getElementById('anniversaire-popup').classList.add('open'),4000);
-        }
       }
     }
   }
