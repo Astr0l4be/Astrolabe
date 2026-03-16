@@ -213,8 +213,8 @@
     .lecture-ch-sep{text-align:center;color:var(--text3);font-size:18px;margin:0 0 28px;letter-spacing:6px;}
 
     /* POV */
-    .lecture-pov{font-family:'Cormorant Garamond',serif;font-weight:700;text-align:center;color:var(--text);margin:28px 0 20px;letter-spacing:2px;position:relative;}
-    .lecture-pov::before,.lecture-pov::after{content:'✦';font-size:.7em;opacity:.5;margin:0 10px;}
+    .lecture-pov{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;text-align:center;color:var(--text);margin:28px 0 20px;letter-spacing:2px;display:flex;align-items:center;justify-content:center;gap:12px;}
+    .lecture-pov::before,.lecture-pov::after{content:'✦';font-size:24px;opacity:.8;}
 
     /* IMAGE */
     .lecture-img-bloc{margin:20px 0;width:100%;}
@@ -235,8 +235,9 @@
     #p-lecture.mode-jour-lecture .lecture-body p,#p-lecture.mode-jour-lecture .lecture-body p.d,#p-lecture.mode-jour-lecture .lecture-ch-num,#p-lecture.mode-jour-lecture .lecture-ch-title{color:#1a1510!important;}
     .lecture-body.texte-bleu p,.lecture-body.texte-bleu p.d{color:var(--accent)!important;}
     .lecture-body.texte-blanc p,.lecture-body.texte-blanc p.d{color:#eef0fa!important;}
-    .texte-bleu .lecture-ch-num,.texte-bleu .lecture-ch-title{color:var(--accent)!important;}
-    .texte-blanc .lecture-ch-num,.texte-blanc .lecture-ch-title{color:#eef0fa!important;}
+    .texte-bleu .lecture-ch-num,.texte-bleu .lecture-ch-title,.texte-bleu .lecture-pov{color:var(--accent)!important;}
+    .texte-blanc .lecture-ch-num,.texte-blanc .lecture-ch-title,.texte-blanc .lecture-pov{color:#eef0fa!important;}
+    #p-lecture.mode-jour-lecture .lecture-pov{color:#1a1510!important;}
 
     /* MON COMPTE */
     .compte-top{display:flex;flex-direction:column;align-items:center;padding:20px 18px 0;}

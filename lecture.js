@@ -196,7 +196,7 @@ function applyLectureMode(){
   if(lp)lp.classList.toggle('mode-jour-lecture',modeJour);
   // Appliquer la couleur aux titres de chapitre
   const couleur=modeJour?'':textesBlancs?'#eef0fa':'var(--accent)';
-  document.querySelectorAll('.lecture-ch-num,.lecture-ch-title').forEach(el=>{
+  document.querySelectorAll('.lecture-ch-num,.lecture-ch-title,.lecture-pov').forEach(el=>{
     el.style.color=modeJour?'':'couleur';
     el.style.color=couleur;
   });
@@ -302,7 +302,7 @@ function saveOptions(){
       if(!v.modeJour)lb.classList.add(v.textesBlancs?'texte-blanc':'texte-bleu');
       lb.style.fontSize=TAILLES[v.taille||'normal']+'px';
     }
-    document.querySelectorAll('.lecture-ch-num,.lecture-ch-title').forEach(el=>{
+    document.querySelectorAll('.lecture-ch-num,.lecture-ch-title,.lecture-pov').forEach(el=>{
       el.style.color=v.modeJour?'#1a1510':v.textesBlancs?'#eef0fa':'var(--accent)';
     });
   } else {
@@ -324,7 +324,7 @@ function saveOptions(){
         if(!v.modeJour)lb.classList.add(v.textesBlancs?'texte-blanc':'texte-bleu');
         lb.style.fontSize=TAILLES[v.taille||'normal']+'px';
       }
-      document.querySelectorAll('.lecture-ch-num,.lecture-ch-title').forEach(el=>{
+      document.querySelectorAll('.lecture-ch-num,.lecture-ch-title,.lecture-pov').forEach(el=>{
         el.style.color=v.modeJour?'#1a1510':v.textesBlancs?'#eef0fa':'var(--accent)';
       });
     }
@@ -354,7 +354,7 @@ function applyLectureModeForHistoire(bookId){
     lb.classList.remove('texte-bleu','texte-blanc');
     if(!mj)lb.classList.add(tb?'texte-blanc':'texte-bleu');
   }
-  document.querySelectorAll('.lecture-ch-num,.lecture-ch-title').forEach(el=>{
+  document.querySelectorAll('.lecture-ch-num,.lecture-ch-title,.lecture-pov').forEach(el=>{
     el.style.color=mj?'#1a1510':tb?'#eef0fa':'var(--accent)';
   });
 }

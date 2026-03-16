@@ -63,6 +63,7 @@ async function loadHistoires(){
       desc:h.resume||'',
       adulte:h.adulte||false,
       gratuit_jusqu_au:h.gratuit_jusqu_au||8,
+      numerotation:h.numerotation||'arabe',
       chapitres
     };
   });
@@ -91,15 +92,17 @@ async function loadContenuChapitre(bookId, chapNum){
   if(!b)return null;
   const ch=b.chapitres.find(c=>c.num===chapNum);
   if(!ch)return null;
-  // Déjà chargé
   if(ch.texte)return ch.texte;
-  // Charger depuis Supabase
   const {data}=await db.from('chapitres')
-    .select('contenu')
+    .select('contenu,citation,citation_auteur')
     .eq('histoire_id',bookId)
     .eq('numero',chapNum)
     .single();
-  if(data){ch.texte=data.contenu;}
+  if(data){
+    ch.texte=data.contenu;
+    ch.citation=data.citation||null;
+    ch.citation_auteur=data.citation_auteur||null;
+  }
   return ch.texte;
 }
 
