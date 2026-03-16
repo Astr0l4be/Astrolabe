@@ -79,7 +79,7 @@ function initDobFields(){
     const jourSel=document.getElementById('dob-jour');
     const moisSel=document.getElementById('dob-mois');
     const anneeSel=document.getElementById('dob-annee');
-    if(!jourSel||!moisSel||!anneeSel)return;
+    if(!jourSel)return;
     const moisNoms=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
     for(let i=1;i<=31;i++){const o=document.createElement('option');o.value=i;o.textContent=i;if(i===1)o.selected=true;jourSel.appendChild(o);}
     moisNoms.forEach((m,i)=>{const o=document.createElement('option');o.value=i+1;o.textContent=m;if(i===0)o.selected=true;moisSel.appendChild(o);});
@@ -96,7 +96,7 @@ function initDobFields(){
     dobDate.min=new Date(now2.getFullYear()-100,now2.getMonth(),now2.getDate()).toISOString().split('T')[0];
   }
 }
-document.addEventListener('DOMContentLoaded', initDobFields);
+document.addEventListener('DOMContentLoaded',initDobFields);
 
 /* CONNEXION */
 async function handleConnexion(){
