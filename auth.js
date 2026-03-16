@@ -124,19 +124,7 @@ async function savePrefs(){
   await db.from('profils').update({adulte:compte.adulte,trigger_warnings_histoire:compte.twrHistoire,trigger_warnings_chapitre:compte.twrChapitre}).eq('id',compte.userId);
 }
 
-function syncCompteToggles(){
-  const togAdulte=document.getElementById('toggle-adulte');
-  const togTWH=document.getElementById('toggle-tw-histoire');
-  const togTWC=document.getElementById('toggle-tw-chapitre');
-  if(togAdulte)togAdulte.checked=compte.adulte;
-  if(togTWH)togTWH.checked=compte.twrHistoire;
-  if(togTWC)togTWC.checked=compte.twrChapitre;
-  const rowAdulte=document.getElementById('row-adulte');
-  if(rowAdulte)rowAdulte.style.display=compte.estAdulteAge?'flex':'none';
-  // Restaurer le mode lecture sauvegardé
-  toggleModeJour(modeJour);
-  setTexte(textesBlancs?'blanc':'bleu');
-}
+
 
 function updateTopbar(){
   const loggedIn=compte.loggedIn;
