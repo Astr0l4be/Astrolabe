@@ -404,6 +404,14 @@
             <input type="hidden" id="n-statut" value="brouillon">
           </div>
         </div>
+        <div class="form-group">
+          <label class="form-label">Numérotation des chapitres</label>
+          <div style="display:flex;gap:8px">
+            <button type="button" class="btn btn-accent" id="num-arabe" onclick="setNumerotation('arabe')" style="flex:1">1, 2, 3… (Arabe)</button>
+            <button type="button" class="btn" id="num-romain" onclick="setNumerotation('romain')" style="flex:1">I, II, III… (Romain)</button>
+          </div>
+          <input type="hidden" id="n-numerotation" value="arabe">
+        </div>
         <button class="btn btn-accent btn-full" onclick="creerHistoire()" style="margin-top:8px">✦ Créer l'histoire</button>
       </div>
     </div>
@@ -598,7 +606,35 @@
           </div>
           <div class="form-group">
             <label class="form-label">Titre *</label>
-            <input type="text" class="form-input" id="ch-titre" placeholder="Titre du chapitre">
+            <div class="editor-wrap">
+              <div class="editor-toolbar">
+                <button type="button" class="tb-btn" onclick="fmt('ch-titre','bold')"><b>G</b></button>
+                <button type="button" class="tb-btn" onclick="fmt('ch-titre','italic')"><i>I</i></button>
+              </div>
+              <input type="text" class="form-input" id="ch-titre" placeholder="Titre du chapitre" style="border:none;border-radius:0">
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Citation <span style="color:var(--text3);font-size:9px">(optionnel — italique centré par défaut)</span></label>
+            <div class="editor-wrap">
+              <div class="editor-toolbar">
+                <button type="button" class="tb-btn" onclick="fmt('ch-citation','bold')"><b>G</b></button>
+                <button type="button" class="tb-btn" onclick="fmt('ch-citation','italic')"><i>I</i></button>
+              </div>
+              <input type="text" class="form-input" id="ch-citation" placeholder="« Une citation… »" style="border:none;border-radius:0;font-style:italic">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Auteur de la citation <span style="color:var(--text3);font-size:9px">(optionnel — gras gauche par défaut)</span></label>
+            <div class="editor-wrap">
+              <div class="editor-toolbar">
+                <button type="button" class="tb-btn" onclick="fmt('ch-citation-auteur','bold')"><b>G</b></button>
+                <button type="button" class="tb-btn" onclick="fmt('ch-citation-auteur','italic')"><i>I</i></button>
+              </div>
+              <input type="text" class="form-input" id="ch-citation-auteur" placeholder="— Auteur" style="border:none;border-radius:0">
+            </div>
           </div>
         </div>
         <div class="form-group">
@@ -808,17 +844,14 @@ function fmt(id,type){
 
 function align(id,direction){
   const ta=document.getElementById(id);
-  const val=ta.value;
-  const pos=ta.selectionStart;
-  const before=val.lastIndexOf('\n\n',pos);
-  const after=val.indexOf('\n\n',pos);
-  const pStart=before===-1?0:before+2;
-  const pEnd=after===-1?val.length:after;
-  const para=val.substring(pStart,pEnd);
-  const clean=para.replace(/<div[^>]*style="[^"]*text-align[^"]*"[^>]*>([\s\S]*?)<\/div>/g,'$1').trim();
+  const start=ta.selectionStart,end=ta.selectionEnd;
+  const sel=ta.value.substring(start,end);
+  if(!sel)return;
+  const clean=sel.replace(/<div[^>]*style="[^"]*text-align[^"]*"[^>]*>([\s\S]*?)<\/div>/g,'$1').trim();
   const wrapped=direction==='left'?clean:`<div style="text-align:${direction}">${clean}</div>`;
-  ta.value=val.substring(0,pStart)+wrapped+val.substring(pEnd);
+  ta.value=ta.value.substring(0,start)+wrapped+ta.value.substring(end);
   ta.focus();
+  ta.setSelectionRange(start+wrapped.length,start+wrapped.length);
 }
 
 /* UPLOAD IMAGE SUPABASE */
@@ -921,6 +954,7 @@ async function creerHistoire(){
       prix_ticket:parseInt(document.getElementById('n-prix').value)||1,
       adulte:document.getElementById('n-adulte').value==='true',
       statut:document.getElementById('n-statut').value||'brouillon',
+      numerotation:document.getElementById('n-numerotation').value||'arabe',
     }).select().single();
     if(error)throw error;
 
@@ -1419,12 +1453,14 @@ async function ajouterChapitre(){
   const num=parseInt(document.getElementById('ch-num').value);
   const titre=document.getElementById('ch-titre').value.trim();
   const contenu=document.getElementById('ch-contenu').value.trim();
+  const citation=document.getElementById('ch-citation').value.trim()||null;
+  const citationAuteur=document.getElementById('ch-citation-auteur').value.trim()||null;
   const gratuit=document.getElementById('ch-gratuit').value==='true'||document.getElementById('ch-gratuit').value===true;
   if(!histoireId||!titre||!contenu){showAlert('chapitre','L\'histoire, le titre et le contenu sont obligatoires.','error');return;}
   const btn=document.querySelector('#panel-chapitre .btn-accent');
   btn.textContent='Publication…';btn.disabled=true;
   try{
-    const {error}=await db.from('chapitres').insert({histoire_id:histoireId,numero:num,titre,contenu,gratuit});
+    const {error}=await db.from('chapitres').insert({histoire_id:histoireId,numero:num,titre,contenu,gratuit,citation,citation_auteur:citationAuteur});
     if(error)throw error;
     // Ajouter les TW du chapitre à l'histoire si pas déjà présents
     if(chTws.length>0){
@@ -1438,6 +1474,8 @@ async function ajouterChapitre(){
     }
     showAlert('chapitre','Chapitre publié avec succès ! ✦');
     document.getElementById('ch-titre').value='';
+    document.getElementById('ch-citation').value='';
+    document.getElementById('ch-citation-auteur').value='';
     document.getElementById('ch-contenu').value='';
     document.getElementById('ch-wordcount').textContent='0 mots';
     chTws=[];renderChTws();
@@ -2024,6 +2062,22 @@ function setGratuit(val){
   document.getElementById('ch-gratuit').value=String(val);
   document.getElementById('gratuit-gratuit').className='btn'+(val?' btn-accent':'');
   document.getElementById('gratuit-payant').className='btn'+(val?'':' btn-accent');
+}
+function setNumerotation(val){
+  document.getElementById('n-numerotation').value=val;
+  document.getElementById('num-arabe').className='btn'+(val==='arabe'?' btn-accent':'');
+  document.getElementById('num-romain').className='btn'+(val==='romain'?' btn-accent':'');
+}
+
+/* CHIFFRES ROMAINS */
+function toRoman(num){
+  const vals=[1000,900,500,400,100,90,50,40,10,9,5,4,1];
+  const syms=['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
+  let result='';
+  for(let i=0;i<vals.length;i++){
+    while(num>=vals[i]){result+=syms[i];num-=vals[i];}
+  }
+  return result;
 }
 
 checkSession();
