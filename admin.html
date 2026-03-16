@@ -111,6 +111,15 @@
     .editor-wrap textarea{border:none;border-radius:0;}
     .editor-wrap textarea:focus{border-color:transparent;}
 
+    /* BLOCS ÉDITEUR */
+    .bloc-wrap{background:rgba(140,150,195,.05);border:1px solid rgba(180,190,230,.12);border-radius:8px;margin-bottom:8px;overflow:hidden;}
+    .bloc-header{display:flex;align-items:center;gap:6px;padding:6px 8px;background:rgba(140,150,195,.08);border-bottom:1px solid rgba(180,190,230,.1);}
+    .bloc-type{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);flex:1;}
+    .bloc-type.pov{color:var(--accent2);}
+    .bloc-pov-input{width:100%;background:none;border:none;outline:none;color:var(--text);font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;text-align:center;padding:10px 14px;}
+    .bloc-pov-input::placeholder{color:var(--text3);font-weight:400;}
+    .bloc-textarea{width:100%;background:none;border:none;outline:none;color:var(--text);font-family:'Jost',sans-serif;font-size:13px;line-height:1.8;padding:10px 14px;resize:vertical;min-height:120px;}
+
     /* CUSTOM SELECT */
     .custom-select-wrap{position:relative;}
     .custom-select-box{width:100%;background:rgba(140,150,195,.1);border:1px solid rgba(180,190,230,.16);border-radius:8px;color:var(--text);font-family:'Jost',sans-serif;font-size:13px;padding:10px 12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:border-color .2s;}
@@ -619,17 +628,10 @@
             </div>
             <div class="form-group">
               <label class="form-label">Contenu *</label>
-              <div class="editor-wrap">
-                <div class="editor-toolbar">
-                  <button type="button" class="tb-btn" onclick="fmt('edit-chap-contenu','bold')"><b>G</b></button>
-                  <button type="button" class="tb-btn" onclick="fmt('edit-chap-contenu','italic')"><i>I</i></button>
-                  <div class="tb-sep"></div>
-                  <button type="button" class="tb-btn" onclick="align('edit-chap-contenu','left')">⬤◁</button>
-                  <button type="button" class="tb-btn" onclick="align('edit-chap-contenu','center')">◁⬤▷</button>
-                  <button type="button" class="tb-btn" onclick="align('edit-chap-contenu','right')">▷⬤</button>
-                  <button type="button" class="tb-btn" onclick="align('edit-chap-contenu','justify')">▤</button>
-                </div>
-                <textarea class="form-textarea" id="edit-chap-contenu" style="min-height:300px;font-size:13px;line-height:1.8"></textarea>
+              <div id="edit-ch-blocs"></div>
+              <div style="display:flex;gap:8px;margin-top:8px">
+                <button type="button" class="btn btn-sm" onclick="ajouterBlocTexte()">+ Texte</button>
+                <button type="button" class="btn btn-sm btn-accent" onclick="ajouterBlocPOV()">✦ + POV</button>
               </div>
               <div class="form-hint" id="edit-chap-wordcount">0 mots</div>
             </div>
@@ -687,17 +689,10 @@
         </div>
         <div class="form-group">
           <label class="form-label">Contenu *</label>
-          <div class="editor-wrap">
-            <div class="editor-toolbar">
-              <button type="button" class="tb-btn" onclick="fmt('ch-contenu','bold')" title="Gras"><b>G</b></button>
-              <button type="button" class="tb-btn" onclick="fmt('ch-contenu','italic')" title="Italique"><i>I</i></button>
-              <div class="tb-sep"></div>
-              <button type="button" class="tb-btn" onclick="align('ch-contenu','left')" title="Gauche">⬤◁</button>
-              <button type="button" class="tb-btn" onclick="align('ch-contenu','center')" title="Centré">◁⬤▷</button>
-              <button type="button" class="tb-btn" onclick="align('ch-contenu','right')" title="Droite">▷⬤</button>
-              <button type="button" class="tb-btn" onclick="align('ch-contenu','justify')" title="Justifié">▤</button>
-            </div>
-            <textarea class="form-textarea" id="ch-contenu" style="min-height:300px;font-size:13px;line-height:1.8" placeholder="Colle ici le texte du chapitre…&#10;&#10;Les dialogues commençant par — seront mis en valeur automatiquement.&#10;&#10;Sépare les paragraphes par une ligne vide."></textarea>
+          <div id="ch-blocs"></div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button type="button" class="btn btn-sm" onclick="ajouterBlocTexte()">+ Texte</button>
+            <button type="button" class="btn btn-sm btn-accent" onclick="ajouterBlocPOV()">✦ + POV</button>
           </div>
           <div class="form-hint" id="ch-wordcount">0 mots</div>
         </div>
@@ -839,7 +834,7 @@ function switchTab(tab){
     loadAuteurs();
   }
   if(tab==='tags'){loadTagsGestion();loadTWsGestion();}
-  if(tab==='chapitre'){chTws=[];renderChTws();loadHistoiresSelect();}
+  if(tab==='chapitre'){chTws=[];renderChTws();loadHistoiresSelect();initBlocs('');}
   if(tab==='nouvelle')loadAuteursSelect();
   if(tab==='nouvel-auteur'){
     document.getElementById('a-pseudo').value='';
@@ -877,7 +872,158 @@ function removeImg(type){
   input.value='';
 }
 
-/* ÉDITEUR TEXTE */
+/* ÉDITEUR PAR BLOCS */
+let _blocs=[]; // [{type:'texte'|'pov', id:n, contenu:''}]
+let _blocIdCounter=0;
+
+function initBlocs(contenuExistant, containerId){
+  _blocs=[];
+  _blocIdCounter=0;
+  _blocsContainer=containerId||'ch-blocs';
+  if(contenuExistant){
+    const parts=contenuExistant.split(/(<pov>[^<]*<\/pov>)/g);
+    parts.forEach(p=>{
+      if(p.startsWith('<pov>')){
+        const nom=p.replace(/<\/?pov>/g,'').trim();
+        if(nom)_blocs.push({type:'pov',id:_blocIdCounter++,contenu:nom});
+      } else if(p.trim()){
+        _blocs.push({type:'texte',id:_blocIdCounter++,contenu:p.trim()});
+      }
+    });
+  }
+  if(!_blocs.length)_blocs.push({type:'texte',id:_blocIdCounter++,contenu:''});
+  renderBlocs();
+}
+
+let _blocsContainer='ch-blocs';
+
+function renderBlocs(){
+  const container=document.getElementById(_blocsContainer);
+  if(!container)return;
+  const wcId=_blocsContainer==='ch-blocs'?'ch-wordcount':'edit-chap-wordcount';
+  container.innerHTML='';
+  _blocs.forEach((bloc,i)=>{
+    const div=document.createElement('div');
+    div.className='bloc-wrap';
+    div.dataset.id=bloc.id;
+    if(bloc.type==='pov'){
+      div.innerHTML=`
+        <div class="bloc-header">
+          <span class="bloc-type pov">✦ POV</span>
+          <button class="tb-btn" onclick="deplacerBloc(${i},-1)" ${i===0?'disabled style="opacity:.3"':''}>▲</button>
+          <button class="tb-btn" onclick="deplacerBloc(${i},1)" ${i===_blocs.length-1?'disabled style="opacity:.3"':''}>▼</button>
+          <button class="tb-btn" onclick="supprimerBloc(${i})" style="color:var(--danger)">✕</button>
+        </div>
+        <input class="bloc-pov-input" type="text" placeholder="Nom du personnage…" value="${bloc.contenu.replace(/"/g,'&quot;')}" oninput="updateBlocContenu(${i},this.value)" data-bloc-id="${bloc.id}">`;
+    } else {
+      div.innerHTML=`
+        <div class="bloc-header">
+          <span class="bloc-type">Texte</span>
+          <div class="editor-toolbar" style="background:none;padding:0;border:none">
+            <button type="button" class="tb-btn" onclick="fmtBloc(${i},'bold')"><b>G</b></button>
+            <button type="button" class="tb-btn" onclick="fmtBloc(${i},'italic')"><i>I</i></button>
+            <div class="tb-sep"></div>
+            <button type="button" class="tb-btn" onclick="alignBloc(${i},'left')">⬤◁</button>
+            <button type="button" class="tb-btn" onclick="alignBloc(${i},'center')">◁⬤▷</button>
+            <button type="button" class="tb-btn" onclick="alignBloc(${i},'right')">▷⬤</button>
+          </div>
+          <button class="tb-btn" onclick="deplacerBloc(${i},-1)" ${i===0?'disabled style="opacity:.3"':''}>▲</button>
+          <button class="tb-btn" onclick="deplacerBloc(${i},1)" ${i===_blocs.length-1?'disabled style="opacity:.3"':''}>▼</button>
+          <button class="tb-btn" onclick="supprimerBloc(${i})" style="color:var(--danger)">✕</button>
+        </div>
+        <textarea class="bloc-textarea" oninput="updateBlocContenu(${i},this.value);majWordcount()" placeholder="Texte du chapitre…" data-bloc-id="${bloc.id}">${bloc.contenu}</textarea>`;
+    }
+    container.appendChild(div);
+  });
+  majWordcount();
+}
+
+function updateBlocContenu(idx,val){_blocs[idx].contenu=val;}
+
+function ajouterBlocTexte(){
+  _blocs.push({type:'texte',id:_blocIdCounter++,contenu:''});
+  renderBlocs();
+  // Focus sur le dernier textarea
+  setTimeout(()=>{const tas=document.querySelectorAll('.bloc-textarea');if(tas.length)tas[tas.length-1].focus();},50);
+}
+
+function ajouterBlocPOV(){
+  _blocs.push({type:'pov',id:_blocIdCounter++,contenu:''});
+  _blocs.push({type:'texte',id:_blocIdCounter++,contenu:''});
+  renderBlocs();
+  // Focus sur l'input POV
+  setTimeout(()=>{const inputs=document.querySelectorAll('.bloc-pov-input');if(inputs.length)inputs[inputs.length-1].focus();},50);
+}
+
+function deplacerBloc(idx,dir){
+  // Sauvegarder les valeurs actuelles depuis le DOM
+  document.querySelectorAll('[data-bloc-id]').forEach(el=>{
+    const id=parseInt(el.dataset.blocId);
+    const b=_blocs.find(x=>x.id===id);
+    if(b)b.contenu=el.value||el.textContent||b.contenu;
+  });
+  const swap=idx+dir;
+  if(swap<0||swap>=_blocs.length)return;
+  [_blocs[idx],_blocs[swap]]=[_blocs[swap],_blocs[idx]];
+  renderBlocs();
+}
+
+function supprimerBloc(idx){
+  if(_blocs.length<=1)return;
+  _blocs.splice(idx,1);
+  renderBlocs();
+}
+
+function fmtBloc(idx,type){
+  const el=document.querySelector(`[data-bloc-id="${_blocs[idx].id}"]`);
+  if(!el)return;
+  const start=(_savedSel.id===el.id)?_savedSel.start:el.selectionStart;
+  const end=(_savedSel.id===el.id)?_savedSel.end:el.selectionEnd;
+  const sel=el.value.substring(start,end);
+  if(!sel)return;
+  const tag=type==='bold'?'strong':'em';
+  const wrapped=`<${tag}>${sel}</${tag}>`;
+  el.value=el.value.substring(0,start)+wrapped+el.value.substring(end);
+  _blocs[idx].contenu=el.value;
+  el.focus();
+  el.setSelectionRange(start+wrapped.length,start+wrapped.length);
+}
+
+function alignBloc(idx,direction){
+  const el=document.querySelector(`[data-bloc-id="${_blocs[idx].id}"]`);
+  if(!el)return;
+  const start=(_savedSel.id===el.id)?_savedSel.start:el.selectionStart;
+  const end=(_savedSel.id===el.id)?_savedSel.end:el.selectionEnd;
+  const sel=el.value.substring(start,end);
+  if(!sel)return;
+  const clean=sel.replace(/<div[^>]*style="[^"]*text-align[^"]*"[^>]*>([\s\S]*?)<\/div>/g,'$1').trim();
+  const wrapped=direction==='left'?clean:`<div style="text-align:${direction}">${clean}</div>`;
+  el.value=el.value.substring(0,start)+wrapped+el.value.substring(end);
+  _blocs[idx].contenu=el.value;
+  el.focus();
+  el.setSelectionRange(start+wrapped.length,start+wrapped.length);
+}
+
+function majWordcount(){
+  const total=_blocs.filter(b=>b.type==='texte').reduce((acc,b)=>acc+(b.contenu?b.contenu.trim().split(/\s+/).filter(w=>w).length:0),0);
+  const el=document.getElementById('ch-wordcount');
+  if(el)el.textContent=total.toLocaleString('fr')+' mots';
+}
+
+function compileBlocsToContenu(){
+  // Sauvegarder les valeurs DOM actuelles
+  document.querySelectorAll('[data-bloc-id]').forEach(el=>{
+    const id=parseInt(el.dataset.blocId);
+    const b=_blocs.find(x=>x.id===id);
+    if(b)b.contenu=el.value||b.contenu;
+  });
+  return _blocs.map(b=>{
+    if(b.type==='pov')return`<pov>${b.contenu}</pov>`;
+    return b.contenu;
+  }).join('\n\n');
+}
+
+
 // Sauvegarde de la sélection pour les inputs (perdent le focus au clic bouton)
 let _savedSel={id:null,start:0,end:0};
 document.addEventListener('mousedown',e=>{
@@ -1480,7 +1626,7 @@ async function ouvrirEditionChapitre(id, histoireId){
   document.getElementById('edit-chap-titre').value=ch.titre||'';
   document.getElementById('edit-chap-citation').value=ch.citation||'';
   document.getElementById('edit-chap-citation-auteur').value=ch.citation_auteur||'';
-  document.getElementById('edit-chap-contenu').value=ch.contenu||'';
+  initBlocs(ch.contenu||'','edit-ch-blocs');
   document.getElementById('edit-chap-wordcount').textContent=(ch.contenu?ch.contenu.trim().split(/\s+/).filter(w=>w).length.toLocaleString('fr'):0)+' mots';
   document.getElementById('edit-chap-gratuit-val').value=String(ch.gratuit);
   document.getElementById('edit-chap-gratuit').className='btn'+(ch.gratuit?' btn-accent':'');
@@ -1504,7 +1650,7 @@ function setEditChapGratuit(val){
 async function sauvegarderChapitre(){
   if(!_editChapId)return;
   const titre=document.getElementById('edit-chap-titre').value.trim();
-  const contenu=document.getElementById('edit-chap-contenu').value.trim();
+  const contenu=compileBlocsToContenu().trim();
   const numero=parseInt(document.getElementById('edit-chap-num').value);
   const gratuit=document.getElementById('edit-chap-gratuit-val').value==='true';
   const citation=document.getElementById('edit-chap-citation').value.trim()||null;
@@ -1526,7 +1672,7 @@ async function ajouterChapitre(){
   const histoireId=document.getElementById('ch-histoire').value;
   const num=parseInt(document.getElementById('ch-num').value);
   const titre=document.getElementById('ch-titre').value.trim();
-  const contenu=document.getElementById('ch-contenu').value.trim();
+  const contenu=compileBlocsToContenu().trim();
   const citation=document.getElementById('ch-citation').value.trim()||null;
   const citationAuteur=document.getElementById('ch-citation-auteur').value.trim()||null;
   const gratuit=document.getElementById('ch-gratuit').value==='true'||document.getElementById('ch-gratuit').value===true;
@@ -1550,7 +1696,7 @@ async function ajouterChapitre(){
     document.getElementById('ch-titre').value='';
     document.getElementById('ch-citation').value='';
     document.getElementById('ch-citation-auteur').value='';
-    document.getElementById('ch-contenu').value='';
+    initBlocs('');
     document.getElementById('ch-wordcount').textContent='0 mots';
     chTws=[];renderChTws();
     loadChapitresExistants(histoireId);
@@ -1579,7 +1725,7 @@ async function ouvrirEditionChapitreDepuisFiche(id, histoireId){
   document.getElementById('edit-chap-titre').value=ch.titre||'';
   document.getElementById('edit-chap-citation').value=ch.citation||'';
   document.getElementById('edit-chap-citation-auteur').value=ch.citation_auteur||'';
-  document.getElementById('edit-chap-contenu').value=ch.contenu||'';
+  initBlocs(ch.contenu||'','edit-ch-blocs');
   document.getElementById('edit-chap-wordcount').textContent=(ch.contenu?ch.contenu.trim().split(/\s+/).filter(w=>w).length.toLocaleString('fr'):0)+' mots';
   document.getElementById('edit-chap-gratuit-val').value=String(ch.gratuit);
   document.getElementById('edit-chap-gratuit').className='btn'+(ch.gratuit?' btn-accent':'');
