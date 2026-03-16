@@ -1513,17 +1513,34 @@ let _selectedTWs=new Set();
 let _supprType=null;
 
 async function loadTagsGestion(){
-  const {data}=await db.from('tags').select('id,nom').order('nom');
+  const {data}=await db.from('tags').select('id,nom,ordre').order('ordre',{ascending:true,nullsFirst:false});
   const list=document.getElementById('tags-gestion-list');
   if(!list)return;
   _selectedTags.clear();
   document.getElementById('btn-suppr-tags').style.display='none';
   if(!data||!data.length){list.innerHTML='<div style="font-size:12px;color:var(--text3)">Aucun tag pour l\'instant.</div>';return;}
-  list.innerHTML=data.map(t=>`
+  // Dédupliquer et trier par ordre
+  const sorted=[...data].sort((a,b)=>(a.ordre??999)-(b.ordre??999));
+  window._tagOrdreList=sorted;
+  list.innerHTML=sorted.map((t,i)=>`
     <div class="histoire-item" style="padding:10px 14px;gap:10px">
       <input type="checkbox" id="ck-tag-${t.id}" onchange="toggleSelectTag('${t.id}')" style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent);flex-shrink:0">
       <div class="histoire-item-info"><div class="histoire-item-title" style="font-size:13px">✦ ${t.nom}</div></div>
+      <div style="display:flex;gap:4px;flex-shrink:0">
+        <button class="btn btn-sm" onclick="deplacerTag(${i},-1)" ${i===0?'disabled style="opacity:.3"':''}>▲</button>
+        <button class="btn btn-sm" onclick="deplacerTag(${i},1)" ${i===sorted.length-1?'disabled style="opacity:.3"':''}>▼</button>
+      </div>
     </div>`).join('');
+}
+
+async function deplacerTag(idx, direction){
+  const list=window._tagOrdreList;
+  if(!list)return;
+  const swapIdx=idx+direction;
+  if(swapIdx<0||swapIdx>=list.length)return;
+  await db.from('tags').update({ordre:swapIdx}).eq('id',list[idx].id);
+  await db.from('tags').update({ordre:idx}).eq('id',list[swapIdx].id);
+  await loadTagsGestion();
 }
 
 async function loadTWsGestion(){
@@ -1544,10 +1561,6 @@ async function loadTWsGestion(){
     <div class="histoire-item" style="padding:10px 14px;gap:10px">
       <input type="checkbox" id="ck-tw-${t.contenu.replace(/[\s']/g,'-')}" onchange="toggleSelectTW('${t.contenu.replace(/'/g,"\\'")}')" style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent2);flex-shrink:0">
       <div class="histoire-item-info"><div class="histoire-item-title" style="font-size:13px;color:var(--accent2)">✦ ${t.contenu}</div></div>
-      <div style="display:flex;gap:4px;flex-shrink:0">
-        <button class="btn btn-sm" onclick="deplacerTW(${i},-1)" ${i===0?'disabled style="opacity:.3"':''} style="font-size:10px">haut</button>
-        <button class="btn btn-sm" onclick="deplacerTW(${i},1)" ${i===uniq.length-1?'disabled style="opacity:.3"':''} style="font-size:10px">bas</button>
-      </div>
     </div>`).join('');
 }
 
