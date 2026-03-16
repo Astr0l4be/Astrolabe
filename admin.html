@@ -632,6 +632,7 @@
               <div style="display:flex;gap:8px;margin-top:8px">
                 <button type="button" class="btn btn-sm" onclick="ajouterBlocTexte()">+ Texte</button>
                 <button type="button" class="btn btn-sm btn-accent" onclick="ajouterBlocPOV()">✦ + POV</button>
+                <button type="button" class="btn btn-sm" onclick="ajouterBlocImage()" style="background:rgba(126,159,212,.1);border-color:rgba(126,159,212,.3);color:var(--accent)">🖼 + Image</button>
               </div>
               <div class="form-hint" id="edit-chap-wordcount">0 mots</div>
             </div>
@@ -693,6 +694,7 @@
           <div style="display:flex;gap:8px;margin-top:8px">
             <button type="button" class="btn btn-sm" onclick="ajouterBlocTexte()">+ Texte</button>
             <button type="button" class="btn btn-sm btn-accent" onclick="ajouterBlocPOV()">✦ + POV</button>
+            <button type="button" class="btn btn-sm" onclick="ajouterBlocImage()" style="background:rgba(126,159,212,.1);border-color:rgba(126,159,212,.3);color:var(--accent)">🖼 + Image</button>
           </div>
           <div class="form-hint" id="ch-wordcount">0 mots</div>
         </div>
@@ -881,11 +883,14 @@ function initBlocs(contenuExistant, containerId){
   _blocIdCounter=0;
   _blocsContainer=containerId||'ch-blocs';
   if(contenuExistant){
-    const parts=contenuExistant.split(/(<pov>[^<]*<\/pov>)/g);
+    const parts=contenuExistant.split(/(<pov>[^<]*<\/pov>|<img-bloc>[^<]*<\/img-bloc>)/g);
     parts.forEach(p=>{
       if(p.startsWith('<pov>')){
         const nom=p.replace(/<\/?pov>/g,'').trim();
         if(nom)_blocs.push({type:'pov',id:_blocIdCounter++,contenu:nom});
+      } else if(p.startsWith('<img-bloc>')){
+        const url=p.replace(/<\/?img-bloc>/g,'').trim();
+        if(url)_blocs.push({type:'image',id:_blocIdCounter++,contenu:url});
       } else if(p.trim()){
         _blocs.push({type:'texte',id:_blocIdCounter++,contenu:p.trim()});
       }
@@ -915,6 +920,23 @@ function renderBlocs(){
           <button class="tb-btn" onclick="supprimerBloc(${i})" style="color:var(--danger)">✕</button>
         </div>
         <input class="bloc-pov-input" type="text" placeholder="Nom du personnage…" value="${bloc.contenu.replace(/"/g,'&quot;')}" oninput="updateBlocContenu(${i},this.value)" data-bloc-id="${bloc.id}">`;
+    } else if(bloc.type==='image'){
+      div.innerHTML=`
+        <div class="bloc-header">
+          <span class="bloc-type" style="color:var(--accent)">🖼 Image</span>
+          <button class="tb-btn" onclick="deplacerBloc(${i},-1)" ${i===0?'disabled style="opacity:.3"':''}>▲</button>
+          <button class="tb-btn" onclick="deplacerBloc(${i},1)" ${i===_blocs.length-1?'disabled style="opacity:.3"':''}>▼</button>
+          <button class="tb-btn" onclick="supprimerBloc(${i})" style="color:var(--danger)">✕</button>
+        </div>
+        <div style="padding:10px 14px">
+          ${bloc.contenu
+            ?`<div style="position:relative"><img src="${bloc.contenu}" style="width:100%;border-radius:6px;display:block"><button class="btn btn-sm btn-danger" onclick="retirerImageBloc(${i})" style="position:absolute;top:6px;right:6px;opacity:.8">✕ Retirer</button></div>`
+            :`<div class="img-upload" style="margin:0" id="img-upload-bloc-${bloc.id}">
+                <input type="file" accept="image/*" onchange="uploadImageBloc(${i},${bloc.id},this)">
+                <div class="img-upload-text">📎 Cliquer ou glisser une image</div>
+              </div>`
+          }
+        </div>`;
     } else {
       div.innerHTML=`
         <div class="bloc-header">
@@ -943,7 +965,6 @@ function updateBlocContenu(idx,val){_blocs[idx].contenu=val;}
 function ajouterBlocTexte(){
   _blocs.push({type:'texte',id:_blocIdCounter++,contenu:''});
   renderBlocs();
-  // Focus sur le dernier textarea
   setTimeout(()=>{const tas=document.querySelectorAll('.bloc-textarea');if(tas.length)tas[tas.length-1].focus();},50);
 }
 
@@ -951,8 +972,31 @@ function ajouterBlocPOV(){
   _blocs.push({type:'pov',id:_blocIdCounter++,contenu:''});
   _blocs.push({type:'texte',id:_blocIdCounter++,contenu:''});
   renderBlocs();
-  // Focus sur l'input POV
   setTimeout(()=>{const inputs=document.querySelectorAll('.bloc-pov-input');if(inputs.length)inputs[inputs.length-1].focus();},50);
+}
+
+function ajouterBlocImage(){
+  _blocs.push({type:'image',id:_blocIdCounter++,contenu:''});
+  renderBlocs();
+}
+
+async function uploadImageBloc(idx, blocId, input){
+  if(!input.files[0])return;
+  const zone=document.getElementById('img-upload-bloc-'+blocId);
+  if(zone)zone.innerHTML='<div class="img-upload-text"><span class="spinner"></span>Upload…</div>';
+  try{
+    const url=await uploadImage(input.files[0],'chapitres');
+    _blocs[idx].contenu=url;
+    renderBlocs();
+  }catch(e){
+    alert('Erreur upload : '+e.message);
+    renderBlocs();
+  }
+}
+
+function retirerImageBloc(idx){
+  _blocs[idx].contenu='';
+  renderBlocs();
 }
 
 function deplacerBloc(idx,dir){
@@ -1011,16 +1055,16 @@ function majWordcount(){
 }
 
 function compileBlocsToContenu(){
-  // Sauvegarder les valeurs DOM actuelles
   document.querySelectorAll('[data-bloc-id]').forEach(el=>{
     const id=parseInt(el.dataset.blocId);
     const b=_blocs.find(x=>x.id===id);
-    if(b)b.contenu=el.value||b.contenu;
+    if(b&&b.type!=='image')b.contenu=el.value||b.contenu;
   });
   return _blocs.map(b=>{
     if(b.type==='pov')return`<pov>${b.contenu}</pov>`;
+    if(b.type==='image')return b.contenu?`<img-bloc>${b.contenu}</img-bloc>`:'';
     return b.contenu;
-  }).join('\n\n');
+  }).filter(Boolean).join('\n\n');
 }
 
 
