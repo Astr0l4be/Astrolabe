@@ -209,6 +209,7 @@ function saveOptions(){
     }
   }
   closeM('options-popup');
+  refreshTWHistoire();
 }
 
 function ouvrirPopupResetOptions(){

@@ -176,6 +176,23 @@ function openHistoire(id){
   go('p-histoire');
 }
 
+function refreshTWHistoire(){
+  const b=BOOKS.find(x=>x.id===currentHistoireId);
+  if(!b)return;
+  const prefs=optParHistoire[currentHistoireId];
+  const twrHistoire=prefs?prefs.twrHistoire:compte.twrHistoire;
+  const twBox=document.getElementById('tw-box');
+  const twRevealBtn=document.getElementById('tw-reveal-btn');
+  const twBoxReveal=document.getElementById('tw-box-reveal');
+  twBox.style.display='none';
+  if(twBoxReveal)twBoxReveal.style.display='none';
+  if(twRevealBtn)twRevealBtn.style.display='none';
+  if(b.tw){
+    if(twrHistoire!==false){twBox.style.display='block';document.getElementById('tw-text').textContent=b.tw;}
+    else{if(twRevealBtn)twRevealBtn.style.display='block';if(twBoxReveal)twBoxReveal.textContent=b.tw;}
+  }
+}
+
 async function openLecture(bookId,chapNum){
   const b=BOOKS.find(x=>x.id===bookId);
   if(!b)return;
