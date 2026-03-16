@@ -201,23 +201,22 @@
     .lecture-header{padding:14px 16px 10px;flex-shrink:0;display:flex;align-items:center;gap:10px;justify-content:space-between;}
     .lecture-titre{font-family:'Cormorant Garamond',serif;font-size:13px;color:var(--text2);letter-spacing:1px;text-align:center;flex:1;}
     .lecture-body{padding:20px 22px 40px;font-size:15px;line-height:2.1;color:var(--text2);}
-    .lecture-body p{margin-bottom:1.5em;}
+    .lecture-body p{margin-bottom:1.5em;text-align:justify;}
     .lecture-body .d{color:var(--text);}
-    .lecture-ch-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--text);margin-bottom:6px;text-align:center;}
-    .lecture-ch-sub{font-size:13px;color:var(--text3);font-style:italic;text-align:center;margin-bottom:32px;letter-spacing:.5px;}
+    .lecture-ch-num{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;color:var(--text);text-align:center;margin-bottom:4px;display:flex;align-items:center;justify-content:center;gap:12px;}
+    .lecture-ch-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--text);margin-bottom:32px;text-align:center;font-style:normal;letter-spacing:.5px;}
+    .lecture-star-side{font-size:24px;color:inherit;opacity:.8;}
     .lecture-nav{display:flex;gap:10px;padding:0 16px 40px;}
     #p-lecture.mode-jour-lecture{background:#f5f0e8;}
     #p-lecture.mode-jour-lecture .lecture-body{background:#f5f0e8;color:#1a1510;}
     #p-lecture.mode-jour-lecture .lecture-body p,#p-lecture.mode-jour-lecture .lecture-body p.d{color:#1a1510!important;}
-    #p-lecture.mode-jour-lecture .lecture-ch-title{color:#1a1510;}
-    #p-lecture.mode-jour-lecture .lecture-ch-sub{color:#6b5e4e;}
+    #p-lecture.mode-jour-lecture .lecture-ch-num,#p-lecture.mode-jour-lecture .lecture-ch-title{color:#1a1510;}
     #p-lecture.mode-jour-lecture .lecture-header{background:#ede8df;}
     #p-lecture.mode-jour-lecture .lecture-titre{color:#6b5e4e;}
     .lecture-body.texte-bleu p,.lecture-body.texte-bleu p.d{color:var(--accent)!important;}
     .lecture-body.texte-blanc p,.lecture-body.texte-blanc p.d{color:#eef0fa!important;}
-    .lecture-ch-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--text);margin-bottom:6px;text-align:center;display:flex;align-items:center;justify-content:center;gap:12px;}
-    .lecture-star-side{font-size:20px;color:inherit;opacity:.8;}
-    .lecture-ch-sub{font-size:13px;color:var(--text3);font-style:italic;text-align:center;margin-bottom:32px;letter-spacing:.5px;}
+    .texte-bleu .lecture-ch-num,.texte-bleu .lecture-ch-title{color:var(--accent)!important;}
+    .texte-blanc .lecture-ch-num,.texte-blanc .lecture-ch-title{color:#eef0fa!important;}
 
     /* MON COMPTE */
     .compte-top{display:flex;flex-direction:column;align-items:center;padding:20px 18px 0;}
@@ -1141,8 +1140,8 @@ async function openLecture(bookId,chapNum){
   }
   document.getElementById('lecture-titre').textContent=b.title;
   // Titre et sous-titre depuis les métadonnées du chapitre
-  let html=`<div class="lecture-ch-title"><span class="lecture-star-side">✦</span>Chapitre ${ch.num}<span class="lecture-star-side">✦</span></div>`;
-  if(ch.titre)html+=`<div class="lecture-ch-sub">${ch.titre}</div>`;
+  let html=`<div class="lecture-ch-num"><span class="lecture-star-side">✦</span>Chapitre ${ch.num}<span class="lecture-star-side">✦</span></div>`;
+  if(ch.titre)html+=`<div class="lecture-ch-title">${ch.titre}</div>`;
   // Nettoyer le contenu : supprimer les balises de style mais garder <strong> et <em>
   const contenuPropre=contenu
     .replace(/<div[^>]*style="[^"]*text-align[^"]*"[^>]*>([\s\S]*?)<\/div>/gi,'$1')
@@ -1359,6 +1358,12 @@ function applyLectureMode(){
   if(!modeJour){lb.classList.add(textesBlancs?'texte-blanc':'texte-bleu');}
   const lp=document.getElementById('p-lecture');
   if(lp)lp.classList.toggle('mode-jour-lecture',modeJour);
+  // Appliquer la couleur aux titres de chapitre
+  const couleur=modeJour?'':textesBlancs?'#eef0fa':'var(--accent)';
+  document.querySelectorAll('.lecture-ch-num,.lecture-ch-title').forEach(el=>{
+    el.style.color=modeJour?'':'couleur';
+    el.style.color=couleur;
+  });
 }
 
 /* AVATAR */
