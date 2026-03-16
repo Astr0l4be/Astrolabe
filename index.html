@@ -897,6 +897,20 @@
     </div>
   </div>
 
+
+  <!-- POP-UP ANNIVERSAIRE 18 ANS -->
+  <div class="modal-overlay" id="anniversaire-popup" style="position:fixed;z-index:200">
+    <div class="modal-box" style="text-align:center">
+      <div style="font-size:48px;margin-bottom:12px">🎂</div>
+      <div class="modal-title">Joyeux anniversaire !</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Tu as maintenant accès au contenu adulte si tu le souhaites. Cette option est modifiable depuis ton compte.<br><br>Souhaites-tu rendre visible le contenu pour adultes ?</p>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-full btn-accent" onclick="confirmerAdulte(true)">Oui ✦</button>
+        <button class="btn btn-full" onclick="confirmerAdulte(false)">Non</button>
+      </div>
+    </div>
+  </div>
+
 </div><!-- #app -->
 
 <div id="pwa-banner" class="hidden">
@@ -1205,7 +1219,10 @@ async function finishInscription(){
     }
     const userId=data.user?.id;
     if(!userId)throw new Error('Erreur création compte');
-    const {error:pe}=await db.from('profils').insert({id:userId,pseudo,email,tickets:20,adulte,trigger_warnings_histoire:twrHistoire,trigger_warnings_chapitre:twrChapitre});
+    const dobVal=isMobile
+      ?`${document.getElementById('dob-annee').value}-${String(document.getElementById('dob-mois').value).padStart(2,'0')}-${String(document.getElementById('dob-jour').value).padStart(2,'0')}`
+      :(document.getElementById('dob-date').value||null);
+    const {error:pe}=await db.from('profils').insert({id:userId,pseudo,email,tickets:20,adulte,trigger_warnings_histoire:twrHistoire,trigger_warnings_chapitre:twrChapitre,date_naissance:dobVal||null});
     if(pe)throw pe;
     compte.loggedIn=true;compte.userId=userId;compte.pseudo=pseudo;compte.tickets=20;
     compte.adulte=adulte;compte.twrHistoire=twrHistoire;compte.twrChapitre=twrChapitre;
@@ -1420,6 +1437,19 @@ async function supprimerCompteDefinitif(){
   }
 }
 
+/* ANNIVERSAIRE 18 ANS */
+async function confirmerAdulte(choix){
+  document.getElementById('anniversaire-popup').classList.remove('open');
+  // Mémoriser que le popup a été vu pour ne plus le réafficher
+  if(compte.userId) localStorage.setItem('adulte_popup_vu_'+compte.userId,'1');
+  if(choix&&compte.userId){
+    await db.from('profils').update({adulte:true}).eq('id',compte.userId);
+    compte.adulte=true;
+    syncCompteToggles();
+    renderGrid('book-grid',BOOKS);
+  }
+}
+
 /* SESSION */
 async function checkSession(){
   const {data:{session}}=await db.auth.getSession();
@@ -1433,6 +1463,16 @@ async function checkSession(){
       compte.twrChapitre=profil.trigger_warnings_chapitre===true;
       document.getElementById('compte-name').textContent=compte.pseudo;
       updateTicketsDisplay();syncCompteToggles();renderGrid('book-grid',BOOKS);updateTopbar();
+      // Vérifier si l'utilisateur vient d'avoir 18 ans
+      if(profil.date_naissance&&!profil.adulte&&!localStorage.getItem('adulte_popup_vu_'+session.user.id)){
+        const dob=new Date(profil.date_naissance);
+        const today=new Date();
+        let age=today.getFullYear()-dob.getFullYear();
+        if(today.getMonth()<dob.getMonth()||(today.getMonth()===dob.getMonth()&&today.getDate()<dob.getDate()))age--;
+        if(age>=18){
+          setTimeout(()=>document.getElementById('anniversaire-popup').classList.add('open'),4000);
+        }
+      }
     }
   }
 }
