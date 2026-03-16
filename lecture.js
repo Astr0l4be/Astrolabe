@@ -217,3 +217,9 @@ function ouvrirPopupResetOptions(){
   openModal('reset-options-popup');
 }
 
+function confirmerResetOptions(){
+  optParHistoire={};
+  closeM('reset-options-popup');
+  openModal('reset-options-popup2');
+}
+
