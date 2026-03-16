@@ -23,6 +23,10 @@ async function openLecture(bookId,chapNum){
   contenuPropre.split('\n\n').forEach(para=>{
     para=para.trim();
     if(!para)return;
+    // Espaces insécables pour la typographie française
+    para=para
+      .replace(/ ([?!:;»])/g,'\u00a0$1')
+      .replace(/(«) /g,'$1\u00a0');
     const isD=para.startsWith('—')||para.startsWith('-');
     html+=`<p class="${isD?'d':''}">${para.replace(/\n/g,'<br>')}</p>`;
   });
