@@ -45,6 +45,11 @@ async function openLecture(bookId,chapNum){
   document.querySelector('#p-lecture .page-scroll').scrollTop=0;
   go('p-lecture');
   setTimeout(()=>applyLectureModeForHistoire(bookId),50);
+  // Appliquer la taille du texte
+  const lb2=document.getElementById('lecture-body');
+  const prefsT=optParHistoire[bookId];
+  const t=prefsT&&prefsT.taille?prefsT.taille:tailleLecture;
+  if(lb2)lb2.style.fontSize=TAILLES[t]+'px';
   ajouterBiblioContinuer(bookId, chapNum);
 }
 
@@ -73,6 +78,44 @@ function renderBiblioContinuer(){
 /* MODE LECTURE */
 let modeJour=localStorage.getItem('modeJour')==='1';
 let textesBlancs=localStorage.getItem('textesBlancs')==='1';
+let tailleLecture=localStorage.getItem('tailleLecture')||'normal';
+const TAILLES={'petit':13,'normal':15,'grand':17,'tres-grand':20};
+
+function setTaille(taille){
+  tailleLecture=taille;
+  localStorage.setItem('tailleLecture',taille);
+  // Appliquer au corps de lecture
+  const lb=document.getElementById('lecture-body');
+  if(lb)lb.style.fontSize=TAILLES[taille]+'px';
+  // Mettre à jour les boutons Mon Compte
+  ['petit','normal','grand','tres-grand'].forEach(t=>{
+    const btn=document.getElementById('compte-taille-'+t.replace('-',''));
+    if(btn)btn.classList.toggle('btn-taille-sel',t===taille);
+  });
+  syncTailleBtns('compte',taille);
+}
+
+function setOptTaille(prefix,taille){
+  syncTailleBtns(prefix,taille);
+  // Stocker temporairement dans un dataset sur le panel
+  const panel=document.getElementById('opt-panel-'+(prefix==='c'?'cette':'toutes'));
+  if(panel)panel.dataset.taille=taille;
+}
+
+function syncTailleBtns(prefix,taille){
+  ['p','n','g','tg'].forEach((suf,i)=>{
+    const keys=['petit','normal','grand','tres-grand'];
+    const id=prefix==='compte'?`compte-taille-${suf}`:`opt-${prefix}-taille-${suf}`;
+    const btn=document.getElementById(id);
+    if(btn)btn.classList.toggle('btn-taille-sel',keys[i]===taille);
+  });
+}
+
+function initTailleBtns(){
+  syncTailleBtns('compte',tailleLecture);
+  syncTailleBtns('c',tailleLecture);
+  syncTailleBtns('t',tailleLecture);
+}
 function toggleModeJour(actif){
   modeJour=actif;
   localStorage.setItem('modeJour',actif?'1':'0');
@@ -117,6 +160,7 @@ function syncCompteToggles(){
   // Restaurer le mode lecture sauvegardé
   toggleModeJour(modeJour);
   setTexte(textesBlancs?'blanc':'bleu');
+  initTailleBtns();
   renderBiblioContinuer();
 }
 
@@ -129,19 +173,25 @@ let currentHistoireId=null;
 function _setOngletControls(prefix, prefs){
   const mj=prefs.modeJour||false;
   const tb=prefs.textesBlancs||false;
+  const t=prefs.taille||tailleLecture;
   document.getElementById('opt-'+prefix+'-mode-jour').checked=mj;
   document.getElementById('opt-'+prefix+'-mode-label').textContent=mj?'Jour':'Nuit';
   document.getElementById('opt-'+prefix+'-row-couleur').style.display=mj?'none':'flex';
   _setOptTexte(prefix, tb?'blanc':'bleu');
   document.getElementById('opt-'+prefix+'-tw-histoire').checked=prefs.twrHistoire!==false;
   document.getElementById('opt-'+prefix+'-tw-chapitre').checked=prefs.twrChapitre===true;
+  syncTailleBtns(prefix,t);
+  const panel=document.getElementById('opt-panel-'+(prefix==='c'?'cette':'toutes'));
+  if(panel)panel.dataset.taille=t;
 }
 function _getOngletValues(prefix){
+  const panel=document.getElementById('opt-panel-'+(prefix==='c'?'cette':'toutes'));
   return {
     modeJour: document.getElementById('opt-'+prefix+'-mode-jour').checked,
     textesBlancs: document.getElementById('opt-'+prefix+'-btn-blanc').dataset.sel==='1',
     twrHistoire: document.getElementById('opt-'+prefix+'-tw-histoire').checked,
     twrChapitre: document.getElementById('opt-'+prefix+'-tw-chapitre').checked,
+    taille: panel&&panel.dataset.taille?panel.dataset.taille:tailleLecture,
   };
 }
 function _setOptTexte(prefix, couleur){
@@ -188,40 +238,46 @@ function openOptionsPopup(bookId){
 // Valider
 function saveOptions(){
   if(optOnglet==='cette'){
-    // Sauvegarder UNIQUEMENT pour cette histoire, sans toucher aux vars globales
     const v=_getOngletValues('c');
     optParHistoire[currentHistoireId]=v;
-    // Appliquer visuellement à la lecture en cours
     const lp=document.getElementById('p-lecture');
     if(lp)lp.classList.toggle('mode-jour-lecture',v.modeJour);
     const lb=document.getElementById('lecture-body');
-    if(lb){lb.classList.remove('texte-bleu','texte-blanc');if(!v.modeJour)lb.classList.add(v.textesBlancs?'texte-blanc':'texte-bleu');}
+    if(lb){
+      lb.classList.remove('texte-bleu','texte-blanc');
+      if(!v.modeJour)lb.classList.add(v.textesBlancs?'texte-blanc':'texte-bleu');
+      lb.style.fontSize=TAILLES[v.taille||'normal']+'px';
+    }
     document.querySelectorAll('.lecture-ch-num,.lecture-ch-title').forEach(el=>{
       el.style.color=v.modeJour?'#1a1510':v.textesBlancs?'#eef0fa':'var(--accent)';
     });
   } else {
-    // Sauvegarder les prefs générales SANS écraser les prefs par histoire déjà définies
     const v=_getOngletValues('t');
-    modeJour=v.modeJour; textesBlancs=v.textesBlancs;
+    modeJour=v.modeJour; textesBlancs=v.textesBlancs; tailleLecture=v.taille||'normal';
     compte.twrHistoire=v.twrHistoire; compte.twrChapitre=v.twrChapitre;
+    localStorage.setItem('tailleLecture',tailleLecture);
     toggleModeJour(v.modeJour); setTexte(v.textesBlancs?'blanc':'bleu');
+    syncTailleBtns('compte',tailleLecture);
     const togTWH=document.getElementById('toggle-tw-histoire');if(togTWH)togTWH.checked=v.twrHistoire;
     const togTWC=document.getElementById('toggle-tw-chapitre');if(togTWC)togTWC.checked=v.twrChapitre;
     savePrefs();
-    // Appliquer seulement si cette histoire n'a pas de prefs spécifiques
     if(!optParHistoire[currentHistoireId]){
       const lp=document.getElementById('p-lecture');
       if(lp)lp.classList.toggle('mode-jour-lecture',v.modeJour);
       const lb=document.getElementById('lecture-body');
-      if(lb){lb.classList.remove('texte-bleu','texte-blanc');if(!v.modeJour)lb.classList.add(v.textesBlancs?'texte-blanc':'texte-bleu');}
+      if(lb){
+        lb.classList.remove('texte-bleu','texte-blanc');
+        if(!v.modeJour)lb.classList.add(v.textesBlancs?'texte-blanc':'texte-bleu');
+        lb.style.fontSize=TAILLES[v.taille||'normal']+'px';
+      }
       document.querySelectorAll('.lecture-ch-num,.lecture-ch-title').forEach(el=>{
         el.style.color=v.modeJour?'#1a1510':v.textesBlancs?'#eef0fa':'var(--accent)';
       });
     }
   }
   closeM('options-popup');
+  refreshTWHistoire();
 }
-
 function ouvrirPopupResetOptions(){
   closeM('options-popup');
   openModal('reset-options-popup');

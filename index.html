@@ -368,6 +368,15 @@
             <button id="btn-texte-blanc" onclick="setTexte('blanc')" style="background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);color:#eef0fa;font-family:'Jost',sans-serif;font-size:11px;padding:5px 14px;border-radius:20px;cursor:pointer;">Blanc</button>
           </div>
         </div>
+        <div class="toggle-row" style="justify-content:space-between;align-items:center;">
+          <span class="toggle-label">Taille du texte</span>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button id="compte-taille-p" onclick="setTaille('petit')" class="btn-taille" style="font-size:11px">A</button>
+            <button id="compte-taille-n" onclick="setTaille('normal')" class="btn-taille btn-taille-sel" style="font-size:13px">A</button>
+            <button id="compte-taille-g" onclick="setTaille('grand')" class="btn-taille" style="font-size:16px">A</button>
+            <button id="compte-taille-tg" onclick="setTaille('tres-grand')" class="btn-taille" style="font-size:19px">A</button>
+          </div>
+        </div>
         <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(180,190,255,.07)">
           <button class="btn btn-full" style="font-size:11px;color:var(--danger);border-color:rgba(212,126,126,.3)" onclick="ouvrirPopupResetOptions()">↺ Réinitialiser les paramètres pour toutes les histoires</button>
         </div>
@@ -628,6 +637,15 @@
             <button id="opt-c-btn-blanc" onclick="setOptCTexte('blanc')" style="background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);color:#eef0fa;font-family:'Jost',sans-serif;font-size:11px;padding:5px 14px;border-radius:20px;cursor:pointer;">Blanc</button>
           </div>
         </div>
+        <div class="toggle-row" style="justify-content:space-between;align-items:center">
+          <span class="toggle-label">Taille du texte</span>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button id="opt-c-taille-p" onclick="setOptTaille('c','petit')" class="btn-taille" style="font-size:11px">A</button>
+            <button id="opt-c-taille-n" onclick="setOptTaille('c','normal')" class="btn-taille btn-taille-sel" style="font-size:13px">A</button>
+            <button id="opt-c-taille-g" onclick="setOptTaille('c','grand')" class="btn-taille" style="font-size:16px">A</button>
+            <button id="opt-c-taille-tg" onclick="setOptTaille('c','tres-grand')" class="btn-taille" style="font-size:19px">A</button>
+          </div>
+        </div>
         <div class="toggle-row"><span class="toggle-label">TW par histoire</span><label class="tgl"><input type="checkbox" id="opt-c-tw-histoire"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
         <div class="toggle-row"><span class="toggle-label">TW par chapitre</span><label class="tgl"><input type="checkbox" id="opt-c-tw-chapitre"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
         <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(180,190,255,.08)">
@@ -642,6 +660,15 @@
           <div style="display:flex;gap:8px">
             <button id="opt-t-btn-bleu" onclick="setOptTTexte('bleu')" style="background:rgba(126,159,212,.25);border:1.5px solid rgba(126,159,212,.6);color:var(--accent);font-family:'Jost',sans-serif;font-size:11px;padding:5px 14px;border-radius:20px;cursor:pointer;">Bleu</button>
             <button id="opt-t-btn-blanc" onclick="setOptTTexte('blanc')" style="background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);color:#eef0fa;font-family:'Jost',sans-serif;font-size:11px;padding:5px 14px;border-radius:20px;cursor:pointer;">Blanc</button>
+          </div>
+        </div>
+        <div class="toggle-row" style="justify-content:space-between;align-items:center">
+          <span class="toggle-label">Taille du texte</span>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button id="opt-t-taille-p" onclick="setOptTaille('t','petit')" class="btn-taille" style="font-size:11px">A</button>
+            <button id="opt-t-taille-n" onclick="setOptTaille('t','normal')" class="btn-taille btn-taille-sel" style="font-size:13px">A</button>
+            <button id="opt-t-taille-g" onclick="setOptTaille('t','grand')" class="btn-taille" style="font-size:16px">A</button>
+            <button id="opt-t-taille-tg" onclick="setOptTaille('t','tres-grand')" class="btn-taille" style="font-size:19px">A</button>
           </div>
         </div>
         <div class="toggle-row"><span class="toggle-label">TW par histoire</span><label class="tgl"><input type="checkbox" id="opt-t-tw-histoire"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
