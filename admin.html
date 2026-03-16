@@ -280,6 +280,14 @@
                 <input type="hidden" id="edit-statut-val" value="brouillon">
               </div>
             </div>
+            <div class="form-group">
+              <label class="form-label">Numérotation des chapitres</label>
+              <div style="display:flex;gap:8px">
+                <button type="button" class="btn" id="edit-num-arabe" onclick="setEditNumerotation('arabe')" style="flex:1">1, 2, 3… (Arabe)</button>
+                <button type="button" class="btn" id="edit-num-romain" onclick="setEditNumerotation('romain')" style="flex:1">I, II, III… (Romain)</button>
+              </div>
+              <input type="hidden" id="edit-numerotation-val" value="arabe">
+            </div>
             <div style="display:flex;gap:10px;margin-top:8px">
               <button class="btn btn-full" onclick="fermerEditionHistoire()" style="flex:1">Annuler</button>
               <button class="btn btn-full btn-accent" id="edit-save-btn" onclick="sauvegarderHistoire()" style="flex:2">✦ Sauvegarder</button>
@@ -566,7 +574,35 @@
               </div>
               <div class="form-group">
                 <label class="form-label">Titre *</label>
-                <input type="text" class="form-input" id="edit-chap-titre">
+                <div class="editor-wrap">
+                  <div class="editor-toolbar">
+                    <button type="button" class="tb-btn" onclick="fmt('edit-chap-titre','bold')"><b>G</b></button>
+                    <button type="button" class="tb-btn" onclick="fmt('edit-chap-titre','italic')"><i>I</i></button>
+                  </div>
+                  <input type="text" class="form-input" id="edit-chap-titre" style="border:none;border-radius:0">
+                </div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Citation <span style="color:var(--text3);font-size:9px">(optionnel)</span></label>
+                <div class="editor-wrap">
+                  <div class="editor-toolbar">
+                    <button type="button" class="tb-btn" onclick="fmt('edit-chap-citation','bold')"><b>G</b></button>
+                    <button type="button" class="tb-btn" onclick="fmt('edit-chap-citation','italic')"><i>I</i></button>
+                  </div>
+                  <input type="text" class="form-input" id="edit-chap-citation" placeholder="« Une citation… »" style="border:none;border-radius:0;font-style:italic">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Auteur de la citation <span style="color:var(--text3);font-size:9px">(optionnel)</span></label>
+                <div class="editor-wrap">
+                  <div class="editor-toolbar">
+                    <button type="button" class="tb-btn" onclick="fmt('edit-chap-citation-auteur','bold')"><b>G</b></button>
+                    <button type="button" class="tb-btn" onclick="fmt('edit-chap-citation-auteur','italic')"><i>I</i></button>
+                  </div>
+                  <input type="text" class="form-input" id="edit-chap-citation-auteur" placeholder="— Auteur" style="border:none;border-radius:0">
+                </div>
               </div>
             </div>
             <div class="form-group">
@@ -1182,6 +1218,11 @@ async function ouvrirEditionHistoire(id){
   document.getElementById('edit-adulte-oui').className='btn'+(h.adulte?' btn-accent':'');
   document.getElementById('edit-statut-brouillon').className='btn'+(h.statut==='brouillon'?' btn-accent':'');
   document.getElementById('edit-statut-publie').className='btn'+(h.statut==='publie'?' btn-accent':'');
+  // Numérotation
+  const num=h.numerotation||'arabe';
+  document.getElementById('edit-numerotation-val').value=num;
+  document.getElementById('edit-num-arabe').className='btn'+(num==='arabe'?' btn-accent':'');
+  document.getElementById('edit-num-romain').className='btn'+(num==='romain'?' btn-accent':'');
 
   // Auteur dropdown
   await loadAuteursSelect();
@@ -1271,6 +1312,7 @@ async function sauvegarderHistoire(){
       prix_ticket:parseInt(document.getElementById('edit-prix').value)||1,
       adulte:document.getElementById('edit-adulte-val').value==='true',
       statut:document.getElementById('edit-statut-val').value,
+      numerotation:document.getElementById('edit-numerotation-val').value||'arabe',
     }).eq('id',id);
 
     // Tags — supprimer et recréer
@@ -1408,6 +1450,8 @@ async function ouvrirEditionChapitre(id, histoireId){
   if(!ch)return;
   document.getElementById('edit-chap-num').value=ch.numero;
   document.getElementById('edit-chap-titre').value=ch.titre||'';
+  document.getElementById('edit-chap-citation').value=ch.citation||'';
+  document.getElementById('edit-chap-citation-auteur').value=ch.citation_auteur||'';
   document.getElementById('edit-chap-contenu').value=ch.contenu||'';
   document.getElementById('edit-chap-wordcount').textContent=(ch.contenu?ch.contenu.trim().split(/\s+/).filter(w=>w).length.toLocaleString('fr'):0)+' mots';
   document.getElementById('edit-chap-gratuit-val').value=String(ch.gratuit);
@@ -1435,11 +1479,13 @@ async function sauvegarderChapitre(){
   const contenu=document.getElementById('edit-chap-contenu').value.trim();
   const numero=parseInt(document.getElementById('edit-chap-num').value);
   const gratuit=document.getElementById('edit-chap-gratuit-val').value==='true';
+  const citation=document.getElementById('edit-chap-citation').value.trim()||null;
+  const citationAuteur=document.getElementById('edit-chap-citation-auteur').value.trim()||null;
   if(!titre||!contenu){showAlert('chapitre','Le titre et le contenu sont obligatoires.','error');return;}
   const btn=document.getElementById('edit-chap-save-btn');
   btn.textContent='Sauvegarde…';btn.disabled=true;
   try{
-    await db.from('chapitres').update({titre,contenu,numero,gratuit}).eq('id',_editChapId);
+    await db.from('chapitres').update({titre,contenu,numero,gratuit,citation,citation_auteur:citationAuteur}).eq('id',_editChapId);
     showAlert('chapitre','Chapitre modifié avec succès ! ✦');
     fermerEditionChapitre();
     loadChapitresExistants(_editChapHistoireId);
@@ -1503,6 +1549,8 @@ async function ouvrirEditionChapitreDepuisFiche(id, histoireId){
   selectHistoire(histoireId, histoires.find(h=>h.id===histoireId)?.titre||'');
   document.getElementById('edit-chap-num').value=ch.numero;
   document.getElementById('edit-chap-titre').value=ch.titre||'';
+  document.getElementById('edit-chap-citation').value=ch.citation||'';
+  document.getElementById('edit-chap-citation-auteur').value=ch.citation_auteur||'';
   document.getElementById('edit-chap-contenu').value=ch.contenu||'';
   document.getElementById('edit-chap-wordcount').textContent=(ch.contenu?ch.contenu.trim().split(/\s+/).filter(w=>w).length.toLocaleString('fr'):0)+' mots';
   document.getElementById('edit-chap-gratuit-val').value=String(ch.gratuit);
@@ -2067,6 +2115,11 @@ function setNumerotation(val){
   document.getElementById('n-numerotation').value=val;
   document.getElementById('num-arabe').className='btn'+(val==='arabe'?' btn-accent':'');
   document.getElementById('num-romain').className='btn'+(val==='romain'?' btn-accent':'');
+}
+function setEditNumerotation(val){
+  document.getElementById('edit-numerotation-val').value=val;
+  document.getElementById('edit-num-arabe').className='btn'+(val==='arabe'?' btn-accent':'');
+  document.getElementById('edit-num-romain').className='btn'+(val==='romain'?' btn-accent':'');
 }
 
 /* CHIFFRES ROMAINS */
