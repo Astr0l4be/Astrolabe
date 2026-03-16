@@ -858,48 +858,50 @@
       <button class="modal-close" onclick="closeM('options-popup')">✕</button>
       <div class="modal-title" style="margin-bottom:16px">Paramètres de lecture</div>
       <!-- Onglets -->
-      <div style="display:flex;gap:10px;margin-bottom:18px">
-        <button id="opt-btn-toutes" onclick="selectOptScope('toutes')" class="btn btn-full btn-accent" style="font-size:11px">Pour toutes les histoires</button>
-        <button id="opt-btn-cette" onclick="selectOptScope('cette')" class="btn btn-full" style="font-size:11px">Pour cette histoire</button>
+      <div style="display:flex;gap:10px;margin-bottom:20px">
+        <button id="opt-btn-cette" onclick="afficherOnglet('cette')" class="btn btn-full btn-accent" style="font-size:11px">Pour cette histoire</button>
+        <button id="opt-btn-toutes" onclick="afficherOnglet('toutes')" class="btn btn-full" style="font-size:11px">Pour toutes les histoires</button>
       </div>
-      <!-- Paramètres communs -->
-      <div class="toggle-row"><span class="toggle-label">Mode lecture : <span id="opt-mode-label">Nuit</span></span><label class="tgl"><input type="checkbox" id="opt-mode-jour" onchange="document.getElementById('opt-mode-label').textContent=this.checked?'Jour':'Nuit';document.getElementById('opt-row-couleur').style.display=this.checked?'none':'flex'"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
-      <div id="opt-row-couleur" class="toggle-row" style="justify-content:space-between;align-items:center;margin-top:8px">
-        <span class="toggle-label">Couleur du texte</span>
-        <div style="display:flex;gap:8px">
-          <button id="opt-btn-bleu" onclick="setOptTexte('bleu')" style="background:rgba(126,159,212,.25);border:1.5px solid rgba(126,159,212,.6);color:var(--accent);font-family:'Jost',sans-serif;font-size:11px;padding:5px 14px;border-radius:20px;cursor:pointer;">Bleu</button>
-          <button id="opt-btn-blanc" onclick="setOptTexte('blanc')" style="background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);color:#eef0fa;font-family:'Jost',sans-serif;font-size:11px;padding:5px 14px;border-radius:20px;cursor:pointer;">Blanc</button>
+      <!-- Contenu onglet "cette histoire" -->
+      <div id="opt-panel-cette">
+        <div class="toggle-row"><span class="toggle-label">Mode lecture : <span id="opt-c-mode-label">Nuit</span></span><label class="tgl"><input type="checkbox" id="opt-c-mode-jour" onchange="optCModeChange(this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+        <div id="opt-c-row-couleur" class="toggle-row" style="justify-content:space-between;align-items:center">
+          <span class="toggle-label">Couleur du texte</span>
+          <div style="display:flex;gap:8px">
+            <button id="opt-c-btn-bleu" onclick="setOptCTexte('bleu')" style="background:rgba(126,159,212,.25);border:1.5px solid rgba(126,159,212,.6);color:var(--accent);font-family:'Jost',sans-serif;font-size:11px;padding:5px 14px;border-radius:20px;cursor:pointer;">Bleu</button>
+            <button id="opt-c-btn-blanc" onclick="setOptCTexte('blanc')" style="background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);color:#eef0fa;font-family:'Jost',sans-serif;font-size:11px;padding:5px 14px;border-radius:20px;cursor:pointer;">Blanc</button>
+          </div>
+        </div>
+        <div class="toggle-row"><span class="toggle-label">TW par histoire</span><label class="tgl"><input type="checkbox" id="opt-c-tw-histoire"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+        <div class="toggle-row"><span class="toggle-label">TW par chapitre</span><label class="tgl"><input type="checkbox" id="opt-c-tw-chapitre"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(180,190,255,.08)">
+          <button class="btn btn-full" style="font-size:11px;color:var(--danger);border-color:rgba(212,126,126,.3)" onclick="ouvrirPopupResetOptions()">↺ Réinitialiser les paramètres pour toutes les histoires</button>
         </div>
       </div>
-      <div class="toggle-row" style="margin-top:8px"><span class="toggle-label">TW par histoire</span><label class="tgl"><input type="checkbox" id="opt-tw-histoire" checked><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
-      <div class="toggle-row" style="margin-top:8px"><span class="toggle-label">TW par chapitre</span><label class="tgl"><input type="checkbox" id="opt-tw-chapitre"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
-      <!-- Bouton réinitialiser (visible seulement sur onglet "cette histoire") -->
-      <div id="opt-reset-zone" style="display:none;margin-top:16px;padding-top:14px;border-top:1px solid rgba(180,190,255,.08)">
-        <button class="btn btn-full" style="font-size:11px;color:var(--danger);border-color:rgba(212,126,126,.3)" onclick="ouvrirPopupResetOptions()">↺ Réinitialiser les paramètres pour toutes les histoires</button>
+      <!-- Contenu onglet "toutes les histoires" -->
+      <div id="opt-panel-toutes" style="display:none">
+        <div class="toggle-row"><span class="toggle-label">Mode lecture : <span id="opt-t-mode-label">Nuit</span></span><label class="tgl"><input type="checkbox" id="opt-t-mode-jour" onchange="optTModeChange(this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+        <div id="opt-t-row-couleur" class="toggle-row" style="justify-content:space-between;align-items:center">
+          <span class="toggle-label">Couleur du texte</span>
+          <div style="display:flex;gap:8px">
+            <button id="opt-t-btn-bleu" onclick="setOptTTexte('bleu')" style="background:rgba(126,159,212,.25);border:1.5px solid rgba(126,159,212,.6);color:var(--accent);font-family:'Jost',sans-serif;font-size:11px;padding:5px 14px;border-radius:20px;cursor:pointer;">Bleu</button>
+            <button id="opt-t-btn-blanc" onclick="setOptTTexte('blanc')" style="background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);color:#eef0fa;font-family:'Jost',sans-serif;font-size:11px;padding:5px 14px;border-radius:20px;cursor:pointer;">Blanc</button>
+          </div>
+        </div>
+        <div class="toggle-row"><span class="toggle-label">TW par histoire</span><label class="tgl"><input type="checkbox" id="opt-t-tw-histoire"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+        <div class="toggle-row"><span class="toggle-label">TW par chapitre</span><label class="tgl"><input type="checkbox" id="opt-t-tw-chapitre"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
       </div>
-      <button class="btn btn-full btn-accent" style="margin-top:16px" onclick="saveOptions()">Valider ✦</button>
+      <button class="btn btn-full btn-accent" style="margin-top:20px" onclick="saveOptions()">Valider ✦</button>
     </div>
   </div>
 
-  <!-- POP-UP RESET OPTIONS 1 -->
-  <div class="modal-overlay" id="reset-options-popup1" style="position:fixed;z-index:210">
+  <!-- POP-UP RESET EN TRAVAUX -->
+  <div class="modal-overlay" id="reset-options-popup" style="position:fixed;z-index:210">
     <div class="modal-box" style="text-align:center">
-      <div class="modal-title">Réinitialiser ?</div>
-      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Vous êtes sur le point de réinitialiser les paramètres particuliers à chaque histoire. Cette action est irréversible et toutes les histoires s'afficheront avec les paramètres de votre compte.<br><br>Souhaitez-vous poursuivre ?</p>
-      <div style="display:flex;gap:10px">
-        <button class="btn btn-full btn-accent" onclick="confirmerResetOptions()">Oui</button>
-        <button class="btn btn-full" onclick="closeM('reset-options-popup1');openModal('options-popup')">Non</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- POP-UP RESET OPTIONS 2 -->
-  <div class="modal-overlay" id="reset-options-popup2" style="position:fixed;z-index:210">
-    <div class="modal-box" style="text-align:center">
-      <div style="font-size:36px;margin-bottom:12px">✦</div>
-      <div class="modal-title">C'est fait !</div>
-      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Tous vos paramètres particuliers ont été réinitialisés. Désormais, toutes vos lectures s'afficheront avec les paramètres de votre compte.</p>
-      <button class="btn btn-full btn-accent" onclick="closeM('reset-options-popup2');openModal('options-popup')">Ok</button>
+      <div style="font-size:36px;margin-bottom:12px">🚧</div>
+      <div class="modal-title">En travaux</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Cette fonctionnalité sera disponible prochainement.</p>
+      <button class="btn btn-full btn-accent" onclick="closeM('reset-options-popup');openModal('options-popup')">Ok</button>
     </div>
   </div>
 
@@ -1412,98 +1414,110 @@ function togglePwd(inputId,btnId){
 }
 
 /* OPTIONS LECTURE */
-let optScope='toutes';
-let optParHistoire={};
+let optOnglet='cette'; // onglet actif dans le popup
+let optParHistoire={};  // prefs spécifiques par histoire { [id]: {modeJour, textesBlancs, twrHistoire, twrChapitre} }
 let currentHistoireId=null;
 
-function selectOptScope(scope){
-  optScope=scope;
-  // Onglets actifs
-  document.getElementById('opt-btn-cette').className='btn btn-full'+(scope==='cette'?' btn-accent':'');
-  document.getElementById('opt-btn-toutes').className='btn btn-full'+(scope==='toutes'?' btn-accent':'');
-  // Bouton reset visible seulement sur "cette histoire"
-  document.getElementById('opt-reset-zone').style.display=scope==='cette'?'block':'none';
-  // Charger les bons paramètres selon l'onglet
-  if(scope==='toutes'){
-    // Paramètres du compte
-    document.getElementById('opt-mode-jour').checked=modeJour;
-    document.getElementById('opt-mode-label').textContent=modeJour?'Jour':'Nuit';
-    document.getElementById('opt-row-couleur').style.display=modeJour?'none':'flex';
-    setOptTexte(textesBlancs?'blanc':'bleu');
-    document.getElementById('opt-tw-histoire').checked=compte.twrHistoire!==false;
-    document.getElementById('opt-tw-chapitre').checked=compte.twrChapitre===true;
-  } else {
-    // Paramètres spécifiques à cette histoire (ou compte si pas encore définis)
-    const prefs=optParHistoire[currentHistoireId]||{modeJour,textesBlancs,twrHistoire:compte.twrHistoire,twrChapitre:compte.twrChapitre};
-    document.getElementById('opt-mode-jour').checked=prefs.modeJour||false;
-    document.getElementById('opt-mode-label').textContent=prefs.modeJour?'Jour':'Nuit';
-    document.getElementById('opt-row-couleur').style.display=prefs.modeJour?'none':'flex';
-    setOptTexte(prefs.textesBlancs?'blanc':'bleu');
-    document.getElementById('opt-tw-histoire').checked=prefs.twrHistoire!==false;
-    document.getElementById('opt-tw-chapitre').checked=prefs.twrChapitre===true;
-  }
+// Helpers pour remplir/lire les contrôles d'un onglet
+function _setOngletControls(prefix, prefs){
+  const mj=prefs.modeJour||false;
+  const tb=prefs.textesBlancs||false;
+  document.getElementById('opt-'+prefix+'-mode-jour').checked=mj;
+  document.getElementById('opt-'+prefix+'-mode-label').textContent=mj?'Jour':'Nuit';
+  document.getElementById('opt-'+prefix+'-row-couleur').style.display=mj?'none':'flex';
+  _setOptTexte(prefix, tb?'blanc':'bleu');
+  document.getElementById('opt-'+prefix+'-tw-histoire').checked=prefs.twrHistoire!==false;
+  document.getElementById('opt-'+prefix+'-tw-chapitre').checked=prefs.twrChapitre===true;
+}
+function _getOngletValues(prefix){
+  return {
+    modeJour: document.getElementById('opt-'+prefix+'-mode-jour').checked,
+    textesBlancs: document.getElementById('opt-'+prefix+'-btn-blanc').dataset.sel==='1',
+    twrHistoire: document.getElementById('opt-'+prefix+'-tw-histoire').checked,
+    twrChapitre: document.getElementById('opt-'+prefix+'-tw-chapitre').checked,
+  };
+}
+function _setOptTexte(prefix, couleur){
+  document.getElementById('opt-'+prefix+'-btn-bleu').dataset.sel=couleur==='bleu'?'1':'0';
+  document.getElementById('opt-'+prefix+'-btn-blanc').dataset.sel=couleur==='blanc'?'1':'0';
+  document.getElementById('opt-'+prefix+'-btn-bleu').style.opacity=couleur==='bleu'?'1':'0.5';
+  document.getElementById('opt-'+prefix+'-btn-blanc').style.opacity=couleur==='blanc'?'1':'0.5';
 }
 
-function setOptTexte(couleur){
-  document.getElementById('opt-btn-bleu').dataset.sel=couleur==='bleu'?'1':'0';
-  document.getElementById('opt-btn-blanc').dataset.sel=couleur==='blanc'?'1':'0';
-  document.getElementById('opt-btn-bleu').style.opacity=couleur==='bleu'?'1':'0.5';
-  document.getElementById('opt-btn-blanc').style.opacity=couleur==='blanc'?'1':'0.5';
+// Changement mode jour/nuit dans les onglets
+function optCModeChange(checked){
+  document.getElementById('opt-c-mode-label').textContent=checked?'Jour':'Nuit';
+  document.getElementById('opt-c-row-couleur').style.display=checked?'none':'flex';
+}
+function optTModeChange(checked){
+  document.getElementById('opt-t-mode-label').textContent=checked?'Jour':'Nuit';
+  document.getElementById('opt-t-row-couleur').style.display=checked?'none':'flex';
+}
+function setOptCTexte(c){_setOptTexte('c',c);}
+function setOptTTexte(c){_setOptTexte('t',c);}
+
+// Afficher un onglet
+function afficherOnglet(onglet){
+  optOnglet=onglet;
+  document.getElementById('opt-btn-cette').className='btn btn-full'+(onglet==='cette'?' btn-accent':'');
+  document.getElementById('opt-btn-toutes').className='btn btn-full'+(onglet==='toutes'?' btn-accent':'');
+  document.getElementById('opt-panel-cette').style.display=onglet==='cette'?'block':'none';
+  document.getElementById('opt-panel-toutes').style.display=onglet==='toutes'?'block':'none';
 }
 
+// Ouvrir le popup
 function openOptionsPopup(bookId){
   currentHistoireId=bookId;
-  // Ouvrir sur l'onglet "toutes les histoires" par défaut avec les paramètres du compte
-  selectOptScope('toutes');
+  // Remplir onglet "cette histoire" avec les prefs spécifiques ou les prefs générales par défaut
+  const prefsC=optParHistoire[bookId]||{modeJour,textesBlancs,twrHistoire:compte.twrHistoire,twrChapitre:compte.twrChapitre};
+  _setOngletControls('c', prefsC);
+  // Remplir onglet "toutes les histoires" avec les prefs générales
+  _setOngletControls('t', {modeJour,textesBlancs,twrHistoire:compte.twrHistoire,twrChapitre:compte.twrChapitre});
+  // Ouvrir sur onglet "cette histoire"
+  afficherOnglet('cette');
   openModal('options-popup');
 }
 
+// Valider
 function saveOptions(){
-  const newModeJour=document.getElementById('opt-mode-jour').checked;
-  const newTextesBlancs=document.getElementById('opt-btn-blanc').dataset.sel==='1';
-  const newTwrHistoire=document.getElementById('opt-tw-histoire').checked;
-  const newTwrChapitre=document.getElementById('opt-tw-chapitre').checked;
-
-  if(optScope==='toutes'){
-    // Modifier les paramètres généraux du compte — NE touche PAS aux prefs par histoire
-    modeJour=newModeJour;textesBlancs=newTextesBlancs;
-    compte.twrHistoire=newTwrHistoire;compte.twrChapitre=newTwrChapitre;
-    toggleModeJour(newModeJour);setTexte(newTextesBlancs?'blanc':'bleu');
-    const togTWH=document.getElementById('toggle-tw-histoire');if(togTWH)togTWH.checked=newTwrHistoire;
-    const togTWC=document.getElementById('toggle-tw-chapitre');if(togTWC)togTWC.checked=newTwrChapitre;
-    savePrefs();
-  } else {
-    // Sauvegarder uniquement pour cette histoire — NE touche PAS aux variables globales
-    optParHistoire[currentHistoireId]={
-      modeJour:newModeJour,
-      textesBlancs:newTextesBlancs,
-      twrHistoire:newTwrHistoire,
-      twrChapitre:newTwrChapitre
-    };
-    // Appliquer visuellement sans modifier les variables globales
+  if(optOnglet==='cette'){
+    // Sauvegarder UNIQUEMENT pour cette histoire, sans toucher aux vars globales
+    const v=_getOngletValues('c');
+    optParHistoire[currentHistoireId]=v;
+    // Appliquer visuellement à la lecture en cours
     const lp=document.getElementById('p-lecture');
-    if(lp)lp.classList.toggle('mode-jour-lecture',newModeJour);
+    if(lp)lp.classList.toggle('mode-jour-lecture',v.modeJour);
     const lb=document.getElementById('lecture-body');
-    if(lb){
-      lb.classList.remove('texte-bleu','texte-blanc');
-      if(!newModeJour)lb.classList.add(newTextesBlancs?'texte-blanc':'texte-bleu');
-    }
+    if(lb){lb.classList.remove('texte-bleu','texte-blanc');if(!v.modeJour)lb.classList.add(v.textesBlancs?'texte-blanc':'texte-bleu');}
     document.querySelectorAll('.lecture-ch-num,.lecture-ch-title').forEach(el=>{
-      el.style.color=newModeJour?'#1a1510':newTextesBlancs?'#eef0fa':'var(--accent)';
+      el.style.color=v.modeJour?'#1a1510':v.textesBlancs?'#eef0fa':'var(--accent)';
     });
+  } else {
+    // Sauvegarder les prefs générales SANS écraser les prefs par histoire déjà définies
+    const v=_getOngletValues('t');
+    modeJour=v.modeJour; textesBlancs=v.textesBlancs;
+    compte.twrHistoire=v.twrHistoire; compte.twrChapitre=v.twrChapitre;
+    toggleModeJour(v.modeJour); setTexte(v.textesBlancs?'blanc':'bleu');
+    const togTWH=document.getElementById('toggle-tw-histoire');if(togTWH)togTWH.checked=v.twrHistoire;
+    const togTWC=document.getElementById('toggle-tw-chapitre');if(togTWC)togTWC.checked=v.twrChapitre;
+    savePrefs();
+    // Appliquer seulement si cette histoire n'a pas de prefs spécifiques
+    if(!optParHistoire[currentHistoireId]){
+      const lp=document.getElementById('p-lecture');
+      if(lp)lp.classList.toggle('mode-jour-lecture',v.modeJour);
+      const lb=document.getElementById('lecture-body');
+      if(lb){lb.classList.remove('texte-bleu','texte-blanc');if(!v.modeJour)lb.classList.add(v.textesBlancs?'texte-blanc':'texte-bleu');}
+      document.querySelectorAll('.lecture-ch-num,.lecture-ch-title').forEach(el=>{
+        el.style.color=v.modeJour?'#1a1510':v.textesBlancs?'#eef0fa':'var(--accent)';
+      });
+    }
   }
   closeM('options-popup');
 }
 
 function ouvrirPopupResetOptions(){
   closeM('options-popup');
-  openModal('reset-options-popup1');
-}
-
-function confirmerResetOptions(){
-  optParHistoire={};
-  closeM('reset-options-popup1');
-  openModal('reset-options-popup2');
+  openModal('reset-options-popup');
 }
 
 /* SUPPRESSION */
