@@ -223,3 +223,25 @@ function ouvrirPopupResetOptions(){
   openModal('reset-options-popup');
 }
 
+function confirmerResetOptions(){
+  optParHistoire={};
+  closeM('reset-options-popup');
+  openModal('reset-options-popup2');
+}
+
+function applyLectureModeForHistoire(bookId){
+  const prefs=optParHistoire[bookId];
+  const mj=prefs?prefs.modeJour:modeJour;
+  const tb=prefs?prefs.textesBlancs:textesBlancs;
+  const lp=document.getElementById('p-lecture');
+  if(lp)lp.classList.toggle('mode-jour-lecture',mj);
+  const lb=document.getElementById('lecture-body');
+  if(lb){
+    lb.classList.remove('texte-bleu','texte-blanc');
+    if(!mj)lb.classList.add(tb?'texte-blanc':'texte-bleu');
+  }
+  document.querySelectorAll('.lecture-ch-num,.lecture-ch-title').forEach(el=>{
+    el.style.color=mj?'#1a1510':tb?'#eef0fa':'var(--accent)';
+  });
+}
+
