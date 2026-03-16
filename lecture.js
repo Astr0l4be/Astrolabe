@@ -1,3 +1,37 @@
+let prevPage='p-main';
+function openHistoire(id){
+  currentHistoireId=id;
+  const cur=document.querySelector('.page.active');if(cur)prevPage=cur.id;
+  const b=BOOKS.find(x=>x.id===id);if(!b)return;
+  // Bannière 2:1 (même format que l'accueil)
+  const bannerEl=document.getElementById('histoire-banner');
+  if(b.banner){bannerEl.innerHTML=`<img src="${b.banner}" alt="${b.title}" style="width:100%;height:100%;object-fit:cover;display:block;">`;}
+  else{bannerEl.innerHTML=`<div class="histoire-banner-bg ${b.color}">✦</div>`;}
+  document.getElementById('histoire-title').textContent=b.title;
+  document.getElementById('histoire-author').textContent=b.author?'par '+b.author:'';
+  document.getElementById('histoire-tags').innerHTML=b.tags.map(t=>`<span class="histoire-tag"># ${t}</span>`).join('');
+  document.getElementById('histoire-desc').innerHTML=b.desc;
+  const twBox=document.getElementById('tw-box');
+  const twRevealBtn=document.getElementById('tw-reveal-btn');
+  const twBoxReveal=document.getElementById('tw-box-reveal');
+  twBox.style.display='none';if(twBoxReveal)twBoxReveal.style.display='none';
+  if(twRevealBtn)twRevealBtn.style.display='none';
+  if(b.tw){
+    if(compte.twrHistoire!==false){twBox.style.display='block';document.getElementById('tw-text').textContent=b.tw;}
+    else{if(twRevealBtn){twRevealBtn.style.display='block';}if(document.getElementById('tw-text-reveal'))document.getElementById('tw-text-reveal').textContent=b.tw;}
+  }
+  const chapList=document.getElementById('chapitres-list');
+  chapList.innerHTML=b.chapitres.map(ch=>{
+    const libre=ch.gratuit||ch.num<=8;
+    return`<button class="btn-lire ${libre?'':'btn-lire-locked'}" onclick="openLecture('${b.id}',${ch.num})">
+      <span>Chapitre ${ch.num} · ${ch.titre}</span>
+      <span class="ch-badge ${libre?'':'ch-badge-ticket'}">${libre?'Gratuit':'🎟 1 ticket'}</span>
+    </button>`;
+  }).join('');
+  document.getElementById('histoire-back-btn').onclick=()=>go(prevPage);
+  go('p-histoire');
+}
+
 async function openLecture(bookId,chapNum){
   const b=BOOKS.find(x=>x.id===bookId);
   if(!b)return;
@@ -41,23 +75,29 @@ async function openLecture(bookId,chapNum){
   document.querySelector('#p-lecture .page-scroll').scrollTop=0;
   go('p-lecture');
   setTimeout(()=>applyLectureModeForHistoire(bookId),50);
+  ajouterBiblioContinuer(bookId, chapNum);
 }
 
-function applyLectureModeForHistoire(bookId){
-  // Utiliser les prefs spécifiques à cette histoire si elles existent, sinon les prefs générales
-  const prefs=optParHistoire[bookId];
-  const mj=prefs?prefs.modeJour:modeJour;
-  const tb=prefs?prefs.textesBlancs:textesBlancs;
-  const lp=document.getElementById('p-lecture');
-  if(lp)lp.classList.toggle('mode-jour-lecture',mj);
-  const lb=document.getElementById('lecture-body');
-  if(lb){
-    lb.classList.remove('texte-bleu','texte-blanc');
-    if(!mj)lb.classList.add(tb?'texte-blanc':'texte-bleu');
-  }
-  document.querySelectorAll('.lecture-ch-num,.lecture-ch-title').forEach(el=>{
-    el.style.color=mj?'#1a1510':tb?'#eef0fa':'var(--accent)';
-  });
+function ajouterBiblioContinuer(bookId, chapNum){
+  let enCours=JSON.parse(localStorage.getItem('biblio_continuer')||'[]');
+  enCours=enCours.filter(e=>e.id!==bookId);
+  enCours.unshift({id:bookId,chapNum});
+  enCours=enCours.slice(0,20);
+  localStorage.setItem('biblio_continuer',JSON.stringify(enCours));
+  renderBiblioContinuer();
+}
+
+function renderBiblioContinuer(){
+  const el=document.getElementById('biblio-continuer');
+  if(!el)return;
+  const enCours=JSON.parse(localStorage.getItem('biblio_continuer')||'[]');
+  if(!enCours.length){el.innerHTML='<span class="biblio-empty">Aucune lecture en cours</span>';return;}
+  el.innerHTML=enCours.map(e=>{
+    const b=BOOKS.find(x=>x.id===e.id);
+    if(!b)return'';
+    const img=b.cover?`<img src="${b.cover}" alt="${b.title}">`:`<div class="biblio-card-bg ${b.color}">✦</div>`;
+    return`<div class="biblio-card" onclick="openHistoire('${b.id}')" title="${b.title} — Ch.${e.chapNum}">${img}</div>`;
+  }).join('');
 }
 
 /* MODE LECTURE */
@@ -107,6 +147,7 @@ function syncCompteToggles(){
   // Restaurer le mode lecture sauvegardé
   toggleModeJour(modeJour);
   setTexte(textesBlancs?'blanc':'bleu');
+  renderBiblioContinuer();
 }
 
 /* OPTIONS LECTURE */
@@ -209,17 +250,10 @@ function saveOptions(){
     }
   }
   closeM('options-popup');
-  refreshTWHistoire();
 }
 
 function ouvrirPopupResetOptions(){
   closeM('options-popup');
   openModal('reset-options-popup');
-}
-
-function confirmerResetOptions(){
-  optParHistoire={};
-  closeM('reset-options-popup');
-  openModal('reset-options-popup2');
 }
 

@@ -359,7 +359,7 @@
         <!-- MODE LECTURE -->
         <div class="toggle-row">
           <span class="toggle-label">Mode lecture : <span id="mode-lecture-label">Nuit</span></span>
-          <label class="tgl tgl-mode"><input type="checkbox" id="toggle-mode-jour" onchange="toggleModeJour(this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
+          <label class="tgl"><input type="checkbox" id="toggle-mode-jour" onchange="toggleModeJour(this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
         </div>
         <div class="toggle-row" id="row-couleur-texte" style="justify-content:space-between;align-items:center;">
           <span class="toggle-label">Couleur du texte en mode nuit</span>
@@ -368,10 +368,8 @@
             <button id="btn-texte-blanc" onclick="setTexte('blanc')" style="background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);color:#eef0fa;font-family:'Jost',sans-serif;font-size:11px;padding:5px 14px;border-radius:20px;cursor:pointer;">Blanc</button>
           </div>
         </div>
-        <div class="divider"></div>
-        <!-- SUPPRESSION -->
-        <div style="text-align:center;padding:8px 0 16px">
-          <button style="background:none;border:none;color:var(--danger);font-family:'Jost',sans-serif;font-size:11px;cursor:pointer;letter-spacing:.5px;opacity:.7" onclick="openModal('delete-popup1')">Supprimer mon compte</button>
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(180,190,255,.07)">
+          <button class="btn btn-full" style="font-size:11px;color:var(--danger);border-color:rgba(212,126,126,.3)" onclick="ouvrirPopupResetOptions()">↺ Réinitialiser les paramètres pour toutes les histoires</button>
         </div>
         <div class="divider"></div>
         <!-- BIBLIOTHÈQUE -->
@@ -381,6 +379,11 @@
         <div class="biblio-row" id="biblio-pal"><span class="biblio-empty">Ta pile à lire est vide</span></div>
         <div class="biblio-section-title">Livres terminés</div>
         <div class="biblio-row" id="biblio-termines"><span class="biblio-empty">Aucun livre terminé</span></div>
+        <div class="divider"></div>
+        <!-- SUPPRESSION -->
+        <div style="text-align:center;padding:8px 0 16px">
+          <button style="background:none;border:none;color:var(--danger);font-family:'Jost',sans-serif;font-size:11px;cursor:pointer;letter-spacing:.5px;opacity:.7" onclick="openModal('delete-popup1')">Supprimer mon compte</button>
+        </div>
       </div>
     </div>
     <!-- Pop-up tickets -->
@@ -617,7 +620,7 @@
       </div>
       <!-- Contenu onglet "cette histoire" -->
       <div id="opt-panel-cette">
-        <div class="toggle-row"><span class="toggle-label">Mode lecture : <span id="opt-c-mode-label">Nuit</span></span><label class="tgl tgl-mode"><input type="checkbox" id="opt-c-mode-jour" onchange="optCModeChange(this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+        <div class="toggle-row"><span class="toggle-label">Mode lecture : <span id="opt-c-mode-label">Nuit</span></span><label class="tgl"><input type="checkbox" id="opt-c-mode-jour" onchange="optCModeChange(this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
         <div id="opt-c-row-couleur" class="toggle-row" style="justify-content:space-between;align-items:center">
           <span class="toggle-label">Couleur du texte</span>
           <div style="display:flex;gap:8px">
@@ -633,7 +636,7 @@
       </div>
       <!-- Contenu onglet "toutes les histoires" -->
       <div id="opt-panel-toutes" style="display:none">
-        <div class="toggle-row"><span class="toggle-label">Mode lecture : <span id="opt-t-mode-label">Nuit</span></span><label class="tgl tgl-mode"><input type="checkbox" id="opt-t-mode-jour" onchange="optTModeChange(this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+        <div class="toggle-row"><span class="toggle-label">Mode lecture : <span id="opt-t-mode-label">Nuit</span></span><label class="tgl"><input type="checkbox" id="opt-t-mode-jour" onchange="optTModeChange(this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
         <div id="opt-t-row-couleur" class="toggle-row" style="justify-content:space-between;align-items:center">
           <span class="toggle-label">Couleur du texte</span>
           <div style="display:flex;gap:8px">
