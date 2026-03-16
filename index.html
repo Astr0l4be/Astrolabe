@@ -1140,28 +1140,22 @@ async function openLecture(bookId,chapNum){
     go('p-lecture');return;
   }
   document.getElementById('lecture-titre').textContent=b.title;
-  // Séparer le titre/sous-titre (première ligne) du reste du contenu
-  const firstBreak=contenu.indexOf('\n\n');
-  const firstLine=firstBreak===-1?contenu:contenu.substring(0,firstBreak);
-  const bodyText=firstBreak===-1?'':contenu.substring(firstBreak+2);
-  const parts=firstLine.split('\n');
-  let html=`<div class="lecture-ch-title"><span class="lecture-star-side">✦</span>${parts[0]||''}<span class="lecture-star-side">✦</span></div>`;
-  if(parts[1])html+=`<div class="lecture-ch-sub">${parts[1]}</div>`;
-  // Le reste est du HTML généré par l'admin — on l'affiche directement
-  // On convertit les sauts de ligne simples en <br> uniquement dans les morceaux hors balises HTML
-  const bodyHtml=bodyText
-    .split('\n\n')
-    .map(para=>{
-      para=para.trim();
-      if(!para)return'';
-      // Si le paragraphe contient déjà des balises HTML, on l'affiche tel quel
-      if(/<[a-z][\s\S]*>/i.test(para))return para;
-      // Sinon on l'enveloppe dans un <p> en détectant les dialogues
-      const isD=para.startsWith('—')||para.startsWith('-');
-      return`<p class="${isD?'d':''}">${para.replace(/\n/g,'<br>')}</p>`;
-    })
-    .join('\n');
-  html+=bodyHtml;
+  // Titre et sous-titre depuis les métadonnées du chapitre
+  let html=`<div class="lecture-ch-title"><span class="lecture-star-side">✦</span>Chapitre ${ch.num}<span class="lecture-star-side">✦</span></div>`;
+  if(ch.titre)html+=`<div class="lecture-ch-sub">${ch.titre}</div>`;
+  // Nettoyer le contenu : supprimer les balises de style mais garder <strong> et <em>
+  const contenuPropre=contenu
+    .replace(/<div[^>]*style="[^"]*text-align[^"]*"[^>]*>([\s\S]*?)<\/div>/gi,'$1')
+    .replace(/<div[^>]*>([\s\S]*?)<\/div>/gi,'$1')
+    .replace(/style="[^"]*"/gi,'')
+    .trim();
+  // Découper en paragraphes et afficher
+  contenuPropre.split('\n\n').forEach(para=>{
+    para=para.trim();
+    if(!para)return;
+    const isD=para.startsWith('—')||para.startsWith('-');
+    html+=`<p class="${isD?'d':''}">${para.replace(/\n/g,'<br>')}</p>`;
+  });
   const showTWCh=compte.twrChapitre===true;
   const histPrefs=optParHistoire[bookId];
   const useTWCh=histPrefs?histPrefs.twrChapitre:showTWCh;
