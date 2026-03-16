@@ -1106,7 +1106,7 @@ function openHistoire(id){
   document.getElementById('histoire-title').textContent=b.title;
   document.getElementById('histoire-author').textContent=b.author?'par '+b.author:'';
   document.getElementById('histoire-tags').innerHTML=b.tags.map(t=>`<span class="histoire-tag"># ${t}</span>`).join('');
-  document.getElementById('histoire-desc').textContent=b.desc;
+  document.getElementById('histoire-desc').innerHTML=b.desc;
   const twBox=document.getElementById('tw-box');
   const twRevealBtn=document.getElementById('tw-reveal-btn');
   const twBoxReveal=document.getElementById('tw-box-reveal');
@@ -1119,7 +1119,7 @@ function openHistoire(id){
   const chapList=document.getElementById('chapitres-list');
   chapList.innerHTML=b.chapitres.map(ch=>{
     const libre=ch.gratuit||ch.num<=8;
-    return`<button class="btn-lire ${libre?'':'btn-lire-locked'}" onclick="openLecture(${b.id},${ch.num})">
+    return`<button class="btn-lire ${libre?'':'btn-lire-locked'}" onclick="openLecture('${b.id}',${ch.num})">
       <span>Chapitre ${ch.num} · ${ch.titre}</span>
       <span class="ch-badge ${libre?'':'ch-badge-ticket'}">${libre?'Gratuit':'🎟 1 ticket'}</span>
     </button>`;
@@ -1156,8 +1156,8 @@ async function openLecture(bookId,chapNum){
   const prev=b.chapitres.find(c=>c.num===chapNum-1);
   const next=b.chapitres.find(c=>c.num===chapNum+1);
   nav.innerHTML='';
-  if(prev)nav.innerHTML+=`<button class="btn btn-full" style="flex:1" onclick="openLecture(${bookId},${prev.num})">← Ch.${prev.num}</button>`;
-  if(next)nav.innerHTML+=`<button class="btn btn-full btn-accent" style="flex:1" onclick="openLecture(${bookId},${next.num})">Ch.${next.num} →</button>`;
+  if(prev)nav.innerHTML+=`<button class="btn btn-full" style="flex:1" onclick="openLecture('${bookId}',${prev.num})">← Ch.${prev.num}</button>`;
+  if(next)nav.innerHTML+=`<button class="btn btn-full btn-accent" style="flex:1" onclick="openLecture('${bookId}',${next.num})">Ch.${next.num} →</button>`;
   document.getElementById('lecture-back-btn').onclick=()=>go('p-histoire');
   document.querySelector('#p-lecture .page-scroll').scrollTop=0;
   go('p-lecture');
