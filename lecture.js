@@ -40,7 +40,24 @@ async function openLecture(bookId,chapNum){
   document.getElementById('lecture-back-btn').onclick=()=>go('p-histoire');
   document.querySelector('#p-lecture .page-scroll').scrollTop=0;
   go('p-lecture');
-  setTimeout(applyLectureMode,50);
+  setTimeout(()=>applyLectureModeForHistoire(bookId),50);
+}
+
+function applyLectureModeForHistoire(bookId){
+  // Utiliser les prefs spécifiques à cette histoire si elles existent, sinon les prefs générales
+  const prefs=optParHistoire[bookId];
+  const mj=prefs?prefs.modeJour:modeJour;
+  const tb=prefs?prefs.textesBlancs:textesBlancs;
+  const lp=document.getElementById('p-lecture');
+  if(lp)lp.classList.toggle('mode-jour-lecture',mj);
+  const lb=document.getElementById('lecture-body');
+  if(lb){
+    lb.classList.remove('texte-bleu','texte-blanc');
+    if(!mj)lb.classList.add(tb?'texte-blanc':'texte-bleu');
+  }
+  document.querySelectorAll('.lecture-ch-num,.lecture-ch-title').forEach(el=>{
+    el.style.color=mj?'#1a1510':tb?'#eef0fa':'var(--accent)';
+  });
 }
 
 /* MODE LECTURE */
