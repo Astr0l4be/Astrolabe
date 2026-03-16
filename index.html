@@ -1321,8 +1321,10 @@ function syncCompteToggles(){
   if(togTWH)togTWH.checked=compte.twrHistoire;
   if(togTWC)togTWC.checked=compte.twrChapitre;
   const rowAdulte=document.getElementById('row-adulte');
-  // Afficher le toggle adulte si l'utilisateur a 18 ans ou plus (calculé depuis date_naissance)
   if(rowAdulte)rowAdulte.style.display=compte.estAdulteAge?'flex':'none';
+  // Restaurer le mode lecture sauvegardé
+  toggleModeJour(modeJour);
+  setTexte(textesBlancs?'blanc':'bleu');
 }
 
 function updateTopbar(){
@@ -1340,16 +1342,21 @@ function updateTopbar(){
 }
 
 /* MODE LECTURE */
-let modeJour=false;let textesBlancs=false;
+let modeJour=localStorage.getItem('modeJour')==='1';
+let textesBlancs=localStorage.getItem('textesBlancs')==='1';
 function toggleModeJour(actif){
   modeJour=actif;
+  localStorage.setItem('modeJour',actif?'1':'0');
   document.getElementById('mode-lecture-label').textContent=actif?'Jour':'Nuit';
   document.getElementById('row-couleur-texte').style.display=actif?'none':'flex';
+  const togModeJour=document.getElementById('toggle-mode-jour');
+  if(togModeJour)togModeJour.checked=actif;
   const lp=document.getElementById('p-lecture');
   if(lp)lp.classList.toggle('mode-jour-lecture',actif);
 }
 function setTexte(couleur){
   textesBlancs=(couleur==='blanc');
+  localStorage.setItem('textesBlancs',textesBlancs?'1':'0');
   document.getElementById('btn-texte-bleu').style.opacity=textesBlancs?'0.5':'1';
   document.getElementById('btn-texte-blanc').style.opacity=textesBlancs?'1':'0.5';
   applyLectureMode();
