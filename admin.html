@@ -970,7 +970,6 @@ function ajouterBlocTexte(){
 
 function ajouterBlocPOV(){
   _blocs.push({type:'pov',id:_blocIdCounter++,contenu:''});
-  _blocs.push({type:'texte',id:_blocIdCounter++,contenu:''});
   renderBlocs();
   setTimeout(()=>{const inputs=document.querySelectorAll('.bloc-pov-input');if(inputs.length)inputs[inputs.length-1].focus();},50);
 }
