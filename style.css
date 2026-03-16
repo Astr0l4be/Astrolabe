@@ -200,9 +200,30 @@
     .lecture-body p{margin-bottom:1.5em;text-align:justify;}
     .lecture-body .d{color:var(--text);}
     .lecture-ch-num{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;color:var(--text);text-align:center;margin-bottom:4px;display:flex;align-items:center;justify-content:center;gap:12px;}
-    .lecture-ch-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--text);margin-bottom:32px;text-align:center;font-style:normal;letter-spacing:.5px;}
+    .lecture-ch-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--text);margin-bottom:16px;text-align:center;font-style:normal;letter-spacing:.5px;}
     .lecture-star-side{font-size:24px;color:inherit;opacity:.8;}
     .lecture-nav{display:flex;gap:10px;padding:0 16px 40px;}
+
+    /* CITATION */
+    .lecture-citation{margin:0 0 24px;padding:0 24px;border-left:2px solid rgba(167,143,212,.3);}
+    .lecture-citation-texte{font-style:italic;color:var(--text2);line-height:1.8;text-align:center;margin-bottom:6px;}
+    .lecture-citation-auteur{font-weight:600;color:var(--text);text-align:left;font-size:13px;}
+
+    /* SÉPARATEUR */
+    .lecture-ch-sep{text-align:center;color:var(--text3);font-size:18px;margin:0 0 28px;letter-spacing:6px;}
+
+    /* POV */
+    .lecture-pov{font-family:'Cormorant Garamond',serif;font-weight:700;text-align:center;color:var(--text);margin:28px 0 20px;letter-spacing:2px;position:relative;}
+    .lecture-pov::before,.lecture-pov::after{content:'✦';font-size:.7em;opacity:.5;margin:0 10px;}
+
+    /* IMAGE */
+    .lecture-img-bloc{margin:20px 0;width:100%;}
+    .lecture-img-bloc img{width:100%;display:block;border-radius:4px;}
+
+    /* ALIGNEMENTS dans le texte */
+    .lecture-body div[style*="text-align"]{margin-bottom:1.5em;}
+
+    /* MODE JOUR */
     #p-lecture.mode-jour-lecture{background:#f5f0e8;}
     #p-lecture.mode-jour-lecture .lecture-body{background:#f5f0e8;color:#1a1510;}
     #p-lecture.mode-jour-lecture .lecture-body p,#p-lecture.mode-jour-lecture .lecture-body p.d{color:#1a1510!important;}
