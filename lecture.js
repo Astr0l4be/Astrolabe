@@ -1,7 +1,6 @@
 async function openLecture(bookId,chapNum){
   const b=BOOKS.find(x=>x.id===bookId);
   if(!b)return;
-  // Charger le contenu si pas encore fait
   const contenu=await loadContenuChapitre(bookId,chapNum);
   const ch=b.chapitres.find(c=>c.num===chapNum);
   if(!ch)return;
@@ -10,47 +9,102 @@ async function openLecture(bookId,chapNum){
     go('p-lecture');return;
   }
   document.getElementById('lecture-titre').textContent=b.title;
-  // Titre et sous-titre depuis les métadonnées du chapitre
-  let html=`<div class="lecture-ch-num"><span class="lecture-star-side">✦</span>Chapitre ${ch.num}<span class="lecture-star-side">✦</span></div>`;
+
+  // Numéro du chapitre — arabe ou romain
+  const numAffiche=(b.numerotation==='romain')?toRoman(chapNum):chapNum;
+  let html=`<div class="lecture-ch-num"><span class="lecture-star-side">✦</span>Chapitre ${numAffiche}<span class="lecture-star-side">✦</span></div>`;
+
+  // Titre du chapitre
   if(ch.titre)html+=`<div class="lecture-ch-title">${ch.titre}</div>`;
-  // Nettoyer le contenu : supprimer les balises de style mais garder <strong> et <em>
-  const contenuPropre=contenu
-    .replace(/<div[^>]*style="[^"]*text-align[^"]*"[^>]*>([\s\S]*?)<\/div>/gi,'$1')
-    .replace(/<div[^>]*>([\s\S]*?)<\/div>/gi,'$1')
-    .replace(/style="[^"]*"/gi,'')
-    .trim();
-  // Découper en paragraphes et afficher
-  contenuPropre.split('\n\n').forEach(para=>{
-    para=para.trim();
-    if(!para)return;
-    // Espaces insécables pour la typographie française
-    para=para
-      .replace(/ ([?!:;»])/g,'\u00a0$1')
-      .replace(/(«) /g,'$1\u00a0');
-    const isD=para.startsWith('—')||para.startsWith('-');
-    html+=`<p class="${isD?'d':''}">${para.replace(/\n/g,'<br>')}</p>`;
+
+  // Citation + Auteur
+  if(ch.citation){
+    html+=`<div class="lecture-citation">`;
+    html+=`<div class="lecture-citation-texte">${ch.citation}</div>`;
+    if(ch.citation_auteur)html+=`<div class="lecture-citation-auteur">${ch.citation_auteur}</div>`;
+    html+=`</div>`;
+  }
+
+  html+=`<div class="lecture-ch-sep">✦</div>`;
+
+  // Parser le contenu en blocs
+  const parties=contenu.split(/(<pov>[^<]*<\/pov>|<img-bloc>[^<]*<\/img-bloc>)/g);
+  parties.forEach(partie=>{
+    partie=partie.trim();
+    if(!partie)return;
+
+    if(partie.startsWith('<pov>')){
+      // Bloc POV
+      const nom=partie.replace(/<\/?pov>/g,'').trim();
+      if(nom)html+=`<div class="lecture-pov">${nom}</div>`;
+
+    } else if(partie.startsWith('<img-bloc>')){
+      // Bloc image
+      const url=partie.replace(/<\/?img-bloc>/g,'').trim();
+      if(url)html+=`<div class="lecture-img-bloc"><img src="${url}" alt="" loading="lazy"></div>`;
+
+    } else {
+      // Bloc texte — parser paragraphe par paragraphe
+      partie.split('\n\n').forEach(para=>{
+        para=para.trim();
+        if(!para)return;
+        // Conserver les divs d'alignement
+        if(para.startsWith('<div')){
+          // Appliquer typographie française à l'intérieur
+          para=para
+            .replace(/ ([?!:;»])/g,'\u00a0$1')
+            .replace(/(«) /g,'$1\u00a0');
+          html+=para;
+          return;
+        }
+        // Typographie française
+        para=para
+          .replace(/ ([?!:;»])/g,'\u00a0$1')
+          .replace(/(«) /g,'$1\u00a0');
+        const isD=para.startsWith('—')||para.startsWith('-');
+        html+=`<p class="${isD?'d':''}">${para.replace(/\n/g,'<br>')}</p>`;
+      });
+    }
   });
+
+  // TW chapitre
   const showTWCh=compte.twrChapitre===true;
   const histPrefs=optParHistoire[bookId];
   const useTWCh=histPrefs?histPrefs.twrChapitre:showTWCh;
   if(b.tw&&useTWCh){html=`<div class="tw-box" style="margin:0 0 20px"><div class="tw-label">Trigger warnings</div><div class="tw-text">${b.tw}</div></div>`+html;}
+
   document.getElementById('lecture-body').innerHTML=html;
+
+  // Navigation chapitres
   const nav=document.getElementById('lecture-nav');
   const prev=b.chapitres.find(c=>c.num===chapNum-1);
   const next=b.chapitres.find(c=>c.num===chapNum+1);
   nav.innerHTML='';
-  if(prev)nav.innerHTML+=`<button class="btn btn-full" style="flex:1" onclick="openLecture('${bookId}',${prev.num})">← Ch.${prev.num}</button>`;
-  if(next)nav.innerHTML+=`<button class="btn btn-full btn-accent" style="flex:1" onclick="openLecture('${bookId}',${next.num})">Ch.${next.num} →</button>`;
+  const prevNum=prev?(b.numerotation==='romain'?toRoman(prev.num):prev.num):null;
+  const nextNum=next?(b.numerotation==='romain'?toRoman(next.num):next.num):null;
+  if(prev)nav.innerHTML+=`<button class="btn btn-full" style="flex:1" onclick="openLecture('${bookId}',${prev.num})">← Ch.${prevNum}</button>`;
+  if(next)nav.innerHTML+=`<button class="btn btn-full btn-accent" style="flex:1" onclick="openLecture('${bookId}',${next.num})">Ch.${nextNum} →</button>`;
+
   document.getElementById('lecture-back-btn').onclick=()=>go('p-histoire');
   document.querySelector('#p-lecture .page-scroll').scrollTop=0;
   go('p-lecture');
   setTimeout(()=>applyLectureModeForHistoire(bookId),50);
-  // Appliquer la taille du texte
+
+  // Taille du texte
   const lb2=document.getElementById('lecture-body');
   const prefsT=optParHistoire[bookId];
   const t=prefsT&&prefsT.taille?prefsT.taille:tailleLecture;
   if(lb2)lb2.style.fontSize=TAILLES[t]+'px';
-  ajouterBiblioContinuer(bookId, chapNum);
+  ajouterBiblioContinuer(bookId,chapNum);
+}
+
+/* CONVERSION CHIFFRES ROMAINS */
+function toRoman(num){
+  const vals=[1000,900,500,400,100,90,50,40,10,9,5,4,1];
+  const syms=['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
+  let r='';
+  for(let i=0;i<vals.length;i++){while(num>=vals[i]){r+=syms[i];num-=vals[i];}}
+  return r;
 }
 
 function ajouterBiblioContinuer(bookId, chapNum){
