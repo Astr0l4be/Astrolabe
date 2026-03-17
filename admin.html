@@ -188,7 +188,7 @@
       <!-- DETAIL HISTOIRE (caché par défaut) -->
       <div id="histoire-detail" style="display:none">
         <div style="margin-bottom:12px">
-          <button class="btn btn-sm" onclick="document.getElementById('histoire-detail').style.display='none';document.getElementById('histoires-card').style.display='block';renderHistoiresList()">← Retour</button>
+          <button class="btn btn-sm" onclick="retourDepuisHistoire()">← Retour</button>
         </div>
         <div class="card" id="detail-card"></div>
         <!-- FORMULAIRE ÉDITION -->
@@ -522,7 +522,7 @@
       <!-- DETAIL AUTEUR -->
       <div id="auteur-detail" style="display:none">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-          <button class="btn btn-sm" onclick="fermerAuteurDetail()">← Retour</button>
+          <button class="btn btn-sm" onclick="retourDepuisAuteur()">← Retour</button>
           <button class="btn btn-sm btn-danger" onclick="ouvrirPopupSupprimerAuteur()" style="width:34px;height:34px;padding:0;border-radius:50%;font-size:15px;display:flex;align-items:center;justify-content:center" title="Supprimer">🗑</button>
         </div>
         <div class="card" id="auteur-detail-card"></div>
@@ -1497,6 +1497,18 @@ async function ouvrirEditionHistoire(id){
   await loadTWSuggestions('edit');
 }
 
+function retourDepuisHistoire(){
+  const editForm=document.getElementById('edit-histoire-form');
+  if(editForm&&editForm.style.display!=='none'){
+    // On est en mode édition → revenir sur la fiche
+    fermerEditionHistoire();
+  } else {
+    // On est sur la fiche → revenir sur la liste
+    document.getElementById('histoire-detail').style.display='none';
+    document.getElementById('histoires-card').style.display='block';
+    renderHistoiresList();
+  }
+}
 function fermerEditionHistoire(){
   document.getElementById('edit-histoire-form').style.display='none';
   document.getElementById('histoires-card').style.display='none';
@@ -2137,6 +2149,14 @@ function fermerAuteurDetail(){
   document.getElementById('auteur-detail').style.display='none';
   document.getElementById('auteurs-card').style.display='block';
   currentAuteurId=null;
+}
+function retourDepuisAuteur(){
+  const editForm=document.getElementById('edit-auteur-form');
+  if(editForm&&editForm.style.display!=='none'){
+    fermerEditionAuteur();
+  } else {
+    fermerAuteurDetail();
+  }
 }
 
 async function showAuteurDetail(id){
