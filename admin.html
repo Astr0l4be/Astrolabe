@@ -1499,10 +1499,9 @@ async function ouvrirEditionHistoire(id){
 
 function fermerEditionHistoire(){
   document.getElementById('edit-histoire-form').style.display='none';
-  document.getElementById('detail-card').style.display='block';
-  document.getElementById('histoire-detail').style.display='block';
   document.getElementById('histoires-card').style.display='none';
-  showHistoireDetail(currentDetailId);
+  document.getElementById('histoire-detail').style.display='block';
+  document.getElementById('detail-card').style.display='block';
 }
 
 function renderEditTags(){
