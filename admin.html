@@ -710,6 +710,24 @@
               </div>
               <input type="hidden" id="edit-chap-gratuit-val" value="true">
             </div>
+            <div class="form-group">
+              <label class="form-label">Scène spicy ?</label>
+              <div style="display:flex;gap:8px">
+                <button type="button" class="btn btn-accent" id="edit-chap-spicy-non" onclick="setEditChapSpicy(false)">Non</button>
+                <button type="button" class="btn" id="edit-chap-spicy-oui" onclick="setEditChapSpicy(true)">Oui 🌶</button>
+              </div>
+              <input type="hidden" id="edit-chap-spicy" value="false">
+            </div>
+            <div id="edit-chap-soft-wrap" style="display:none" class="form-group">
+              <label class="form-label">Version soft <span style="color:var(--text3);font-size:9px">(version alternative sans scènes explicites)</span></label>
+              <div id="edit-ch-soft-blocs"></div>
+              <div style="display:flex;gap:8px;margin-top:8px">
+                <button type="button" class="btn btn-sm" onclick="ajouterBlocTexte('edit-ch-soft-blocs')">+ Texte</button>
+                <button type="button" class="btn btn-sm btn-accent" onclick="ajouterBlocPOV('edit-ch-soft-blocs')">✦ + POV</button>
+                <button type="button" class="btn btn-sm" onclick="ajouterBlocImage('edit-ch-soft-blocs')" style="background:rgba(126,159,212,.1);border-color:rgba(126,159,212,.3);color:var(--accent)">🖼 + Image</button>
+              </div>
+              <div class="form-hint" id="edit-chap-soft-wordcount">0 mots</div>
+            </div>
             <div style="display:flex;gap:10px;margin-top:8px">
               <button class="btn btn-full" onclick="fermerEditionChapitre()" style="flex:1">Annuler</button>
               <button class="btn btn-full btn-accent" id="edit-chap-save-btn" onclick="sauvegarderChapitre()" style="flex:2">✦ Sauvegarder</button>
@@ -771,6 +789,24 @@
           </div>
           <div id="ch-tw-suggestions-label" style="font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:10px;margin-bottom:5px;display:none">Suggestions</div>
           <div id="ch-tw-suggestions" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Scène spicy ?</label>
+          <div style="display:flex;gap:8px">
+            <button type="button" class="btn btn-accent" id="ch-spicy-non" onclick="setChSpicy(false)">Non</button>
+            <button type="button" class="btn" id="ch-spicy-oui" onclick="setChSpicy(true)">Oui 🌶</button>
+          </div>
+          <input type="hidden" id="ch-spicy" value="false">
+        </div>
+        <div id="ch-soft-wrap" style="display:none" class="form-group">
+          <label class="form-label">Version soft <span style="color:var(--text3);font-size:9px">(version alternative sans scènes explicites)</span></label>
+          <div id="ch-soft-blocs"></div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button type="button" class="btn btn-sm" onclick="ajouterBlocTexte('ch-soft-blocs')">+ Texte</button>
+            <button type="button" class="btn btn-sm btn-accent" onclick="ajouterBlocPOV('ch-soft-blocs')">✦ + POV</button>
+            <button type="button" class="btn btn-sm" onclick="ajouterBlocImage('ch-soft-blocs')" style="background:rgba(126,159,212,.1);border-color:rgba(126,159,212,.3);color:var(--accent)">🖼 + Image</button>
+          </div>
+          <div class="form-hint" id="ch-soft-wordcount">0 mots</div>
         </div>
         <div class="form-group">
           <label class="form-label">Accès</label>
@@ -902,7 +938,7 @@ function switchTab(tab){
     loadAuteurs();
   }
   if(tab==='tags'){loadTagsGestion();loadTWsGestion();}
-  if(tab==='chapitre'){chTws=[];renderChTws();loadHistoiresSelect();initBlocs('');}
+  if(tab==='chapitre'){chTws=[];renderChTws();loadHistoiresSelect();initBlocs('','ch-blocs');}
   if(tab==='nouvelle'){loadAuteursSelect();document.getElementById('n-options-adulte').style.display='none';document.getElementById('n-options-non-adulte').style.display='block';}
   if(tab==='nouvel-auteur'){
     document.getElementById('a-pseudo').value='';
@@ -940,192 +976,112 @@ function removeImg(type){
   input.value='';
 }
 
-/* ÉDITEUR PAR BLOCS */
-let _blocs=[]; // [{type:'texte'|'pov', id:n, contenu:''}]
-let _blocIdCounter=0;
+/* ÉDITEUR PAR BLOCS — multi-containers */
+const _blocsMap={};
 
-function initBlocs(contenuExistant, containerId){
-  _blocs=[];
-  _blocIdCounter=0;
-  _blocsContainer=containerId||'ch-blocs';
+function getBlocsForContainer(cid){
+  if(!_blocsMap[cid])_blocsMap[cid]={blocs:[],counter:0};
+  return _blocsMap[cid];
+}
+
+function initBlocs(contenuExistant,containerId){
+  const cid=containerId||'ch-blocs';
+  _blocsMap[cid]={blocs:[],counter:0};
+  const state=_blocsMap[cid];
   if(contenuExistant){
     const parts=contenuExistant.split(/(<pov>[^<]*<\/pov>|<img-bloc>[^<]*<\/img-bloc>)/g);
     parts.forEach(p=>{
-      if(p.startsWith('<pov>')){
-        const nom=p.replace(/<\/?pov>/g,'').trim();
-        if(nom)_blocs.push({type:'pov',id:_blocIdCounter++,contenu:nom});
-      } else if(p.startsWith('<img-bloc>')){
-        const url=p.replace(/<\/?img-bloc>/g,'').trim();
-        if(url)_blocs.push({type:'image',id:_blocIdCounter++,contenu:url});
-      } else if(p.trim()){
-        _blocs.push({type:'texte',id:_blocIdCounter++,contenu:p.trim()});
-      }
+      if(p.startsWith('<pov>')){const nom=p.replace(/<\/?pov>/g,'').trim();if(nom)state.blocs.push({type:'pov',id:state.counter++,contenu:nom});}
+      else if(p.startsWith('<img-bloc>')){const url=p.replace(/<\/?img-bloc>/g,'').trim();if(url)state.blocs.push({type:'image',id:state.counter++,contenu:url});}
+      else if(p.trim())state.blocs.push({type:'texte',id:state.counter++,contenu:p.trim()});
     });
   }
-  if(!_blocs.length)_blocs.push({type:'texte',id:_blocIdCounter++,contenu:''});
-  renderBlocs();
+  if(!state.blocs.length)state.blocs.push({type:'texte',id:state.counter++,contenu:''});
+  renderBlocs(cid);
 }
 
-let _blocsContainer='ch-blocs';
+function _wcId(cid){return cid==='ch-blocs'?'ch-wordcount':cid==='ch-soft-blocs'?'ch-soft-wordcount':cid==='edit-ch-blocs'?'edit-chap-wordcount':'edit-chap-soft-wordcount';}
 
-function renderBlocs(){
-  const container=document.getElementById(_blocsContainer);
-  if(!container)return;
-  const wcId=_blocsContainer==='ch-blocs'?'ch-wordcount':'edit-chap-wordcount';
+function renderBlocs(cid){
+  const container=document.getElementById(cid);if(!container)return;
+  const state=getBlocsForContainer(cid);
   container.innerHTML='';
-  _blocs.forEach((bloc,i)=>{
+  state.blocs.forEach((bloc,i)=>{
     const div=document.createElement('div');
     div.className='bloc-wrap';
-    div.dataset.id=bloc.id;
     if(bloc.type==='pov'){
-      div.innerHTML=`
-        <div class="bloc-header">
-          <span class="bloc-type pov">✦ POV</span>
-          <button class="tb-btn" onclick="deplacerBloc(${i},-1)" ${i===0?'disabled style="opacity:.3"':''}>▲</button>
-          <button class="tb-btn" onclick="deplacerBloc(${i},1)" ${i===_blocs.length-1?'disabled style="opacity:.3"':''}>▼</button>
-          <button class="tb-btn" onclick="supprimerBloc(${i})" style="color:var(--danger)">✕</button>
-        </div>
-        <input class="bloc-pov-input" type="text" placeholder="Nom du personnage…" value="${bloc.contenu.replace(/"/g,'&quot;')}" oninput="updateBlocContenu(${i},this.value)" data-bloc-id="${bloc.id}">`;
+      div.innerHTML=`<div class="bloc-header"><span class="bloc-type pov">✦ POV</span><button class="tb-btn" onclick="deplacerBloc('${cid}',${i},-1)" ${i===0?'disabled style="opacity:.3"':''}>▲</button><button class="tb-btn" onclick="deplacerBloc('${cid}',${i},1)" ${i===state.blocs.length-1?'disabled style="opacity:.3"':''}>▼</button><button class="tb-btn" onclick="supprimerBloc('${cid}',${i})" style="color:var(--danger)">✕</button></div><input class="bloc-pov-input" type="text" placeholder="Nom du personnage…" value="${bloc.contenu.replace(/"/g,'&quot;')}" oninput="updateBlocContenu('${cid}',${i},this.value)" data-bloc-id="${bloc.id}" data-bloc-container="${cid}">`;
     } else if(bloc.type==='image'){
-      div.innerHTML=`
-        <div class="bloc-header">
-          <span class="bloc-type" style="color:var(--accent)">🖼 Image</span>
-          <button class="tb-btn" onclick="deplacerBloc(${i},-1)" ${i===0?'disabled style="opacity:.3"':''}>▲</button>
-          <button class="tb-btn" onclick="deplacerBloc(${i},1)" ${i===_blocs.length-1?'disabled style="opacity:.3"':''}>▼</button>
-          <button class="tb-btn" onclick="supprimerBloc(${i})" style="color:var(--danger)">✕</button>
-        </div>
-        <div style="padding:10px 14px">
-          ${bloc.contenu
-            ?`<div style="position:relative"><img src="${bloc.contenu}" style="width:100%;border-radius:6px;display:block"><button class="btn btn-sm btn-danger" onclick="retirerImageBloc(${i})" style="position:absolute;top:6px;right:6px;opacity:.8">✕ Retirer</button></div>`
-            :`<div class="img-upload" style="margin:0" id="img-upload-bloc-${bloc.id}">
-                <input type="file" accept="image/*" onchange="uploadImageBloc(${i},${bloc.id},this)">
-                <div class="img-upload-text">📎 Cliquer ou glisser une image</div>
-              </div>`
-          }
-        </div>`;
+      div.innerHTML=`<div class="bloc-header"><span class="bloc-type" style="color:var(--accent)">🖼 Image</span><button class="tb-btn" onclick="deplacerBloc('${cid}',${i},-1)" ${i===0?'disabled style="opacity:.3"':''}>▲</button><button class="tb-btn" onclick="deplacerBloc('${cid}',${i},1)" ${i===state.blocs.length-1?'disabled style="opacity:.3"':''}>▼</button><button class="tb-btn" onclick="supprimerBloc('${cid}',${i})" style="color:var(--danger)">✕</button></div><div style="padding:10px 14px">${bloc.contenu?`<div style="position:relative"><img src="${bloc.contenu}" style="width:100%;border-radius:6px;display:block"><button class="btn btn-sm btn-danger" onclick="retirerImageBloc('${cid}',${i})" style="position:absolute;top:6px;right:6px;opacity:.8">✕ Retirer</button></div>`:`<div class="img-upload" style="margin:0" id="img-upload-bloc-${cid}-${bloc.id}"><input type="file" accept="image/*" onchange="uploadImageBloc('${cid}',${i},${bloc.id},this)"><div class="img-upload-text">📎 Cliquer ou glisser une image</div></div>`}</div>`;
     } else {
-      div.innerHTML=`
-        <div class="bloc-header">
-          <span class="bloc-type">Texte</span>
-          <div class="editor-toolbar" style="background:none;padding:0;border:none">
-            <button type="button" class="tb-btn" onclick="fmtBloc(${i},'bold')"><b>G</b></button>
-            <button type="button" class="tb-btn" onclick="fmtBloc(${i},'italic')"><i>I</i></button>
-            <div class="tb-sep"></div>
-            <button type="button" class="tb-btn" onclick="alignBloc(${i},'left')">⬤◁</button>
-            <button type="button" class="tb-btn" onclick="alignBloc(${i},'center')">◁⬤▷</button>
-            <button type="button" class="tb-btn" onclick="alignBloc(${i},'right')">▷⬤</button>
-          </div>
-          <button class="tb-btn" onclick="deplacerBloc(${i},-1)" ${i===0?'disabled style="opacity:.3"':''}>▲</button>
-          <button class="tb-btn" onclick="deplacerBloc(${i},1)" ${i===_blocs.length-1?'disabled style="opacity:.3"':''}>▼</button>
-          <button class="tb-btn" onclick="supprimerBloc(${i})" style="color:var(--danger)">✕</button>
-        </div>
-        <textarea class="bloc-textarea" oninput="updateBlocContenu(${i},this.value);majWordcount()" placeholder="Texte du chapitre…" data-bloc-id="${bloc.id}">${bloc.contenu}</textarea>`;
+      div.innerHTML=`<div class="bloc-header"><span class="bloc-type">Texte</span><div class="editor-toolbar" style="background:none;padding:0;border:none"><button type="button" class="tb-btn" onclick="fmtBloc('${cid}',${i},'bold')"><b>G</b></button><button type="button" class="tb-btn" onclick="fmtBloc('${cid}',${i},'italic')"><i>I</i></button><div class="tb-sep"></div><button type="button" class="tb-btn" onclick="alignBloc('${cid}',${i},'left')">⬤◁</button><button type="button" class="tb-btn" onclick="alignBloc('${cid}',${i},'center')">◁⬤▷</button><button type="button" class="tb-btn" onclick="alignBloc('${cid}',${i},'right')">▷⬤</button></div><button class="tb-btn" onclick="deplacerBloc('${cid}',${i},-1)" ${i===0?'disabled style="opacity:.3"':''}>▲</button><button class="tb-btn" onclick="deplacerBloc('${cid}',${i},1)" ${i===state.blocs.length-1?'disabled style="opacity:.3"':''}>▼</button><button class="tb-btn" onclick="supprimerBloc('${cid}',${i})" style="color:var(--danger)">✕</button></div><textarea class="bloc-textarea" oninput="updateBlocContenu('${cid}',${i},this.value);majWordcount('${cid}')" placeholder="Texte du chapitre…" data-bloc-id="${bloc.id}" data-bloc-container="${cid}">${bloc.contenu}</textarea>`;
     }
     container.appendChild(div);
   });
-  majWordcount();
+  majWordcount(cid);
 }
 
-function updateBlocContenu(idx,val){_blocs[idx].contenu=val;}
+function updateBlocContenu(cid,idx,val){const s=getBlocsForContainer(cid);if(s.blocs[idx])s.blocs[idx].contenu=val;}
 
-function ajouterBlocTexte(){
-  _blocs.push({type:'texte',id:_blocIdCounter++,contenu:''});
-  renderBlocs();
-  setTimeout(()=>{const tas=document.querySelectorAll('.bloc-textarea');if(tas.length)tas[tas.length-1].focus();},50);
+function ajouterBlocTexte(cid){
+  const id=cid||'ch-blocs';const s=getBlocsForContainer(id);
+  s.blocs.push({type:'texte',id:s.counter++,contenu:''});renderBlocs(id);
+  setTimeout(()=>{const t=document.querySelectorAll(`#${id} .bloc-textarea`);if(t.length)t[t.length-1].focus();},50);
 }
-
-function ajouterBlocPOV(){
-  _blocs.push({type:'pov',id:_blocIdCounter++,contenu:''});
-  renderBlocs();
-  setTimeout(()=>{const inputs=document.querySelectorAll('.bloc-pov-input');if(inputs.length)inputs[inputs.length-1].focus();},50);
+function ajouterBlocPOV(cid){
+  const id=cid||'ch-blocs';const s=getBlocsForContainer(id);
+  s.blocs.push({type:'pov',id:s.counter++,contenu:''});renderBlocs(id);
+  setTimeout(()=>{const t=document.querySelectorAll(`#${id} .bloc-pov-input`);if(t.length)t[t.length-1].focus();},50);
 }
-
-function ajouterBlocImage(){
-  _blocs.push({type:'image',id:_blocIdCounter++,contenu:''});
-  renderBlocs();
+function ajouterBlocImage(cid){
+  const id=cid||'ch-blocs';const s=getBlocsForContainer(id);
+  s.blocs.push({type:'image',id:s.counter++,contenu:''});renderBlocs(id);
 }
-
-async function uploadImageBloc(idx, blocId, input){
+async function uploadImageBloc(cid,idx,blocId,input){
   if(!input.files[0])return;
-  const zone=document.getElementById('img-upload-bloc-'+blocId);
+  const zone=document.getElementById(`img-upload-bloc-${cid}-${blocId}`);
   if(zone)zone.innerHTML='<div class="img-upload-text"><span class="spinner"></span>Upload…</div>';
-  try{
-    const url=await uploadImage(input.files[0],'chapitres');
-    _blocs[idx].contenu=url;
-    renderBlocs();
-  }catch(e){
-    alert('Erreur upload : '+e.message);
-    renderBlocs();
-  }
+  try{const url=await uploadImage(input.files[0],'chapitres');const s=getBlocsForContainer(cid);if(s.blocs[idx])s.blocs[idx].contenu=url;renderBlocs(cid);}
+  catch(e){alert('Erreur upload : '+e.message);renderBlocs(cid);}
 }
-
-function retirerImageBloc(idx){
-  _blocs[idx].contenu='';
-  renderBlocs();
+function retirerImageBloc(cid,idx){const s=getBlocsForContainer(cid);if(s.blocs[idx])s.blocs[idx].contenu='';renderBlocs(cid);}
+function deplacerBloc(cid,idx,dir){
+  const s=getBlocsForContainer(cid);
+  document.querySelectorAll(`[data-bloc-container="${cid}"]`).forEach(el=>{const b=s.blocs.find(x=>x.id===parseInt(el.dataset.blocId));if(b&&b.type!=='image')b.contenu=el.value||b.contenu;});
+  const swap=idx+dir;if(swap<0||swap>=s.blocs.length)return;
+  [s.blocs[idx],s.blocs[swap]]=[s.blocs[swap],s.blocs[idx]];renderBlocs(cid);
 }
-
-function deplacerBloc(idx,dir){
-  // Sauvegarder les valeurs actuelles depuis le DOM
-  document.querySelectorAll('[data-bloc-id]').forEach(el=>{
-    const id=parseInt(el.dataset.blocId);
-    const b=_blocs.find(x=>x.id===id);
-    if(b)b.contenu=el.value||el.textContent||b.contenu;
-  });
-  const swap=idx+dir;
-  if(swap<0||swap>=_blocs.length)return;
-  [_blocs[idx],_blocs[swap]]=[_blocs[swap],_blocs[idx]];
-  renderBlocs();
-}
-
-function supprimerBloc(idx){
-  if(_blocs.length<=1)return;
-  _blocs.splice(idx,1);
-  renderBlocs();
-}
-
-function fmtBloc(idx,type){
-  const el=document.querySelector(`[data-bloc-id="${_blocs[idx].id}"]`);
-  if(!el)return;
+function supprimerBloc(cid,idx){const s=getBlocsForContainer(cid);if(s.blocs.length<=1)return;s.blocs.splice(idx,1);renderBlocs(cid);}
+function fmtBloc(cid,idx,type){
+  const s=getBlocsForContainer(cid);
+  const el=document.querySelector(`[data-bloc-container="${cid}"][data-bloc-id="${s.blocs[idx].id}"]`);if(!el)return;
   const start=(_savedSel.id===el.id)?_savedSel.start:el.selectionStart;
   const end=(_savedSel.id===el.id)?_savedSel.end:el.selectionEnd;
-  const sel=el.value.substring(start,end);
-  if(!sel)return;
-  const tag=type==='bold'?'strong':'em';
-  const wrapped=`<${tag}>${sel}</${tag}>`;
+  const sel=el.value.substring(start,end);if(!sel)return;
+  const tag=type==='bold'?'strong':'em';const wrapped=`<${tag}>${sel}</${tag}>`;
   el.value=el.value.substring(0,start)+wrapped+el.value.substring(end);
-  _blocs[idx].contenu=el.value;
-  el.focus();
-  el.setSelectionRange(start+wrapped.length,start+wrapped.length);
+  s.blocs[idx].contenu=el.value;el.focus();el.setSelectionRange(start+wrapped.length,start+wrapped.length);
 }
-
-function alignBloc(idx,direction){
-  const el=document.querySelector(`[data-bloc-id="${_blocs[idx].id}"]`);
-  if(!el)return;
+function alignBloc(cid,idx,direction){
+  const s=getBlocsForContainer(cid);
+  const el=document.querySelector(`[data-bloc-container="${cid}"][data-bloc-id="${s.blocs[idx].id}"]`);if(!el)return;
   const start=(_savedSel.id===el.id)?_savedSel.start:el.selectionStart;
   const end=(_savedSel.id===el.id)?_savedSel.end:el.selectionEnd;
-  const sel=el.value.substring(start,end);
-  if(!sel)return;
+  const sel=el.value.substring(start,end);if(!sel)return;
   const clean=sel.replace(/<div[^>]*style="[^"]*text-align[^"]*"[^>]*>([\s\S]*?)<\/div>/g,'$1').trim();
   const wrapped=direction==='left'?clean:`<div style="text-align:${direction}">${clean}</div>`;
   el.value=el.value.substring(0,start)+wrapped+el.value.substring(end);
-  _blocs[idx].contenu=el.value;
-  el.focus();
-  el.setSelectionRange(start+wrapped.length,start+wrapped.length);
+  s.blocs[idx].contenu=el.value;el.focus();el.setSelectionRange(start+wrapped.length,start+wrapped.length);
 }
-
-function majWordcount(){
-  const total=_blocs.filter(b=>b.type==='texte').reduce((acc,b)=>acc+(b.contenu?b.contenu.trim().split(/\s+/).filter(w=>w).length:0),0);
-  const el=document.getElementById('ch-wordcount');
-  if(el)el.textContent=total.toLocaleString('fr')+' mots';
+function majWordcount(cid){
+  const s=getBlocsForContainer(cid);
+  const total=s.blocs.filter(b=>b.type==='texte').reduce((acc,b)=>acc+(b.contenu?b.contenu.trim().split(/\s+/).filter(w=>w).length:0),0);
+  const el=document.getElementById(_wcId(cid));if(el)el.textContent=total.toLocaleString('fr')+' mots';
 }
-
-function compileBlocsToContenu(){
-  document.querySelectorAll('[data-bloc-id]').forEach(el=>{
-    const id=parseInt(el.dataset.blocId);
-    const b=_blocs.find(x=>x.id===id);
-    if(b&&b.type!=='image')b.contenu=el.value||b.contenu;
-  });
-  return _blocs.map(b=>{
+function compileBlocsToContenu(cid){
+  const id=cid||'ch-blocs';const s=getBlocsForContainer(id);
+  document.querySelectorAll(`[data-bloc-container="${id}"]`).forEach(el=>{const b=s.blocs.find(x=>x.id===parseInt(el.dataset.blocId));if(b&&b.type!=='image')b.contenu=el.value||b.contenu;});
+  return s.blocs.map(b=>{
     if(b.type==='pov')return`<pov>${b.contenu}</pov>`;
     if(b.type==='image')return b.contenu?`<img-bloc>${b.contenu}</img-bloc>`:'';
     return b.contenu;
@@ -1678,8 +1634,18 @@ function selectHistoire(val,label){
   labelEl.textContent=label;
   labelEl.style.color=val?'var(--text)':'var(--text3)';
   document.getElementById('histoire-select-list').style.display='none';
-  if(val){loadChapitresExistants(val);setTimeout(loadChTwSuggestions,500);}
-  else document.getElementById('chapitres-existants').style.display='none';
+  if(val){
+    loadChapitresExistants(val);
+    setTimeout(loadChTwSuggestions,500);
+    // Charger version_soft de l'histoire
+    const h=histoires.find(x=>x.id===val);
+    _histoireVersionSoft=h?h.version_soft||false:false;
+    _softBlocsInit=false;
+    // Réinitialiser spicy
+    setChSpicy(false);
+  } else {
+    document.getElementById('chapitres-existants').style.display='none';
+  }
 }
 
 document.addEventListener('click',e=>{
@@ -1752,11 +1718,14 @@ async function ouvrirEditionChapitre(id, histoireId){
   document.getElementById('edit-chap-gratuit-val').value=String(ch.gratuit);
   document.getElementById('edit-chap-gratuit').className='btn'+(ch.gratuit?' btn-accent':'');
   document.getElementById('edit-chap-payant').className='btn'+(ch.gratuit?'':' btn-accent');
+  // Spicy
+  const h=histoires.find(x=>x.id===(_editChapHistoireId||id));
+  _histoireVersionSoft=h?h.version_soft||false:false;
+  _editSoftBlocsInit=!!ch.contenu_soft;
+  setEditChapSpicy(ch.spicy||false);
+  if(ch.contenu_soft)initBlocs(ch.contenu_soft,'edit-ch-soft-blocs');
   document.getElementById('chapitres-existants').style.display='none';
   document.getElementById('edit-chapitre-form').style.display='block';
-}
-
-function fermerEditionChapitre(){
   document.getElementById('edit-chapitre-form').style.display='none';
   document.getElementById('chapitres-existants').style.display='block';
   _editChapId=null;
@@ -1771,16 +1740,18 @@ function setEditChapGratuit(val){
 async function sauvegarderChapitre(){
   if(!_editChapId)return;
   const titre=document.getElementById('edit-chap-titre').value.trim();
-  const contenu=compileBlocsToContenu().trim();
+  const contenu=compileBlocsToContenu('edit-ch-blocs').trim();
   const numero=parseInt(document.getElementById('edit-chap-num').value);
   const gratuit=document.getElementById('edit-chap-gratuit-val').value==='true';
   const citation=document.getElementById('edit-chap-citation').value.trim()||null;
   const citationAuteur=document.getElementById('edit-chap-citation-auteur').value.trim()||null;
+  const spicy=document.getElementById('edit-chap-spicy').value==='true';
+  const contenuSoft=spicy&&_histoireVersionSoft?compileBlocsToContenu('edit-ch-soft-blocs').trim()||null:null;
   if(!titre||!contenu){showAlert('chapitre','Le titre et le contenu sont obligatoires.','error');return;}
   const btn=document.getElementById('edit-chap-save-btn');
   btn.textContent='Sauvegarde…';btn.disabled=true;
   try{
-    await db.from('chapitres').update({titre,contenu,numero,gratuit,citation,citation_auteur:citationAuteur}).eq('id',_editChapId);
+    await db.from('chapitres').update({titre,contenu,numero,gratuit,citation,citation_auteur:citationAuteur,spicy,contenu_soft:contenuSoft}).eq('id',_editChapId);
     showAlert('chapitre','Chapitre modifié avec succès ! ✦');
     fermerEditionChapitre();
     loadChapitresExistants(_editChapHistoireId);
@@ -1796,12 +1767,14 @@ async function ajouterChapitre(){
   const contenu=compileBlocsToContenu().trim();
   const citation=document.getElementById('ch-citation').value.trim()||null;
   const citationAuteur=document.getElementById('ch-citation-auteur').value.trim()||null;
+  const spicy=document.getElementById('ch-spicy').value==='true';
+  const contenuSoft=spicy&&_histoireVersionSoft?compileBlocsToContenu('ch-soft-blocs').trim()||null:null;
   const gratuit=document.getElementById('ch-gratuit').value==='true'||document.getElementById('ch-gratuit').value===true;
   if(!histoireId||!titre||!contenu){showAlert('chapitre','L\'histoire, le titre et le contenu sont obligatoires.','error');return;}
   const btn=document.querySelector('#panel-chapitre .btn-accent');
   btn.textContent='Publication…';btn.disabled=true;
   try{
-    const {error}=await db.from('chapitres').insert({histoire_id:histoireId,numero:num,titre,contenu,gratuit,citation,citation_auteur:citationAuteur});
+    const {error}=await db.from('chapitres').insert({histoire_id:histoireId,numero:num,titre,contenu,gratuit,citation,citation_auteur:citationAuteur,spicy,contenu_soft:contenuSoft});
     if(error)throw error;
     // Ajouter les TW du chapitre à l'histoire si pas déjà présents
     if(chTws.length>0){
@@ -1817,7 +1790,9 @@ async function ajouterChapitre(){
     document.getElementById('ch-titre').value='';
     document.getElementById('ch-citation').value='';
     document.getElementById('ch-citation-auteur').value='';
-    initBlocs('');
+    setChSpicy(false);
+    _softBlocsInit=false;
+    initBlocs('','ch-blocs');
     document.getElementById('ch-wordcount').textContent='0 mots';
     chTws=[];renderChTws();
     loadChapitresExistants(histoireId);
@@ -1851,6 +1826,12 @@ async function ouvrirEditionChapitreDepuisFiche(id, histoireId){
   document.getElementById('edit-chap-gratuit-val').value=String(ch.gratuit);
   document.getElementById('edit-chap-gratuit').className='btn'+(ch.gratuit?' btn-accent':'');
   document.getElementById('edit-chap-payant').className='btn'+(ch.gratuit?'':' btn-accent');
+  // Spicy
+  const hh=histoires.find(x=>x.id===histoireId);
+  _histoireVersionSoft=hh?hh.version_soft||false:false;
+  _editSoftBlocsInit=!!ch.contenu_soft;
+  setEditChapSpicy(ch.spicy||false);
+  if(ch.contenu_soft)initBlocs(ch.contenu_soft,'edit-ch-soft-blocs');
   document.getElementById('chapitres-existants').style.display='none';
   document.getElementById('edit-chapitre-form').style.display='block';
 }
@@ -2432,6 +2413,33 @@ function setStatut(val){
   document.getElementById('statut-brouillon').className='btn'+(val==='brouillon'?' btn-accent':'');
   document.getElementById('statut-publie').className='btn'+(val==='publie'?' btn-accent':'');
 }
+function setChSpicy(val){
+  document.getElementById('ch-spicy').value=String(val);
+  document.getElementById('ch-spicy-non').className='btn'+(val?'':' btn-accent');
+  document.getElementById('ch-spicy-oui').className='btn'+(val?' btn-accent':'');
+  // Afficher version soft seulement si l'histoire a version_soft activée
+  const softWrap=document.getElementById('ch-soft-wrap');
+  if(softWrap)softWrap.style.display=(val&&_histoireVersionSoft)?'block':'none';
+  if(val&&_histoireVersionSoft&&!_softBlocsInit){
+    initBlocs('','ch-soft-blocs');
+    _softBlocsInit=true;
+  }
+}
+function setEditChapSpicy(val){
+  document.getElementById('edit-chap-spicy').value=String(val);
+  document.getElementById('edit-chap-spicy-non').className='btn'+(val?'':' btn-accent');
+  document.getElementById('edit-chap-spicy-oui').className='btn'+(val?' btn-accent':'');
+  const softWrap=document.getElementById('edit-chap-soft-wrap');
+  if(softWrap)softWrap.style.display=(val&&_histoireVersionSoft)?'block':'none';
+  if(val&&_histoireVersionSoft&&!_editSoftBlocsInit){
+    initBlocs('','edit-ch-soft-blocs');
+    _editSoftBlocsInit=true;
+  }
+}
+let _histoireVersionSoft=false;
+let _softBlocsInit=false;
+let _editSoftBlocsInit=false;
+
 function setGratuit(val){
   document.getElementById('ch-gratuit').value=String(val);
   document.getElementById('gratuit-gratuit').className='btn'+(val?' btn-accent':'');
