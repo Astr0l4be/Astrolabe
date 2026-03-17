@@ -122,7 +122,8 @@ async function loadContenuChapitre(bookId, chapNum){
   if(!b)return null;
   const ch=b.chapitres.find(c=>c.num===chapNum);
   if(!ch)return null;
-  if(ch.texte)return ch.texte;
+  // Toujours recharger si contenuSoft pas encore chargé
+  if(ch.texte && ch.contenuSoftCharge)return ch.texte;
   const {data}=await db.from('chapitres')
     .select('contenu,citation,citation_auteur,spicy,contenu_soft')
     .eq('histoire_id',bookId)
@@ -134,6 +135,7 @@ async function loadContenuChapitre(bookId, chapNum){
     ch.citation_auteur=data.citation_auteur||null;
     ch.spicy=data.spicy||false;
     ch.contenuSoft=data.contenu_soft||null;
+    ch.contenuSoftCharge=true;
   }
   return ch.texte;
 }
