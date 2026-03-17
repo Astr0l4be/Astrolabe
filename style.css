@@ -288,3 +288,4 @@
     .ch-soft-btn:hover{background:rgba(212,126,126,.18);}
     .ch-soft-btn-on{border-color:rgba(126,159,212,.4);background:rgba(126,159,212,.12);}
     .ch-soft-btn-on:hover{background:rgba(126,159,212,.22);}
+    .ch-soft-placeholder{flex-shrink:0;width:44px;}

@@ -206,7 +206,7 @@ function openHistoire(id){
     // Le bouton toggle change juste le choix et recharge la liste
     const toggleBtn=hasToggle
       ?`<button class="ch-soft-btn ${veutSoft?'ch-soft-btn-on':''}" onclick="event.stopPropagation();spicyChoix['${key}']=spicyChoix['${key}']!==true;openHistoire('${b.id}');if(_currentBookId==='${b.id}'&&_currentChapNum===${ch.num})_afficherContenuLecture('${b.id}',${ch.num})" title="${veutSoft?'Passer en version complète':'Passer en version douce'}">${veutSoft?'🌸':'🌶'}</button>`
-      :ch.spicy?`<span class="ch-spicy-only">🌶</span>`:'';
+      :`<div class="ch-soft-placeholder"></div>`;
     return`<div class="ch-lire-row">
       <button class="btn-lire ${libre?'':'btn-lire-locked'}" onclick="openLecture('${b.id}',${ch.num})">
         <span class="ch-lire-titre">Ch.${ch.num} · ${ch.titre}</span>
