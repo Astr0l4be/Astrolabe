@@ -261,7 +261,6 @@ async function openLecture(bookId,chapNum){
   _currentBookId=bookId;
   _currentChapNum=chapNum;
 
-  // Charger le contenu si pas encore fait
   await loadContenuChapitre(bookId,chapNum);
   const ch=b.chapitres.find(c=>c.num===chapNum);
   if(!ch)return;
@@ -271,9 +270,54 @@ async function openLecture(bookId,chapNum){
     go('p-lecture');return;
   }
 
+  // Choisir le contenu : soft si activé ET dispo, sinon normal
+  const key=spicyKey(bookId,chapNum);
+  const veutSoft=ch.spicy&&ch.contenuSoft&&spicyChoix[key]===true;
+  const contenu=veutSoft?ch.contenuSoft:ch.texte;
+
   document.getElementById('lecture-titre').textContent=b.title;
   document.getElementById('lecture-back-btn').onclick=()=>go('p-histoire');
-  await _afficherContenuLecture(bookId,chapNum);
+
+  let html='';
+  html+=`<div class="lecture-ch-num"><span class="lecture-star-side">✦</span>Chapitre ${ch.num}<span class="lecture-star-side">✦</span></div>`;
+  if(ch.titre)html+=`<div class="lecture-ch-title">${ch.titre}</div>`;
+
+  // Bandeau informatif si version soft
+  if(veutSoft){
+    html+=`<div style="margin:0 0 20px;padding:10px 14px;background:rgba(126,159,212,.06);border:1px solid rgba(126,159,212,.2);border-radius:10px;font-size:12px;color:var(--text2)">🌸 Version douce</div>`;
+  } else if(ch.spicy&&ch.contenuSoft){
+    html+=`<div style="margin:0 0 20px;padding:10px 14px;background:rgba(212,126,126,.06);border:1px solid rgba(212,126,126,.2);border-radius:10px;font-size:12px;color:var(--text2)">🌶 Version complète</div>`;
+  }
+
+  const contenuPropre=contenu
+    .replace(/<div[^>]*style="[^"]*text-align[^"]*"[^>]*>([\s\S]*?)<\/div>/gi,'$1')
+    .replace(/<div[^>]*>([\s\S]*?)<\/div>/gi,'$1')
+    .replace(/style="[^"]*"/gi,'')
+    .trim();
+  contenuPropre.split('
+
+').forEach(para=>{
+    para=para.trim();
+    if(!para)return;
+    const isD=para.startsWith('—')||para.startsWith('-');
+    html+=`<p class="${isD?'d':''}">${para.replace(/
+/g,'<br>')}</p>`;
+  });
+
+  const showTWCh=compte.twrChapitre===true;
+  const histPrefs=optParHistoire[bookId];
+  const useTWCh=histPrefs?histPrefs.twrChapitre:showTWCh;
+  if(b.tw&&useTWCh){html=`<div class="tw-box" style="margin:0 0 20px"><div class="tw-label">Trigger warnings</div><div class="tw-text">${b.tw}</div></div>`+html;}
+
+  document.getElementById('lecture-body').innerHTML=html;
+
+  const nav=document.getElementById('lecture-nav');
+  const prev=b.chapitres.find(c=>c.num===chapNum-1);
+  const next=b.chapitres.find(c=>c.num===chapNum+1);
+  nav.innerHTML='';
+  if(prev)nav.innerHTML+=`<button class="btn btn-full" style="flex:1" onclick="openLecture('${bookId}',${prev.num})">← Ch.${prev.num}</button>`;
+  if(next)nav.innerHTML+=`<button class="btn btn-full btn-accent" style="flex:1" onclick="openLecture('${bookId}',${next.num})">Ch.${next.num} →</button>`;
+
   document.querySelector('#p-lecture .page-scroll').scrollTop=0;
   go('p-lecture');
   setTimeout(applyLectureMode,50);
