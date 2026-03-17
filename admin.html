@@ -303,7 +303,7 @@
                 <button type="button" class="btn" id="edit-soft-oui" onclick="setEditOption('edit-soft','true')" style="flex:1">Oui</button>
               </div>
               <input type="hidden" id="edit-soft" value="false">
-              <div style="margin-top:10px">
+              <div id="edit-moins18-wrap" style="display:none;margin-top:10px">
                 <label class="form-label">Adapté à un public -18 ans ?</label>
                 <div style="display:flex;gap:8px">
                   <button type="button" class="btn" id="edit-moins18-non" onclick="setEditOption('edit-moins18','false')" style="flex:1">Non</button>
@@ -319,6 +319,14 @@
                 <button type="button" class="btn" id="edit-moins16-oui" onclick="setEditOption('edit-moins16','true')" style="flex:1">Oui</button>
               </div>
               <input type="hidden" id="edit-moins16" value="false">
+              <div style="margin-top:10px">
+                <label class="form-label">Adapté à un public -18 ans ?</label>
+                <div style="display:flex;gap:8px">
+                  <button type="button" class="btn" id="edit-moins18b-non" onclick="setEditOption('edit-moins18b','false')" style="flex:1">Non</button>
+                  <button type="button" class="btn" id="edit-moins18b-oui" onclick="setEditOption('edit-moins18b','true')" style="flex:1">Oui</button>
+                </div>
+                <input type="hidden" id="edit-moins18b" value="false">
+              </div>
             </div>
             <div class="form-group">
               <label class="form-label">Numérotation des chapitres</label>
@@ -466,7 +474,7 @@
             <button type="button" class="btn" id="n-soft-oui" onclick="setOption('n-soft','true')" style="flex:1">Oui</button>
           </div>
           <input type="hidden" id="n-soft" value="false">
-          <div style="margin-top:10px">
+          <div id="n-moins18-wrap" style="display:none;margin-top:10px">
             <label class="form-label">Adapté à un public -18 ans ?</label>
             <div style="display:flex;gap:8px">
               <button type="button" class="btn" id="n-moins18-non" onclick="setOption('n-moins18','false')" style="flex:1">Non</button>
@@ -482,6 +490,14 @@
             <button type="button" class="btn" id="n-moins16-oui" onclick="setOption('n-moins16','true')" style="flex:1">Oui</button>
           </div>
           <input type="hidden" id="n-moins16" value="false">
+          <div style="margin-top:10px">
+            <label class="form-label">Adapté à un public -18 ans ?</label>
+            <div style="display:flex;gap:8px">
+              <button type="button" class="btn" id="n-moins18b-non" onclick="setOption('n-moins18b','false')" style="flex:1">Non</button>
+              <button type="button" class="btn" id="n-moins18b-oui" onclick="setOption('n-moins18b','true')" style="flex:1">Oui</button>
+            </div>
+            <input type="hidden" id="n-moins18b" value="false">
+          </div>
         </div>
         <div class="form-group">
           <label class="form-label">Numérotation des chapitres</label>
@@ -1259,7 +1275,9 @@ async function creerHistoire(){
       statut:document.getElementById('n-statut').value||'brouillon',
       numerotation:document.getElementById('n-numerotation').value||'arabe',
       version_soft:document.getElementById('n-soft').value==='true',
-      adapte_moins18:document.getElementById('n-moins18').value==='true',
+      adapte_moins18:(document.getElementById('n-adulte').value==='true'
+        ?document.getElementById('n-moins18').value==='true'
+        :document.getElementById('n-moins18b').value==='true'),
       adapte_moins16:document.getElementById('n-moins16').value==='true',
     }).select().single();
     if(error)throw error;
@@ -1493,6 +1511,7 @@ async function ouvrirEditionHistoire(id){
   document.getElementById('edit-options-non-adulte').style.display=h.adulte?'none':'block';
   setEditOption('edit-soft',String(h.version_soft||false));
   setEditOption('edit-moins18',String(h.adapte_moins18||false));
+  setEditOption('edit-moins18b',String(h.adapte_moins18||false));
   setEditOption('edit-moins16',String(h.adapte_moins16||false));
   // Numérotation
   const num=h.numerotation||'arabe';
@@ -1590,7 +1609,9 @@ async function sauvegarderHistoire(){
       statut:document.getElementById('edit-statut-val').value,
       numerotation:document.getElementById('edit-numerotation-val').value||'arabe',
       version_soft:document.getElementById('edit-soft').value==='true',
-      adapte_moins18:document.getElementById('edit-moins18').value==='true',
+      adapte_moins18:(document.getElementById('edit-adulte-val').value==='true'
+        ?document.getElementById('edit-moins18').value==='true'
+        :document.getElementById('edit-moins18b').value==='true'),
       adapte_moins16:document.getElementById('edit-moins16').value==='true',
     }).eq('id',id);
 
@@ -2376,6 +2397,8 @@ function setAdulte(val){
   document.getElementById('adulte-oui').className='btn'+(val?' btn-accent':'');
   document.getElementById('n-options-adulte').style.display=val?'block':'none';
   document.getElementById('n-options-non-adulte').style.display=val?'none':'block';
+  // Réinitialiser soft si on passe à non-adulte
+  if(!val)setOption('n-soft','false');
 }
 function setEditAdulte(val){
   document.getElementById('edit-adulte-val').value=String(val);
@@ -2383,16 +2406,26 @@ function setEditAdulte(val){
   document.getElementById('edit-adulte-oui').className='btn'+(val?' btn-accent':'');
   document.getElementById('edit-options-adulte').style.display=val?'block':'none';
   document.getElementById('edit-options-non-adulte').style.display=val?'none':'block';
+  if(!val)setEditOption('edit-soft','false');
 }
 function setOption(id,val){
   document.getElementById(id).value=val;
   document.getElementById(id+'-non').className='btn'+(val==='false'?' btn-accent':'');
   document.getElementById(id+'-oui').className='btn'+(val==='true'?' btn-accent':'');
+  // Si c'est le bouton soft, afficher/cacher -18
+  if(id==='n-soft'){
+    const wrap=document.getElementById('n-moins18-wrap');
+    if(wrap)wrap.style.display=val==='true'?'block':'none';
+  }
 }
 function setEditOption(id,val){
   document.getElementById(id).value=val;
   document.getElementById(id+'-non').className='btn'+(val==='false'?' btn-accent':'');
   document.getElementById(id+'-oui').className='btn'+(val==='true'?' btn-accent':'');
+  if(id==='edit-soft'){
+    const wrap=document.getElementById('edit-moins18-wrap');
+    if(wrap)wrap.style.display=val==='true'?'block':'none';
+  }
 }
 function setStatut(val){
   document.getElementById('n-statut').value=val;
