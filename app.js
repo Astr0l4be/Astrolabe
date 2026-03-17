@@ -294,14 +294,11 @@ async function openLecture(bookId,chapNum){
     .replace(/<div[^>]*>([\s\S]*?)<\/div>/gi,'$1')
     .replace(/style="[^"]*"/gi,'')
     .trim();
-  contenuPropre.split('
-
-').forEach(para=>{
+  contenuPropre.split('\n\n').forEach(para=>{
     para=para.trim();
     if(!para)return;
     const isD=para.startsWith('—')||para.startsWith('-');
-    html+=`<p class="${isD?'d':''}">${para.replace(/
-/g,'<br>')}</p>`;
+    html+=`<p class="${isD?'d':''}">${para.replace(/\n/g,'<br>')}</p>`;
   });
 
   const showTWCh=compte.twrChapitre===true;
