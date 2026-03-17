@@ -183,13 +183,98 @@
     </div></div>
   </div>
 
-  <!-- INSCRIPTION 2 mineurs -->
-  <div class="page" id="p-inscription2">
+  <!-- REFUS < 13 ANS -->
+  <div class="page" id="p-inscription-refuse">
+    <div class="page-scroll"><div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:40px 24px;">
+      <div style="font-size:52px;margin-bottom:20px">🌙</div>
+      <div class="page-title">Bonjour mon petit chat !</div>
+      <p style="font-size:14px;color:var(--text2);line-height:1.9;margin-bottom:30px;max-width:340px">
+        Tu me sembles encore un peu jeune pour entrer sur Astrolabe.<br><br>
+        C'est super de vouloir lire plein d'histoires mais, ici, nous proposons surtout des histoires pour adolescents et adultes, et nous voulons être certains que chaque lecteur et lectrice découvre des récits adaptés à son âge.<br><br>
+        Ce n'est pas grave : nous serons toujours là quand tu seras plus grand ou plus grande, alors ne perds pas la passion de la lecture d'ici là !
+      </p>
+      <p style="font-size:12px;color:var(--text3);margin-bottom:24px">À bientôt ✦ Astrolabe</p>
+      <button class="btn btn-full btn-accent" style="max-width:300px" onclick="go('p-main')">Ok ✦</button>
+    </div></div>
+  </div>
+
+  <!-- ACCORD PARENTAL — choix de l'ado 13-16 -->
+  <div class="page" id="p-inscription-accord">
     <div class="page-header"><button class="btn" onclick="go('p-inscription1')">← Retour</button></div>
     <div class="page-scroll"><div class="page-body">
       <div class="step-stars"><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar">✦</span><span class="sstar">✦</span></div>
+      <div class="page-title">Bonjour mon chat !</div>
+      <p style="font-size:14px;color:var(--text2);line-height:1.9;margin-bottom:24px">
+        Merci d'avoir rejoint le club de lecture d'Astrolabe !<br><br>
+        Tu peux commencer à explorer notre catalogue dès à présent. Cependant, certaines fonctionnalités comme les options d'achat nécessitent l'accord d'un parent ou d'un tuteur légal.<br><br>
+        Sans cet accord, tu ne pourras pas débloquer la suite des histoires.
+      </p>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <button class="btn btn-full btn-accent" onclick="demanderAccordParental()">Demander l'accord parental</button>
+        <button class="btn btn-full" onclick="accordParentalPlusTard()">Continuer sans achat</button>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- PAGE PARENT -->
+  <div class="page" id="p-accord-parent">
+    <div class="page-header"><button class="btn" onclick="go('p-inscription-accord')">← Retour</button></div>
+    <div class="page-scroll"><div class="page-body">
+      <div style="text-align:center;margin-bottom:24px">
+        <div style="font-size:13px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:8px">À l'intention de l'adulte responsable</div>
+        <div class="page-title" style="font-size:22px">Bonjour ✦</div>
+      </div>
+      <p style="font-size:13px;color:var(--text2);line-height:1.9;margin-bottom:20px">
+        Votre enfant souhaite s'inscrire sur <strong style="color:var(--text)">Astrolabe</strong>, une plateforme de lecture en ligne proposant principalement des histoires de romances, mais pas que !
+      </p>
+      <p style="font-size:13px;color:var(--text2);line-height:1.9;margin-bottom:20px">
+        Nous accordons une attention particulière à la sécurité et au bien-être des lecteurs et lectrices. C'est pourquoi les contenus explicites (sexuels ou gore) sont bloqués pour les utilisateurs de moins de 16 ans, et limités à des romances douces pour les utilisateurs de moins de 18 ans. Nous avons de plus mis en place un système de filtre par Trigger Warnings qui permet d'adapter les lectures proposées à chaque utilisateur.
+      </p>
+      <p style="font-size:13px;color:var(--text2);line-height:1.9;margin-bottom:24px">
+        Notre plateforme propose un système d'abonnement ou d'achat par chapitre. En validant, vous autorisez votre enfant à accéder aux fonctionnalités payantes, sous votre responsabilité. Un système de mot de passe sécurisera les achats.
+      </p>
+      <p style="font-size:11px;color:var(--text3);margin-bottom:28px;line-height:1.6">
+        Nous vous recommandons de consulter les contenus disponibles pour vous assurer qu'ils correspondent à vos attentes.
+      </p>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <button class="btn btn-full btn-accent" onclick="parentAutorise()">✦ J'autorise ce compte à accéder aux options d'achat</button>
+        <button class="btn btn-full" style="color:var(--danger);border-color:rgba(212,126,126,.3)" onclick="openModal('parent-refuse-popup')">Je ne souhaite pas valider l'inscription</button>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- POP-UP CONFIRMATION REFUS PARENT -->
+  <div class="modal-overlay" id="parent-refuse-popup" style="position:fixed;z-index:200">
+    <div class="modal-box" style="text-align:center">
+      <div style="font-size:36px;margin-bottom:12px">⚠️</div>
+      <div class="modal-title">Confirmer le refus</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">
+        En confirmant, le compte en cours de création sera définitivement supprimé. Cette action est irréversible.
+      </p>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-full" style="color:var(--danger);border-color:rgba(212,126,126,.3)" onclick="closeM('parent-refuse-popup');parentRefuse()">Confirmer</button>
+        <button class="btn btn-full btn-accent" onclick="closeM('parent-refuse-popup')">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- INSCRIPTION 2 — TW (13-18 ans) -->
+  <div class="page" id="p-inscription2">
+    <div class="page-header"><button class="btn" onclick="go('p-inscription1')">← Retour</button></div>
+    <div class="page-scroll"><div class="page-body">
+      <div class="step-stars"><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar">✦</span></div>
       <div class="page-title">Ton confort de lecture</div>
       <div class="page-subtitle">Sur Astrolabe, nous souhaitons que tu te sentes bien et aies la meilleure expérience possible.</div>
+      <!-- Soft spicy : visible uniquement pour les 16-18, géré par afficherSoftSpicySiAdo() -->
+      <div id="soft-spicy-row" style="display:none">
+        <div style="height:1px;background:rgba(180,190,255,.07);margin:6px 0"></div>
+        <div class="toggle-row">
+          <span class="toggle-label">Activer les scènes romantiques en version douce</span>
+          <label class="tgl"><input type="checkbox" id="soft-spicy3"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
+        </div>
+        <span class="form-hint" style="margin-top:4px;display:block">Versions alternatives des scènes intimes, adaptées aux -18 ans.</span>
+        <div style="height:1px;background:rgba(180,190,255,.07);margin:10px 0"></div>
+      </div>
       <div class="toggle-row"><span class="toggle-label">Afficher les trigger warnings au début de chaque histoire</span><label class="tgl"><input type="checkbox" id="twr2-histoire" checked><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
       <div class="toggle-row"><span class="toggle-label">Afficher les trigger warnings au début de chaque chapitre</span><label class="tgl"><input type="checkbox" id="twr2-chapitre"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
       <span class="form-hint" style="margin-top:14px;display:block;">Tu peux modifier ces options depuis les paramètres de ton compte.</span>
@@ -201,7 +286,7 @@
   <div class="page" id="p-inscription3">
     <div class="page-header"><button class="btn" onclick="go('p-inscription1')">← Retour</button></div>
     <div class="page-scroll"><div class="page-body">
-      <div class="step-stars"><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar">✦</span><span class="sstar">✦</span></div>
+      <div class="step-stars"><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar">✦</span></div>
       <div class="page-title">Personnalise ton expérience</div>
       <div class="page-subtitle">Sur Astrolabe, nous souhaitons que tu te sentes bien et aies la meilleure expérience possible.</div>
       <div class="toggle-row"><span class="toggle-label">Activer l'accès au contenu pour adulte</span><label class="tgl"><input type="checkbox" id="adult3"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
@@ -468,56 +553,6 @@
     </div></div>
   </div>
 
-  <!-- POP-UP SUPPRESSION 1 -->
-  <div class="modal-overlay" id="delete-popup1" onclick="closeModal(event,'delete-popup1')" style="position:fixed;z-index:200">
-    <div class="modal-box" style="text-align:center">
-      <button class="modal-close" onclick="closeM('delete-popup1')">✕</button>
-      <div class="modal-title">Supprimer mon compte</div>
-      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Es-tu sûr·e de vouloir supprimer ton compte ? Toutes tes données seront supprimées dans 30 jours.</p>
-      <div style="display:flex;gap:10px">
-        <button class="btn btn-full" style="background:rgba(212,126,126,.15);border-color:rgba(212,126,126,.4);color:var(--danger)" onclick="closeM('delete-popup1');go('p-delete1')">Oui</button>
-        <button class="btn btn-full btn-accent" onclick="closeM('delete-popup1');openModal('delete-non-popup')">Non</button>
-      </div>
-    </div>
-  </div>
-  <div class="modal-overlay" id="delete-non-popup" onclick="closeModal(event,'delete-non-popup')" style="position:fixed;z-index:200">
-    <div class="modal-box" style="text-align:center">
-      <button class="modal-close" onclick="closeM('delete-non-popup')">✕</button>
-      <div style="font-size:40px;margin-bottom:12px">😮‍💨</div>
-      <div class="modal-title">Ouf !</div>
-      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">On a eu peur ! Content·e de te garder parmi nous ✦</p>
-      <button class="btn btn-full btn-accent" onclick="closeM('delete-non-popup')">Rester sur Astrolabe ✦</button>
-    </div>
-  </div>
-  <div class="page" id="p-delete1">
-    <div class="page-header"><button class="btn" onclick="go('p-moncompte')">← Retour</button></div>
-    <div class="page-scroll"><div class="page-body">
-      <div class="page-title">Une dernière chose…</div>
-      <div class="page-subtitle">Pourquoi souhaites-tu supprimer ton compte ? (facultatif)</div>
-      <textarea id="delete-raison" style="width:100%;background:rgba(140,150,195,.1);border:1px solid rgba(180,190,230,.16);border-radius:10px;color:var(--text);font-family:'Jost',sans-serif;font-size:13px;padding:12px;outline:none;resize:none;min-height:100px;" placeholder="Ton retour nous aide à améliorer Astrolabe…"></textarea>
-      <button class="btn btn-full btn-accent" style="margin-top:16px" onclick="openModal('delete-popup2')">Valider →</button>
-    </div></div>
-  </div>
-  <div class="modal-overlay" id="delete-popup2" onclick="closeModal(event,'delete-popup2')" style="position:fixed;z-index:200">
-    <div class="modal-box" style="text-align:center">
-      <button class="modal-close" onclick="closeM('delete-popup2')">✕</button>
-      <div class="modal-title">100% sûr·e ?</div>
-      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Cette action est irréversible. Ton compte sera supprimé dans 30 jours.</p>
-      <div style="display:flex;gap:10px">
-        <button class="btn btn-full" style="background:rgba(212,126,126,.15);border-color:rgba(212,126,126,.4);color:var(--danger)" onclick="closeM('delete-popup2');go('p-au-revoir')">Oui, supprimer</button>
-        <button class="btn btn-full btn-accent" onclick="closeM('delete-popup2');openModal('delete-non-popup')">Non</button>
-      </div>
-    </div>
-  </div>
-  <div class="page" id="p-au-revoir">
-    <div class="page-scroll"><div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:40px 24px;">
-      <div style="font-size:52px;margin-bottom:20px">🌙</div>
-      <div class="page-title">Au revoir…</div>
-      <p style="font-size:13px;color:var(--text2);line-height:1.8;margin-bottom:30px">Ton compte sera supprimé dans 30 jours. Si tu changes d'avis, reconnecte-toi avant ce délai.</p>
-      <button class="btn btn-full btn-accent" style="max-width:300px" onclick="supprimerCompteDefinitif()">Quitter Astrolabe</button>
-    </div></div>
-  </div>
-
   <!-- POP-UP BIENVENUE -->
   <div class="modal-overlay" id="bienvenue-popup" style="position:fixed;z-index:200">
     <div class="modal-box" style="text-align:center">
@@ -543,92 +578,15 @@
     </div>
   </div>
 
-
-
-
-  <!-- POP-UP SUPPRESSION 1 -->
-  <div class="modal-overlay" id="delete-popup1" onclick="closeModal(event,'delete-popup1')" style="position:fixed;z-index:200">
-    <div class="modal-box" style="text-align:center">
-      <button class="modal-close" onclick="closeM('delete-popup1')">✕</button>
-      <div class="modal-title">Supprimer mon compte</div>
-      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Es-tu sûr·e de vouloir supprimer ton compte ? Toutes tes données seront supprimées dans 30 jours.</p>
-      <div style="display:flex;gap:10px">
-        <button class="btn btn-full" style="background:rgba(212,126,126,.15);border-color:rgba(212,126,126,.4);color:var(--danger)" onclick="closeM('delete-popup1');go('p-delete1')">Oui</button>
-        <button class="btn btn-full btn-accent" onclick="closeM('delete-popup1');openModal('delete-non-popup')">Non</button>
-      </div>
-    </div>
-  </div>
-  <div class="modal-overlay" id="delete-non-popup" onclick="closeModal(event,'delete-non-popup')" style="position:fixed;z-index:200">
-    <div class="modal-box" style="text-align:center">
-      <button class="modal-close" onclick="closeM('delete-non-popup')">✕</button>
-      <div style="font-size:40px;margin-bottom:12px">😮‍💨</div>
-      <div class="modal-title">Ouf !</div>
-      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">On a eu peur ! Content·e de te garder parmi nous ✦</p>
-      <button class="btn btn-full btn-accent" onclick="closeM('delete-non-popup')">Rester sur Astrolabe ✦</button>
-    </div>
-  </div>
-  <div class="page" id="p-delete1">
-    <div class="page-header"><button class="btn" onclick="go('p-moncompte')">← Retour</button></div>
-    <div class="page-scroll"><div class="page-body">
-      <div class="page-title">Une dernière chose…</div>
-      <div class="page-subtitle">Pourquoi souhaites-tu supprimer ton compte ? (facultatif)</div>
-      <textarea id="delete-raison" style="width:100%;background:rgba(140,150,195,.1);border:1px solid rgba(180,190,230,.16);border-radius:10px;color:var(--text);font-family:'Jost',sans-serif;font-size:13px;padding:12px;outline:none;resize:none;min-height:100px;" placeholder="Ton retour nous aide à améliorer Astrolabe…"></textarea>
-      <button class="btn btn-full btn-accent" style="margin-top:16px" onclick="openModal('delete-popup2')">Valider →</button>
-    </div></div>
-  </div>
-  <div class="modal-overlay" id="delete-popup2" onclick="closeModal(event,'delete-popup2')" style="position:fixed;z-index:200">
-    <div class="modal-box" style="text-align:center">
-      <button class="modal-close" onclick="closeM('delete-popup2')">✕</button>
-      <div class="modal-title">100% sûr·e ?</div>
-      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Cette action est irréversible. Ton compte sera supprimé dans 30 jours.</p>
-      <div style="display:flex;gap:10px">
-        <button class="btn btn-full" style="background:rgba(212,126,126,.15);border-color:rgba(212,126,126,.4);color:var(--danger)" onclick="closeM('delete-popup2');go('p-au-revoir')">Oui, supprimer</button>
-        <button class="btn btn-full btn-accent" onclick="closeM('delete-popup2');openModal('delete-non-popup')">Non</button>
-      </div>
-    </div>
-  </div>
-  <div class="page" id="p-au-revoir">
-    <div class="page-scroll"><div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:40px 24px;">
-      <div style="font-size:52px;margin-bottom:20px">🌙</div>
-      <div class="page-title">Au revoir…</div>
-      <p style="font-size:13px;color:var(--text2);line-height:1.8;margin-bottom:30px">Ton compte sera supprimé dans 30 jours. Si tu changes d'avis, reconnecte-toi avant ce délai.</p>
-      <button class="btn btn-full btn-accent" style="max-width:300px" onclick="supprimerCompteDefinitif()">Quitter Astrolabe</button>
-    </div></div>
-  </div>
-  <!-- POP-UP BIENVENUE -->
-  <div class="modal-overlay" id="bienvenue-popup" style="position:fixed;z-index:200">
-    <div class="modal-box" style="text-align:center">
-      <div style="font-size:40px;margin-bottom:12px">🎁</div>
-      <div class="modal-title" style="display:flex;align-items:center;justify-content:center;gap:8px"><span>✦</span><span>Bienvenue <span id="bienvenue-pseudo"></span></span><span>✦</span></div>
-      <p style="font-size:13px;color:var(--text2);margin-bottom:8px;line-height:1.7">Un e-mail de confirmation t'a été envoyé.<br>Clique sur le lien pour activer ton compte.</p>
-      <p style="font-size:11px;color:var(--text3);margin-bottom:22px;line-height:1.6">En attendant, explore le site avec tes 20 tickets offerts ✦</p>
-      <button class="btn btn-full btn-accent" onclick="closeM('bienvenue-popup');updateTopbar();go('p-main')">Commencer l'aventure ✦</button>
-    </div>
-  </div>
-  <!-- POP-UP AVATAR -->
-  <div class="modal-overlay" id="avatar-popup" onclick="closeModal(event,'avatar-popup')" style="position:fixed;z-index:200">
-    <div class="modal-box" style="text-align:center">
-      <button class="modal-close" onclick="cancelAvatar()">✕</button>
-      <div class="modal-title">Changer ma photo de profil</div>
-      <div style="display:flex;justify-content:center;gap:16px;margin:20px 0 24px">
-        <div onclick="setAvatar('☽')" id="av-lune" style="width:64px;height:64px;border-radius:50%;border:1.5px solid rgba(180,190,255,.2);background:rgba(126,159,212,.08);display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;">☽</div>
-        <div onclick="setAvatar('✦')" id="av-etoile" style="width:64px;height:64px;border-radius:50%;border:1.5px solid rgba(180,190,255,.2);background:rgba(126,159,212,.08);display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;">✦</div>
-        <div onclick="setAvatar('☀')" id="av-soleil" style="width:64px;height:64px;border-radius:50%;border:1.5px solid rgba(180,190,255,.2);background:rgba(126,159,212,.08);display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;">☀</div>
-      </div>
-      <button class="btn btn-full btn-accent" onclick="confirmAvatar()">Valider</button>
-    </div>
-  </div>
   <!-- POP-UP OPTIONS -->
   <div class="modal-overlay" id="options-popup" style="position:fixed;z-index:200">
     <div class="modal-box">
       <button class="modal-close" onclick="closeM('options-popup')">✕</button>
       <div class="modal-title" style="margin-bottom:16px">Paramètres de lecture</div>
-      <!-- Onglets -->
       <div style="display:flex;gap:10px;margin-bottom:20px">
         <button id="opt-btn-cette" onclick="afficherOnglet('cette')" class="btn btn-full btn-accent" style="font-size:11px">Pour cette histoire</button>
         <button id="opt-btn-toutes" onclick="afficherOnglet('toutes')" class="btn btn-full" style="font-size:11px">Pour toutes les histoires</button>
       </div>
-      <!-- Contenu onglet "cette histoire" -->
       <div id="opt-panel-cette">
         <div class="toggle-row"><span class="toggle-label">Mode lecture : <span id="opt-c-mode-label">Nuit</span></span><label class="tgl tgl-mode"><input type="checkbox" id="opt-c-mode-jour" onchange="optCModeChange(this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
         <div id="opt-c-row-couleur" class="toggle-row" style="justify-content:space-between;align-items:center">
@@ -653,7 +611,6 @@
           <button class="btn btn-full" style="font-size:11px;color:var(--danger);border-color:rgba(212,126,126,.3)" onclick="ouvrirPopupResetOptions()">↺ Réinitialiser les paramètres pour toutes les histoires</button>
         </div>
       </div>
-      <!-- Contenu onglet "toutes les histoires" -->
       <div id="opt-panel-toutes" style="display:none">
         <div class="toggle-row"><span class="toggle-label">Mode lecture : <span id="opt-t-mode-label">Nuit</span></span><label class="tgl tgl-mode"><input type="checkbox" id="opt-t-mode-jour" onchange="optTModeChange(this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
         <div id="opt-t-row-couleur" class="toggle-row" style="justify-content:space-between;align-items:center">
@@ -679,8 +636,7 @@
     </div>
   </div>
 
-  <!-- POP-UP RESET EN TRAVAUX -->
-  <!-- POP-UP RESET OPTIONS 1 — Confirmation -->
+  <!-- POP-UP RESET OPTIONS 1 -->
   <div class="modal-overlay" id="reset-options-popup" style="position:fixed;z-index:210">
     <div class="modal-box" style="text-align:center">
       <div class="modal-title">Réinitialiser ?</div>
@@ -692,7 +648,7 @@
     </div>
   </div>
 
-  <!-- POP-UP RESET OPTIONS 2 — Succès -->
+  <!-- POP-UP RESET OPTIONS 2 -->
   <div class="modal-overlay" id="reset-options-popup2" style="position:fixed;z-index:210">
     <div class="modal-box" style="text-align:center">
       <div style="font-size:36px;margin-bottom:12px">✦</div>
@@ -702,6 +658,15 @@
     </div>
   </div>
 
+  <!-- POP-UP ANNIVERSAIRE 16 ANS -->
+  <div class="modal-overlay" id="anniversaire-16-popup" style="position:fixed;z-index:200">
+    <div class="modal-box" style="text-align:center">
+      <div style="font-size:48px;margin-bottom:12px">🎂</div>
+      <div class="modal-title">Joyeux anniversaire !</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Tu as maintenant accès à un catalogue plus large !<br><br>Tu peux désormais explorer davantage d'histoires et effectuer des achats sans accord parental.</p>
+      <button class="btn btn-full btn-accent" onclick="confirmer16Ans()">Super ✦</button>
+    </div>
+  </div>
 
   <!-- POP-UP ANNIVERSAIRE 18 ANS -->
   <div class="modal-overlay" id="anniversaire-popup" style="position:fixed;z-index:200">
