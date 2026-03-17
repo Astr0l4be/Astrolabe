@@ -201,24 +201,15 @@ function openHistoire(id){
   chapList.innerHTML=b.chapitres.map(ch=>{
     const libre=ch.gratuit||ch.num<=(b.gratuit_jusqu_au||8);
     const key=spicyKey(b.id,ch.num);
-    const estAdoSoft=compte.trancheAge==='ado'&&compte.softSpicy===true;
-    const forceSoft=ch.spicy&&ch.contenuSoft&&estAdoSoft;
-    const peutToggle=ch.spicy&&ch.contenuSoft&&!forceSoft;
+    const hasToggle=ch.spicy&&ch.contenuSoft;
     const veutSoft=spicyChoix[key]===true;
-    const toggleHTML=peutToggle?`
-      <div style="display:flex;align-items:center;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid rgba(180,190,255,.08)">
-        <span style="font-size:11px;color:var(--text3);flex:1">🌶 Version : ${veutSoft?'<span style="color:var(--accent)">Douce</span>':'<span style="color:#d47e7e">Complète</span>'}</span>
-        <label class="tgl" onclick="event.stopPropagation()"><input type="checkbox" ${veutSoft?'':'checked'} onchange="spicyChoix['${key}']=!this.checked;openHistoire('${b.id}')"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
-      </div>`
-      :forceSoft?`<div style="margin-top:6px;font-size:11px;color:var(--text3)">🌶 Version douce</div>`
-      :ch.spicy?`<div style="margin-top:6px;font-size:11px;color:var(--text3)">🌶</div>`
-      :'';
-    return`<div class="btn-lire-wrap">
-      <button class="btn-lire ${libre?'':'btn-lire-locked'}" onclick="openLecture('${b.id}',${ch.num})" style="width:100%">
-        <span>Chapitre ${ch.num} · ${ch.titre}</span>
+    const toggleBtn=hasToggle?`<button class="ch-soft-btn ${veutSoft?'ch-soft-btn-on':''}" onclick="event.stopPropagation();spicyChoix['${key}']=!spicyChoix['${key}'];openHistoire('${b.id}')" title="${veutSoft?'Version douce':'Version complète'}">${veutSoft?'🌸':'🌶'}</button>`
+      :ch.spicy?`<span style="font-size:14px;padding:0 6px">🌶</span>`:'';
+    return`<div class="ch-lire-row">
+      <button class="btn-lire ${libre?'':'btn-lire-locked'}" onclick="openLecture('${b.id}',${ch.num})">
+        <span>Ch.${ch.num} · ${ch.titre}</span>
         <span class="ch-badge ${libre?'':'ch-badge-ticket'}">${libre?'Gratuit':'🎟 1 ticket'}</span>
-      </button>
-      ${toggleHTML}
+      </button>${toggleBtn}
     </div>`;
   }).join('');
   document.getElementById('histoire-back-btn').onclick=()=>go(prevPage);
