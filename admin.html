@@ -924,11 +924,11 @@ function switchTab(tab){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   event.target.classList.add('active');
   document.getElementById('panel-'+tab).classList.add('active');
-  // Toujours fermer les formulaires d'édition ouverts
-  const editForms=['edit-histoire-form','edit-chapitre-form','edit-auteur-form'];
-  editForms.forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
-  const detailCards=['detail-card','auteur-detail-card'];
-  detailCards.forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='block';});
+  // Toujours fermer les formulaires d'édition histoire et auteur seulement
+  const el1=document.getElementById('edit-histoire-form');if(el1)el1.style.display='none';
+  const el2=document.getElementById('edit-auteur-form');if(el2)el2.style.display='none';
+  const dc=document.getElementById('detail-card');if(dc)dc.style.display='block';
+  const ac=document.getElementById('auteur-detail-card');if(ac)ac.style.display='block';
   if(tab==='histoires'){
     document.getElementById('histoires-card').style.display='block';
     document.getElementById('histoire-detail').style.display='none';
@@ -1500,6 +1500,8 @@ async function ouvrirEditionHistoire(id){
 function fermerEditionHistoire(){
   document.getElementById('edit-histoire-form').style.display='none';
   document.getElementById('detail-card').style.display='block';
+  document.getElementById('histoire-detail').style.display='block';
+  document.getElementById('histoires-card').style.display='none';
 }
 
 function renderEditTags(){
