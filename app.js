@@ -25,9 +25,29 @@ function bookCardHTML(b){
 
 function livreVisible(b){
   const tranche=compte.trancheAge||'adulte';
-  if(b.adulte)return tranche==='adulte'&&compte.adulte===true;
-  if(tranche==='junior')return b.adapteMoins16===true;
-  return true;
+
+  // 18+ : acces a tout le catalogue
+  if(tranche==='adulte') return true;
+
+  // Contenu adulte sans version soft -> 18+ uniquement
+  if(b.adulte && !b.versionSoft) return false;
+
+  // Contenu adulte + version soft mais -18 non coche -> 18+ uniquement
+  if(b.adulte && b.versionSoft && !b.adapteMoins18) return false;
+
+  // 16-18 ans
+  if(tranche==='ado'){
+    // Contenu adulte + version soft + -18 -> accessible (version soft)
+    if(b.adulte && b.versionSoft && b.adapteMoins18) return true;
+    // Contenu non adulte -> accessible
+    if(!b.adulte) return true;
+    return false;
+  }
+
+  // 13-16 ans : uniquement les histoires marquees -16
+  if(tranche==='junior') return b.adapteMoins16===true;
+
+  return false;
 }
 
 function renderGrid(id,books){
