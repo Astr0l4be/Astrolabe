@@ -4,7 +4,7 @@ for(let i=0;i<70;i++){const s=document.createElement('div');s.className='star';s
 
 
 /* ÉTAT */
-const compte={loggedIn:false,pseudo:'',tickets:0,userId:null,adulte:false,twrHistoire:true,twrChapitre:false,avatar:'☽',age:16};
+const compte={loggedIn:false,pseudo:'',tickets:0,userId:null,adulte:false,softSpicy:false,trancheAge:'adulte',twrHistoire:true,twrChapitre:false,avatar:'☽',age:16};
 function addTickets(n){compte.tickets+=n;updateTicketsDisplay();}
 function updateTicketsDisplay(){
   const el=document.getElementById('compte-tickets');if(el)el.textContent=compte.tickets+' ✦';
@@ -24,9 +24,33 @@ function bookCardHTML(b){
   return`<div class="book-card ${b.color}" onclick="openHistoire('${b.id}')">${img}<div class="book-card-label">${b.title}</div></div>`;
 }
 
+/* ── FILTRE SELON LA TRANCHE D'ÂGE ──
+   - non connecté ou adulte : tout sauf adulte (sauf si adulte activé)
+   - ado (16-18) : pas d'adulte, mais histoires adapte_moins18 OK
+   - junior (13-16) : pas d'adulte, pas de spicy, seulement adapte_moins16
+*/
+function livreVisible(b){
+  const tranche = compte.trancheAge || 'adulte';
+
+  // Contenu adulte : uniquement si compte adulte ET option activée
+  if(b.adulte) return tranche==='adulte' && compte.adulte===true;
+
+  // Histoires non-adultes : filtre par tranche
+  if(tranche==='junior'){
+    // 13-16 : seulement histoires adapte_moins16
+    return b.adapteMoins16===true;
+  }
+  if(tranche==='ado'){
+    // 16-18 : histoires adapte_moins18 OU sans restriction d'âge
+    return true; // les histoires non-adultes sont toutes accessibles aux ados
+  }
+  // adulte ou non connecté : tout le non-adulte
+  return true;
+}
+
 function renderGrid(id,books){
   const el=document.getElementById(id);if(!el)return;
-  const filtered=books.filter(b=>!b.adulte||compte.adulte===true);
+  const filtered=books.filter(b=>livreVisible(b));
   el.innerHTML=filtered.map(b=>bookCardHTML(b)).join('');
 }
 
@@ -40,7 +64,8 @@ async function loadHistoires(){
   // Charger tags et TW pour chaque histoire
   const {data:allTags}=await db.from('histoires_tags').select('histoire_id, tags(nom)');
   const {data:allTW}=await db.from('trigger_warnings_histoires').select('histoire_id, contenu');
-  const {data:allChaps}=await db.from('chapitres').select('id,histoire_id,numero,titre,gratuit').order('numero');
+  // Charger aussi spicy et contenu_soft pour les chapitres
+  const {data:allChaps}=await db.from('chapitres').select('id,histoire_id,numero,titre,gratuit,spicy,contenu_soft').order('numero');
 
   BOOKS=histoires.map(h=>{
     const tags=(allTags||[]).filter(t=>t.histoire_id===h.id).map(t=>t.tags?.nom).filter(Boolean);
@@ -49,6 +74,8 @@ async function loadHistoires(){
       num:ch.numero,
       titre:ch.titre,
       gratuit:ch.gratuit,
+      spicy:ch.spicy||false,
+      contenuSoft:ch.contenu_soft||null,
       texte:null // chargé à la demande
     }));
     return{
@@ -62,6 +89,9 @@ async function loadHistoires(){
       tw:tws.join(', ')||null,
       desc:h.resume||'',
       adulte:h.adulte||false,
+      versionSoft:h.version_soft||false,
+      adapteMoins18:h.adapte_moins18||false,
+      adapteMoins16:h.adapte_moins16||false,
       gratuit_jusqu_au:h.gratuit_jusqu_au||8,
       numerotation:h.numerotation||'arabe',
       chapitres
@@ -94,7 +124,7 @@ async function loadContenuChapitre(bookId, chapNum){
   if(!ch)return null;
   if(ch.texte)return ch.texte;
   const {data}=await db.from('chapitres')
-    .select('contenu,citation,citation_auteur')
+    .select('contenu,citation,citation_auteur,spicy,contenu_soft')
     .eq('histoire_id',bookId)
     .eq('numero',chapNum)
     .single();
@@ -102,6 +132,8 @@ async function loadContenuChapitre(bookId, chapNum){
     ch.texte=data.contenu;
     ch.citation=data.citation||null;
     ch.citation_auteur=data.citation_auteur||null;
+    ch.spicy=data.spicy||false;
+    ch.contenuSoft=data.contenu_soft||null;
   }
   return ch.texte;
 }
@@ -128,16 +160,15 @@ function goAcheterTickets(fromPage){
 }
 
 function goHashtag(name){
-  // Mettre à jour pills actives
   document.querySelectorAll('.tag-pill').forEach(p=>p.classList.remove('active'));
   if(!name){
     document.getElementById('tag-pill-all')?.classList.add('active');
     document.getElementById('hashtag-title').textContent='✦ Toutes les histoires';
-    const filtered=BOOKS.filter(b=>!b.adulte||compte.adulte);
+    const filtered=BOOKS.filter(b=>livreVisible(b));
     document.getElementById('hashtag-count').textContent=filtered.length+' histoire'+(filtered.length>1?'s':'');
     renderGrid('hashtag-grid',filtered);
   } else {
-    const res=BOOKS.filter(b=>b.tags.some(t=>t.toLowerCase()===name.toLowerCase())&&(!b.adulte||compte.adulte));
+    const res=BOOKS.filter(b=>livreVisible(b)&&b.tags.some(t=>t.toLowerCase()===name.toLowerCase()));
     document.getElementById('hashtag-title').textContent='# '+name;
     document.getElementById('hashtag-count').textContent=res.length+' histoire'+(res.length>1?'s':'');
     renderGrid('hashtag-grid',res);
@@ -150,7 +181,6 @@ function openHistoire(id){
   currentHistoireId=id;
   const cur=document.querySelector('.page.active');if(cur)prevPage=cur.id;
   const b=BOOKS.find(x=>x.id===id);if(!b)return;
-  // Bannière 2:1 (même format que l'accueil)
   const bannerEl=document.getElementById('histoire-banner');
   if(b.banner){bannerEl.innerHTML=`<img src="${b.banner}" alt="${b.title}" style="width:100%;height:100%;object-fit:cover;display:block;">`;}
   else{bannerEl.innerHTML=`<div class="histoire-banner-bg ${b.color}">✦</div>`;}
@@ -169,9 +199,10 @@ function openHistoire(id){
   }
   const chapList=document.getElementById('chapitres-list');
   chapList.innerHTML=b.chapitres.map(ch=>{
-    const libre=ch.gratuit||ch.num<=8;
+    const libre=ch.gratuit||ch.num<=(b.gratuit_jusqu_au||8);
+    const spicyBadge=ch.spicy?'<span style="font-size:10px;margin-left:4px">🌶</span>':'';
     return`<button class="btn-lire ${libre?'':'btn-lire-locked'}" onclick="openLecture('${b.id}',${ch.num})">
-      <span>Chapitre ${ch.num} · ${ch.titre}</span>
+      <span>Chapitre ${ch.num} · ${ch.titre}${spicyBadge}</span>
       <span class="ch-badge ${libre?'':'ch-badge-ticket'}">${libre?'Gratuit':'🎟 1 ticket'}</span>
     </button>`;
   }).join('');
@@ -196,49 +227,125 @@ function refreshTWHistoire(){
   }
 }
 
+/* ── TOGGLE SPICY (état par chapitre, persisté en mémoire) ── */
+const spicyChoix={};  // { "bookId-chapNum": true/false }
+
+function spicyKey(bookId,chapNum){return bookId+'-'+chapNum;}
+
+function toggleSpicy(bookId,chapNum){
+  const key=spicyKey(bookId,chapNum);
+  spicyChoix[key]=!spicyChoix[key];
+  // Relire le chapitre avec le nouveau choix
+  _afficherContenuLecture(bookId,chapNum);
+}
+
+/* ── LECTURE ── */
+let _currentBookId=null;
+let _currentChapNum=null;
+
 async function openLecture(bookId,chapNum){
   const b=BOOKS.find(x=>x.id===bookId);
   if(!b)return;
+  _currentBookId=bookId;
+  _currentChapNum=chapNum;
+
   // Charger le contenu si pas encore fait
-  const contenu=await loadContenuChapitre(bookId,chapNum);
+  await loadContenuChapitre(bookId,chapNum);
   const ch=b.chapitres.find(c=>c.num===chapNum);
   if(!ch)return;
-  if(!contenu){
+
+  if(!ch.texte){
     document.getElementById('lecture-body').innerHTML='<p style="text-align:center;color:var(--text3)">Chapitre à venir…</p>';
     go('p-lecture');return;
   }
+
   document.getElementById('lecture-titre').textContent=b.title;
-  // Titre et sous-titre depuis les métadonnées du chapitre
-  let html=`<div class="lecture-ch-num"><span class="lecture-star-side">✦</span>Chapitre ${ch.num}<span class="lecture-star-side">✦</span></div>`;
+  _afficherContenuLecture(bookId,chapNum);
+  document.getElementById('lecture-back-btn').onclick=()=>go('p-histoire');
+  document.querySelector('#p-lecture .page-scroll').scrollTop=0;
+  go('p-lecture');
+  setTimeout(applyLectureMode,50);
+}
+
+function _afficherContenuLecture(bookId,chapNum){
+  const b=BOOKS.find(x=>x.id===bookId);if(!b)return;
+  const ch=b.chapitres.find(c=>c.num===chapNum);if(!ch||!ch.texte)return;
+
+  const key=spicyKey(bookId,chapNum);
+
+  // Déterminer si on peut proposer le toggle spicy
+  // — adulte connecté : choix libre entre version complète et soft
+  // — ado (16-18) avec soft_spicy activé : on force la version soft (pas de toggle)
+  // — autres : version normale uniquement
+  const estAdulte = compte.trancheAge==='adulte';
+  const estAdoSoft = compte.trancheAge==='ado' && compte.softSpicy===true;
+  const peutToggle = ch.spicy && ch.contenuSoft && estAdulte;
+  const forceSoft  = ch.spicy && ch.contenuSoft && estAdoSoft;
+
+  // Choisir le contenu à afficher
+  let contenuAffiche = ch.texte;
+  let modeSpicyActif = false;
+
+  if(forceSoft){
+    contenuAffiche = ch.contenuSoft;
+  } else if(peutToggle){
+    // Par défaut : version complète (spicy). L'utilisateur peut basculer.
+    const veutSoft = spicyChoix[key]===true;
+    contenuAffiche = veutSoft ? ch.contenuSoft : ch.texte;
+    modeSpicyActif = !veutSoft;
+  }
+
+  let html='';
+
+  // Numéro et titre du chapitre
+  html+=`<div class="lecture-ch-num"><span class="lecture-star-side">✦</span>Chapitre ${ch.num}<span class="lecture-star-side">✦</span></div>`;
   if(ch.titre)html+=`<div class="lecture-ch-title">${ch.titre}</div>`;
-  // Nettoyer le contenu : supprimer les balises de style mais garder <strong> et <em>
-  const contenuPropre=contenu
+
+  // Toggle spicy (uniquement pour les adultes avec version soft dispo)
+  if(peutToggle){
+    const veutSoft=spicyChoix[key]===true;
+    html+=`<div style="display:flex;align-items:center;justify-content:space-between;margin:0 0 20px;padding:10px 14px;background:rgba(212,126,126,.08);border:1px solid rgba(212,126,126,.2);border-radius:10px">
+      <span style="font-size:12px;color:var(--text2)">🌶 Ce chapitre contient une scène spicy</span>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:11px;color:var(--text3)">
+        <span>${veutSoft?'Version douce':'Version complète'}</span>
+        <label class="tgl"><input type="checkbox" ${veutSoft?'':'checked'} onchange="toggleSpicy('${bookId}',${chapNum})"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
+      </label>
+    </div>`;
+  } else if(forceSoft && ch.spicy){
+    html+=`<div style="margin:0 0 20px;padding:10px 14px;background:rgba(126,159,212,.06);border:1px solid rgba(126,159,212,.15);border-radius:10px;font-size:12px;color:var(--text3)">
+      ✦ Ce chapitre est affiché en version douce.
+    </div>`;
+  }
+
+  // Nettoyer et afficher le contenu
+  const contenuPropre=contenuAffiche
     .replace(/<div[^>]*style="[^"]*text-align[^"]*"[^>]*>([\s\S]*?)<\/div>/gi,'$1')
     .replace(/<div[^>]*>([\s\S]*?)<\/div>/gi,'$1')
     .replace(/style="[^"]*"/gi,'')
     .trim();
-  // Découper en paragraphes et afficher
   contenuPropre.split('\n\n').forEach(para=>{
     para=para.trim();
     if(!para)return;
     const isD=para.startsWith('—')||para.startsWith('-');
     html+=`<p class="${isD?'d':''}">${para.replace(/\n/g,'<br>')}</p>`;
   });
+
+  // Trigger warnings chapitre
   const showTWCh=compte.twrChapitre===true;
   const histPrefs=optParHistoire[bookId];
   const useTWCh=histPrefs?histPrefs.twrChapitre:showTWCh;
-  if(b.tw&&useTWCh){html=`<div class="tw-box" style="margin:0 0 20px"><div class="tw-label">Trigger warnings</div><div class="tw-text">${b.tw}</div></div>`+html;}
+  const bObj=BOOKS.find(x=>x.id===bookId);
+  if(bObj&&bObj.tw&&useTWCh){html=`<div class="tw-box" style="margin:0 0 20px"><div class="tw-label">Trigger warnings</div><div class="tw-text">${bObj.tw}</div></div>`+html;}
+
   document.getElementById('lecture-body').innerHTML=html;
+
+  // Navigation
   const nav=document.getElementById('lecture-nav');
-  const prev=b.chapitres.find(c=>c.num===chapNum-1);
-  const next=b.chapitres.find(c=>c.num===chapNum+1);
+  const prev=bObj.chapitres.find(c=>c.num===chapNum-1);
+  const next=bObj.chapitres.find(c=>c.num===chapNum+1);
   nav.innerHTML='';
   if(prev)nav.innerHTML+=`<button class="btn btn-full" style="flex:1" onclick="openLecture('${bookId}',${prev.num})">← Ch.${prev.num}</button>`;
   if(next)nav.innerHTML+=`<button class="btn btn-full btn-accent" style="flex:1" onclick="openLecture('${bookId}',${next.num})">Ch.${next.num} →</button>`;
-  document.getElementById('lecture-back-btn').onclick=()=>go('p-histoire');
-  document.querySelector('#p-lecture .page-scroll').scrollTop=0;
-  go('p-lecture');
-  setTimeout(applyLectureMode,50);
 }
 
 /* SEARCH */
@@ -246,8 +353,8 @@ function handleSearch(val){
   const label=document.getElementById('search-label');
   const q=val.trim().toLowerCase();
   let res;
-  if(!q){label.textContent='Suggestions';res=BOOKS;}
-  else{res=BOOKS.filter(b=>b.title.toLowerCase().includes(q)||b.tags.some(t=>t.toLowerCase().includes(q)));label.textContent=res.length?res.length+' résultat'+(res.length>1?'s':''):'Aucun résultat';}
+  if(!q){label.textContent='Suggestions';res=BOOKS.filter(b=>livreVisible(b));}
+  else{res=BOOKS.filter(b=>livreVisible(b)&&(b.title.toLowerCase().includes(q)||b.tags.some(t=>t.toLowerCase().includes(q))));label.textContent=res.length?res.length+' résultat'+(res.length>1?'s':''):'Aucun résultat';}
   renderGrid('search-grid',res);
 }
 
@@ -274,4 +381,3 @@ function installPWA(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.
 function closePWABanner(){pwaBanner.classList.add('hidden');}
 window.addEventListener('appinstalled',()=>closePWABanner());
 if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
-
