@@ -295,6 +295,31 @@
                 <input type="hidden" id="edit-statut-val" value="brouillon">
               </div>
             </div>
+            <!-- OPTIONS CONDITIONNELLES ADULTE (édition) -->
+            <div id="edit-options-adulte" style="display:none" class="form-group">
+              <label class="form-label">Version soft des scènes spicy ?</label>
+              <div style="display:flex;gap:8px">
+                <button type="button" class="btn" id="edit-soft-non" onclick="setEditOption('edit-soft','false')" style="flex:1">Non</button>
+                <button type="button" class="btn" id="edit-soft-oui" onclick="setEditOption('edit-soft','true')" style="flex:1">Oui</button>
+              </div>
+              <input type="hidden" id="edit-soft" value="false">
+              <div style="margin-top:10px">
+                <label class="form-label">Adapté à un public -18 ans ?</label>
+                <div style="display:flex;gap:8px">
+                  <button type="button" class="btn" id="edit-moins18-non" onclick="setEditOption('edit-moins18','false')" style="flex:1">Non</button>
+                  <button type="button" class="btn" id="edit-moins18-oui" onclick="setEditOption('edit-moins18','true')" style="flex:1">Oui</button>
+                </div>
+                <input type="hidden" id="edit-moins18" value="false">
+              </div>
+            </div>
+            <div id="edit-options-non-adulte" style="display:none" class="form-group">
+              <label class="form-label">Adapté à un public -16 ans ?</label>
+              <div style="display:flex;gap:8px">
+                <button type="button" class="btn" id="edit-moins16-non" onclick="setEditOption('edit-moins16','false')" style="flex:1">Non</button>
+                <button type="button" class="btn" id="edit-moins16-oui" onclick="setEditOption('edit-moins16','true')" style="flex:1">Oui</button>
+              </div>
+              <input type="hidden" id="edit-moins16" value="false">
+            </div>
             <div class="form-group">
               <label class="form-label">Numérotation des chapitres</label>
               <div style="display:flex;gap:8px">
@@ -432,6 +457,31 @@
             </div>
             <input type="hidden" id="n-statut" value="brouillon">
           </div>
+        </div>
+        <!-- OPTIONS CONDITIONNELLES ADULTE -->
+        <div id="n-options-adulte" style="display:none" class="form-group">
+          <label class="form-label">Version soft des scènes spicy ?</label>
+          <div style="display:flex;gap:8px">
+            <button type="button" class="btn" id="n-soft-non" onclick="setOption('n-soft','false')" style="flex:1">Non</button>
+            <button type="button" class="btn" id="n-soft-oui" onclick="setOption('n-soft','true')" style="flex:1">Oui</button>
+          </div>
+          <input type="hidden" id="n-soft" value="false">
+          <div style="margin-top:10px">
+            <label class="form-label">Adapté à un public -18 ans ?</label>
+            <div style="display:flex;gap:8px">
+              <button type="button" class="btn" id="n-moins18-non" onclick="setOption('n-moins18','false')" style="flex:1">Non</button>
+              <button type="button" class="btn" id="n-moins18-oui" onclick="setOption('n-moins18','true')" style="flex:1">Oui</button>
+            </div>
+            <input type="hidden" id="n-moins18" value="false">
+          </div>
+        </div>
+        <div id="n-options-non-adulte" style="display:none" class="form-group">
+          <label class="form-label">Adapté à un public -16 ans ?</label>
+          <div style="display:flex;gap:8px">
+            <button type="button" class="btn" id="n-moins16-non" onclick="setOption('n-moins16','false')" style="flex:1">Non</button>
+            <button type="button" class="btn" id="n-moins16-oui" onclick="setOption('n-moins16','true')" style="flex:1">Oui</button>
+          </div>
+          <input type="hidden" id="n-moins16" value="false">
         </div>
         <div class="form-group">
           <label class="form-label">Numérotation des chapitres</label>
@@ -837,7 +887,7 @@ function switchTab(tab){
   }
   if(tab==='tags'){loadTagsGestion();loadTWsGestion();}
   if(tab==='chapitre'){chTws=[];renderChTws();loadHistoiresSelect();initBlocs('');}
-  if(tab==='nouvelle')loadAuteursSelect();
+  if(tab==='nouvelle'){loadAuteursSelect();document.getElementById('n-options-adulte').style.display='none';document.getElementById('n-options-non-adulte').style.display='block';}
   if(tab==='nouvel-auteur'){
     document.getElementById('a-pseudo').value='';
     document.getElementById('a-nom').value='';
@@ -1208,6 +1258,9 @@ async function creerHistoire(){
       adulte:document.getElementById('n-adulte').value==='true',
       statut:document.getElementById('n-statut').value||'brouillon',
       numerotation:document.getElementById('n-numerotation').value||'arabe',
+      version_soft:document.getElementById('n-soft').value==='true',
+      adapte_moins18:document.getElementById('n-moins18').value==='true',
+      adapte_moins16:document.getElementById('n-moins16').value==='true',
     }).select().single();
     if(error)throw error;
 
@@ -1435,6 +1488,12 @@ async function ouvrirEditionHistoire(id){
   document.getElementById('edit-adulte-oui').className='btn'+(h.adulte?' btn-accent':'');
   document.getElementById('edit-statut-brouillon').className='btn'+(h.statut==='brouillon'?' btn-accent':'');
   document.getElementById('edit-statut-publie').className='btn'+(h.statut==='publie'?' btn-accent':'');
+  // Options conditionnelles adulte
+  document.getElementById('edit-options-adulte').style.display=h.adulte?'block':'none';
+  document.getElementById('edit-options-non-adulte').style.display=h.adulte?'none':'block';
+  setEditOption('edit-soft',String(h.version_soft||false));
+  setEditOption('edit-moins18',String(h.adapte_moins18||false));
+  setEditOption('edit-moins16',String(h.adapte_moins16||false));
   // Numérotation
   const num=h.numerotation||'arabe';
   document.getElementById('edit-numerotation-val').value=num;
@@ -1530,6 +1589,9 @@ async function sauvegarderHistoire(){
       adulte:document.getElementById('edit-adulte-val').value==='true',
       statut:document.getElementById('edit-statut-val').value,
       numerotation:document.getElementById('edit-numerotation-val').value||'arabe',
+      version_soft:document.getElementById('edit-soft').value==='true',
+      adapte_moins18:document.getElementById('edit-moins18').value==='true',
+      adapte_moins16:document.getElementById('edit-moins16').value==='true',
     }).eq('id',id);
 
     // Tags — supprimer et recréer
@@ -1552,11 +1614,6 @@ async function sauvegarderHistoire(){
   finally{btn.textContent='✦ Sauvegarder';btn.disabled=false;}
 }
 
-function setEditAdulte(val){
-  document.getElementById('edit-adulte-val').value=String(val);
-  document.getElementById('edit-adulte-non').className='btn'+(val?'':' btn-accent');
-  document.getElementById('edit-adulte-oui').className='btn'+(val?' btn-accent':'');
-}
 function setEditStatut(val){
   document.getElementById('edit-statut-val').value=val;
   document.getElementById('edit-statut-brouillon').className='btn'+(val==='brouillon'?' btn-accent':'');
@@ -2317,6 +2374,25 @@ function setAdulte(val){
   document.getElementById('n-adulte').value=String(val);
   document.getElementById('adulte-non').className='btn'+(val?'':' btn-accent');
   document.getElementById('adulte-oui').className='btn'+(val?' btn-accent':'');
+  document.getElementById('n-options-adulte').style.display=val?'block':'none';
+  document.getElementById('n-options-non-adulte').style.display=val?'none':'block';
+}
+function setEditAdulte(val){
+  document.getElementById('edit-adulte-val').value=String(val);
+  document.getElementById('edit-adulte-non').className='btn'+(val?'':' btn-accent');
+  document.getElementById('edit-adulte-oui').className='btn'+(val?' btn-accent':'');
+  document.getElementById('edit-options-adulte').style.display=val?'block':'none';
+  document.getElementById('edit-options-non-adulte').style.display=val?'none':'block';
+}
+function setOption(id,val){
+  document.getElementById(id).value=val;
+  document.getElementById(id+'-non').className='btn'+(val==='false'?' btn-accent':'');
+  document.getElementById(id+'-oui').className='btn'+(val==='true'?' btn-accent':'');
+}
+function setEditOption(id,val){
+  document.getElementById(id).value=val;
+  document.getElementById(id+'-non').className='btn'+(val==='false'?' btn-accent':'');
+  document.getElementById(id+'-oui').className='btn'+(val==='true'?' btn-accent':'');
 }
 function setStatut(val){
   document.getElementById('n-statut').value=val;
