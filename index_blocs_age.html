@@ -1,0 +1,230 @@
+<!-- ════════════════════════════════════════════════════════
+     BLOCS À AJOUTER DANS index.html
+     Colle chaque bloc à l'endroit indiqué ci-dessous.
+     ════════════════════════════════════════════════════════ -->
+
+
+<!-- ─────────────────────────────────────────────────────────
+     1. APRÈS le bloc <!-- INSCRIPTION 1 --> (après la div fermante de p-inscription1)
+        Remplace aussi p-inscription2 existant par celui-ci.
+     ───────────────────────────────────────────────────────── -->
+
+<!-- REFUS < 13 ANS -->
+<div class="page" id="p-inscription-refuse">
+  <div class="page-scroll"><div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:40px 24px;">
+    <div style="font-size:52px;margin-bottom:20px">🌙</div>
+    <div class="page-title">Bonjour mon petit chat !</div>
+    <p style="font-size:14px;color:var(--text2);line-height:1.9;margin-bottom:30px;max-width:340px">
+      Tu me sembles encore un peu jeune pour entrer sur Astrolabe.<br><br>
+      C'est super de vouloir lire plein d'histoires mais, ici, nous proposons surtout des histoires pour adolescents et adultes, et nous voulons être certains que chaque lecteur et lectrice découvre des récits adaptés à son âge.<br><br>
+      Ce n'est pas grave : nous serons toujours là quand tu seras plus grand ou plus grande, alors ne perds pas la passion de la lecture d'ici là !
+    </p>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:24px">À bientôt ✦ Astrolabe</p>
+    <button class="btn btn-full btn-accent" style="max-width:300px" onclick="go('p-main')">Ok ✦</button>
+  </div></div>
+</div>
+
+
+<!-- ─────────────────────────────────────────────────────────
+     2. PAGE ACCORD PARENTAL (choix de l'ado 13-16)
+        Colle après p-inscription-refuse
+     ───────────────────────────────────────────────────────── -->
+
+<!-- ACCORD PARENTAL — choix de l'ado -->
+<div class="page" id="p-inscription-accord">
+  <div class="page-header"><button class="btn" onclick="go('p-inscription1')">← Retour</button></div>
+  <div class="page-scroll"><div class="page-body">
+    <div class="step-stars"><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar">✦</span><span class="sstar">✦</span></div>
+    <div class="page-title">Bonjour mon chat !</div>
+    <p style="font-size:14px;color:var(--text2);line-height:1.9;margin-bottom:24px">
+      Merci d'avoir rejoint le club de lecture d'Astrolabe !<br><br>
+      Tu peux commencer à explorer notre catalogue dès à présent. Cependant, certaines fonctionnalités comme les options d'achat nécessitent l'accord d'un parent ou d'un tuteur légal.<br><br>
+      Sans cet accord, tu ne pourras pas débloquer la suite des histoires.
+    </p>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <button class="btn btn-full btn-accent" onclick="demanderAccordParental()">Demander l'accord parental</button>
+      <button class="btn btn-full" onclick="accordParentalPlusTard()">Continuer sans achat</button>
+    </div>
+  </div></div>
+</div>
+
+
+<!-- ─────────────────────────────────────────────────────────
+     3. PAGE ACCORD PARENTAL — message "plus tard"
+        (pop-up affiché si l'ado clique "continuer sans achat")
+        → pas besoin d'une page dédiée : le bouton "Continuer sans achat"
+          redirige directement vers p-inscription2 via accordParentalPlusTard().
+          Le message ci-dessous est une info affichée dans p-inscription2.
+          Optionnel : tu peux le garder comme pop-up si tu préfères.
+     ───────────────────────────────────────────────────────── -->
+
+<!-- POP-UP INFO "plus tard" -->
+<div class="modal-overlay" id="accord-plus-tard-popup" style="position:fixed;z-index:200">
+  <div class="modal-box" style="text-align:center">
+    <div style="font-size:36px;margin-bottom:12px">✦</div>
+    <div class="modal-title">Pas de problème !</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">
+      Tant que l'accord parental n'est pas validé, les achats et les abonnements restent désactivés.<br><br>
+      Tu peux continuer à découvrir les débuts des histoires gratuitement et activer l'accord parental à tout moment depuis ton compte.
+    </p>
+    <button class="btn btn-full btn-accent" onclick="closeM('accord-plus-tard-popup');go('p-inscription2')">Ok ✦</button>
+  </div>
+</div>
+
+
+<!-- ─────────────────────────────────────────────────────────
+     4. PAGE POUR LE PARENT (on passe l'appareil)
+        Colle après p-inscription-accord
+     ───────────────────────────────────────────────────────── -->
+
+<!-- PAGE PARENT -->
+<div class="page" id="p-accord-parent">
+  <div class="page-header"><button class="btn" onclick="go('p-inscription-accord')">← Retour</button></div>
+  <div class="page-scroll"><div class="page-body">
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="font-size:13px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:8px">À l'intention de l'adulte responsable</div>
+      <div class="page-title" style="font-size:22px">Bonjour ✦</div>
+    </div>
+    <p style="font-size:13px;color:var(--text2);line-height:1.9;margin-bottom:20px">
+      Votre enfant souhaite s'inscrire sur <strong style="color:var(--text)">Astrolabe</strong>, une plateforme de lecture en ligne proposant principalement des histoires de romances, mais pas que !
+    </p>
+    <p style="font-size:13px;color:var(--text2);line-height:1.9;margin-bottom:20px">
+      Nous accordons une attention particulière à la sécurité et au bien-être des lecteurs et lectrices. C'est pourquoi les contenus explicites (sexuels ou gore) sont bloqués pour les utilisateurs de moins de 16 ans, et limités à des romances soft pour les utilisateurs de moins de 18 ans. Nous avons de plus mis en place un système de filtre par Trigger Warnings qui permet d'adapter les lectures proposées à chaque utilisateur.
+    </p>
+    <p style="font-size:13px;color:var(--text2);line-height:1.9;margin-bottom:24px">
+      Notre plateforme propose un système d'abonnement ou d'achat par chapitre. En validant, vous autorisez votre enfant à accéder aux fonctionnalités payantes, sous votre responsabilité. Un système de mot de passe sécurisera les achats.
+    </p>
+    <p style="font-size:11px;color:var(--text3);margin-bottom:28px;line-height:1.6">
+      Nous vous recommandons de consulter les contenus disponibles pour vous assurer qu'ils correspondent à vos attentes.
+    </p>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <button class="btn btn-full btn-accent" onclick="parentAutorise()">✦ J'autorise ce compte à accéder aux options d'achat</button>
+      <button class="btn btn-full" style="color:var(--danger);border-color:rgba(212,126,126,.3)" onclick="openModal('parent-refuse-popup')">Je ne souhaite pas valider l'inscription</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- POP-UP CONFIRMATION REFUS PARENT -->
+<div class="modal-overlay" id="parent-refuse-popup" style="position:fixed;z-index:200">
+  <div class="modal-box" style="text-align:center">
+    <div style="font-size:36px;margin-bottom:12px">⚠️</div>
+    <div class="modal-title">Confirmer le refus</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">
+      En confirmant, le compte en cours de création sera définitivement supprimé. Cette action est irréversible.
+    </p>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-full" style="color:var(--danger);border-color:rgba(212,126,126,.3)" onclick="closeM('parent-refuse-popup');parentRefuse()">Confirmer</button>
+      <button class="btn btn-full btn-accent" onclick="closeM('parent-refuse-popup')">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- POP-UP AUTORISATION PARENT OK -->
+<div class="modal-overlay" id="parent-ok-popup" style="position:fixed;z-index:200">
+  <div class="modal-box" style="text-align:center">
+    <div style="font-size:40px;margin-bottom:12px">✦</div>
+    <div class="modal-title">Merci pour votre confiance !</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">
+      Vous pouvez à présent rendre l'appareil à votre enfant. Il pourra effectuer des achats depuis ce compte.
+    </p>
+    <button class="btn btn-full btn-accent" onclick="closeM('parent-ok-popup');go('p-inscription2')">Ok ✦</button>
+  </div>
+</div>
+
+
+<!-- ─────────────────────────────────────────────────────────
+     5. INSCRIPTION 2 — prefs TW pour juniors ET ados (13-18)
+        REMPLACE l'actuel p-inscription2
+     ───────────────────────────────────────────────────────── -->
+
+<!-- INSCRIPTION 2 — TW (13-18 ans) -->
+<div class="page" id="p-inscription2">
+  <div class="page-header"><button class="btn" onclick="go('p-inscription1')">← Retour</button></div>
+  <div class="page-scroll"><div class="page-body">
+    <div class="step-stars"><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar">✦</span></div>
+    <div class="page-title">Ton confort de lecture</div>
+    <div class="page-subtitle">Sur Astrolabe, nous souhaitons que tu te sentes bien et aies la meilleure expérience possible.</div>
+
+    <!-- Soft spicy : affiché uniquement pour les 16-18 -->
+    <div id="soft-spicy-row" style="display:none">
+      <div style="height:1px;background:rgba(180,190,255,.07);margin:6px 0"></div>
+      <div class="toggle-row">
+        <span class="toggle-label">Activer les scènes romantiques en version douce</span>
+        <label class="tgl"><input type="checkbox" id="soft-spicy3"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
+      </div>
+      <span class="form-hint" style="margin-top:4px;display:block">Versions alternatives des scènes intimes, adaptées aux -18 ans.</span>
+      <div style="height:1px;background:rgba(180,190,255,.07);margin:10px 0"></div>
+    </div>
+
+    <div class="toggle-row"><span class="toggle-label">Afficher les trigger warnings au début de chaque histoire</span><label class="tgl"><input type="checkbox" id="twr2-histoire" checked><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+    <div class="toggle-row"><span class="toggle-label">Afficher les trigger warnings au début de chaque chapitre</span><label class="tgl"><input type="checkbox" id="twr2-chapitre"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+    <span class="form-hint" style="margin-top:14px;display:block;">Tu peux modifier ces options depuis les paramètres de ton compte.</span>
+    <button class="btn btn-full btn-accent" style="margin-top:20px" onclick="go('p-inscription4')">Valider →</button>
+  </div></div>
+</div>
+
+
+<!-- ─────────────────────────────────────────────────────────
+     6. INSCRIPTION 3 — prefs adultes (18+)
+        Conserve l'actuel p-inscription3, ajoute juste le toggle soft-spicy
+        → Pas de modification nécessaire, les adultes n'ont pas de soft-spicy
+     ───────────────────────────────────────────────────────── -->
+<!-- p-inscription3 existant : aucun changement requis -->
+
+
+<!-- ─────────────────────────────────────────────────────────
+     7. POP-UP ANNIVERSAIRE 16 ANS
+        Colle avec le pop-up anniversaire 18 ans existant
+     ───────────────────────────────────────────────────────── -->
+
+<!-- POP-UP ANNIVERSAIRE 16 ANS -->
+<div class="modal-overlay" id="anniversaire-16-popup" style="position:fixed;z-index:200">
+  <div class="modal-box" style="text-align:center">
+    <div style="font-size:48px;margin-bottom:12px">🎂</div>
+    <div class="modal-title">Joyeux anniversaire !</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">
+      Tu as maintenant accès à un catalogue plus large !<br><br>
+      Tu peux désormais explorer davantage d'histoires et effectuer des achats sans accord parental.
+    </p>
+    <button class="btn btn-full btn-accent" onclick="confirmer16Ans()">Super ✦</button>
+  </div>
+</div>
+
+
+<!-- ─────────────────────────────────────────────────────────
+     NOTE : Script à ajouter dans p-inscription2
+     Pour afficher le toggle soft-spicy uniquement pour les 16-18 ans,
+     ajoute ce script juste avant </body> ou dans auth.js après go('p-inscription2')
+     ───────────────────────────────────────────────────────── -->
+<!--
+  Dans auth.js, les fonctions accordParentalPlusTard() et handleInscription1()
+  appelant go('p-inscription2') pour les ados (16-18), tu peux afficher
+  le toggle soft-spicy ainsi :
+
+  function afficherSoftSpicySiAdo() {
+    const row = document.getElementById('soft-spicy-row');
+    if (row) row.style.display = trancheFromAge(compte.age) === 'ado' ? 'block' : 'none';
+  }
+
+  Appelle afficherSoftSpicySiAdo() après chaque go('p-inscription2').
+-->
+
+
+<!-- ─────────────────────────────────────────────────────────
+     MIGRATION SQL SUPABASE
+     À exécuter dans l'éditeur SQL de ton projet Supabase
+     ───────────────────────────────────────────────────────── -->
+<!--
+ALTER TABLE profils
+  ADD COLUMN IF NOT EXISTS tranche_age      TEXT    DEFAULT 'adulte',
+  ADD COLUMN IF NOT EXISTS soft_spicy       BOOLEAN DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS achat_autorise   BOOLEAN DEFAULT TRUE,
+  ADD COLUMN IF NOT EXISTS accord_parental  BOOLEAN DEFAULT FALSE;
+
+-- Mettre à jour les comptes existants (tous passent en 'adulte' par défaut)
+UPDATE profils SET tranche_age = 'adulte' WHERE tranche_age IS NULL;
+
+-- Index utile pour les anniversaires
+CREATE INDEX IF NOT EXISTS idx_profils_tranche ON profils(tranche_age);
+CREATE INDEX IF NOT EXISTS idx_profils_dob ON profils(date_naissance);
+-->
