@@ -288,26 +288,10 @@ function _afficherContenuLecture(bookId,chapNum){
 
   const key=spicyKey(bookId,chapNum);
 
-  // Déterminer si on peut proposer le toggle spicy
-  // — adulte connecté : choix libre entre version complète et soft
-  // — ado (16-18) avec soft_spicy activé : on force la version soft (pas de toggle)
-  // — autres : version normale uniquement
-  const estAdoSoft = compte.trancheAge==='ado' && compte.softSpicy===true;
-  const forceSoft  = ch.spicy && ch.contenuSoft && estAdoSoft;
-  const peutToggle = ch.spicy && ch.contenuSoft && !forceSoft;
-
-  // Choisir le contenu à afficher
-  let contenuAffiche = ch.texte;
-  let modeSpicyActif = false;
-
-  if(forceSoft){
-    contenuAffiche = ch.contenuSoft;
-  } else if(peutToggle){
-    // Par défaut : version complète (spicy). L'utilisateur peut basculer.
-    const veutSoft = spicyChoix[key]===true;
-    contenuAffiche = veutSoft ? ch.contenuSoft : ch.texte;
-    modeSpicyActif = !veutSoft;
-  }
+  // Toggle simple : si le chapitre a spicy=true ET contenu_soft rempli, on propose le choix
+  const aVersionSoft = ch.spicy && ch.contenuSoft;
+  const veutSoft = aVersionSoft && spicyChoix[key]===true;
+  const contenuAffiche = veutSoft ? ch.contenuSoft : ch.texte;
 
   let html='';
 
@@ -315,19 +299,14 @@ function _afficherContenuLecture(bookId,chapNum){
   html+=`<div class="lecture-ch-num"><span class="lecture-star-side">✦</span>Chapitre ${ch.num}<span class="lecture-star-side">✦</span></div>`;
   if(ch.titre)html+=`<div class="lecture-ch-title">${ch.titre}</div>`;
 
-  // Toggle spicy (uniquement pour les adultes avec version soft dispo)
-  if(peutToggle){
-    const veutSoft=spicyChoix[key]===true;
+  // Toggle spicy/soft
+  if(aVersionSoft){
     html+=`<div style="display:flex;align-items:center;justify-content:space-between;margin:0 0 20px;padding:10px 14px;background:rgba(212,126,126,.08);border:1px solid rgba(212,126,126,.2);border-radius:10px">
       <span style="font-size:12px;color:var(--text2)">🌶 Ce chapitre contient une scène spicy</span>
       <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:11px;color:var(--text3)">
         <span>${veutSoft?'Version douce':'Version complète'}</span>
-        <label class="tgl"><input type="checkbox" ${veutSoft?'':'checked'} onchange="toggleSpicy('${bookId}',${chapNum})"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
+        <label class="tgl"><input type="checkbox" ${veutSoft?'checked':''} onchange="toggleSpicy('${bookId}',${chapNum})"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
       </label>
-    </div>`;
-  } else if(forceSoft && ch.spicy){
-    html+=`<div style="margin:0 0 20px;padding:10px 14px;background:rgba(126,159,212,.06);border:1px solid rgba(126,159,212,.15);border-radius:10px;font-size:12px;color:var(--text3)">
-      ✦ Ce chapitre est affiché en version douce.
     </div>`;
   }
 
