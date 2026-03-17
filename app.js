@@ -40,14 +40,12 @@ async function loadHistoires(){
   if(error||!histoires)return;
   const {data:allTags}=await db.from('histoires_tags').select('histoire_id, tags(nom)');
   const {data:allTW}=await db.from('trigger_warnings_histoires').select('histoire_id, contenu');
-  const {data:allChaps}=await db.from('chapitres').select('id,histoire_id,numero,titre,gratuit,spicy,contenu_soft').order('numero');
+  const {data:allChaps}=await db.from('chapitres').select('id,histoire_id,numero,titre,gratuit').order('numero');
   BOOKS=histoires.map(h=>{
     const tags=(allTags||[]).filter(t=>t.histoire_id===h.id).map(t=>t.tags?.nom).filter(Boolean);
     const tws=(allTW||[]).filter(t=>t.histoire_id===h.id).map(t=>t.contenu);
     const chapitres=(allChaps||[]).filter(ch=>ch.histoire_id===h.id).map(ch=>({
       num:ch.numero,titre:ch.titre,gratuit:ch.gratuit,
-      spicy:ch.spicy||false,
-      contenuSoft:ch.contenu_soft||null,
       texte:null,citation:null,citation_auteur:null
     }));
     return{
@@ -79,14 +77,12 @@ async function loadContenuChapitre(bookId,chapNum){
   const ch=b.chapitres.find(c=>c.num===chapNum);if(!ch)return null;
   if(ch.texte)return ch.texte;
   const {data}=await db.from('chapitres')
-    .select('contenu,citation,citation_auteur,spicy,contenu_soft')
+    .select('contenu,citation,citation_auteur')
     .eq('histoire_id',bookId).eq('numero',chapNum).single();
   if(data){
     ch.texte=data.contenu;
     ch.citation=data.citation||null;
     ch.citation_auteur=data.citation_auteur||null;
-    ch.spicy=data.spicy||false;
-    ch.contenuSoft=data.contenu_soft||null;
   }
   return ch.texte;
 }
@@ -127,12 +123,7 @@ function goHashtag(name){
   go('p-hashtag');
 }
 
-/* CHOIX SPICY PAR CHAPITRE
-   false (défaut) = version spicy complète
-   true = version douce (soft)
-*/
-const spicyChoix={};
-function spicyKey(bookId,chapNum){return bookId+'-'+chapNum;}
+
 
 let prevPage='p-main';
 
@@ -159,20 +150,11 @@ function openHistoire(id){
   const chapList=document.getElementById('chapitres-list');
   chapList.innerHTML=b.chapitres.map(function(ch){
     const libre=ch.gratuit||ch.num<=(b.gratuit_jusqu_au||8);
-    const key=spicyKey(b.id,ch.num);
-    const hasSoft=ch.spicy&&ch.contenuSoft;
-    const veutSoft=hasSoft&&spicyChoix[key]===true;
-    var btnSpicy='';
-    if(hasSoft){
-      btnSpicy='<button class="ch-soft-btn'+(veutSoft?' ch-soft-btn-on':'')+'" onclick="toggleSpicyListe(\''+b.id+'\','+ch.num+')" title="'+(veutSoft?'Version douce active — cliquer pour version complète':'Version complète — cliquer pour version douce')+'">'+(veutSoft?'🌸':'🌶')+'</button>';
-    } else {
-      btnSpicy='<div class="ch-soft-placeholder"></div>';
-    }
     return '<div class="ch-lire-row">'
-      +'<button class="btn-lire'+(libre?'':' btn-lire-locked')+'" onclick="openLecture(\''+b.id+'\','+ch.num+')">'
+      +'<button class="btn-lire'+(libre?'':' btn-lire-locked')+'" onclick="openLecture(\''+b.id+'\','+ch.num+')">'  
       +'<span class="ch-lire-titre">Ch.'+ch.num+' · '+ch.titre+'</span>'
       +'<span class="ch-badge'+(libre?'':' ch-badge-ticket')+'" style="flex-shrink:0">'+(libre?'Gratuit':'🎟 1 ticket')+'</span>'
-      +'</button>'+btnSpicy
+      +'</button>'
       +'</div>';
   }).join('');
   const backDest=(prevPage==='p-histoire'||prevPage==='p-lecture')?'p-main':prevPage;
@@ -180,11 +162,7 @@ function openHistoire(id){
   go('p-histoire');
 }
 
-function toggleSpicyListe(bookId,chapNum){
-  var key=spicyKey(bookId,chapNum);
-  spicyChoix[key]=spicyChoix[key]!==true;
-  openHistoire(bookId);
-}
+
 
 function refreshTWHistoire(){
   const b=BOOKS.find(x=>x.id===currentHistoireId);if(!b)return;
@@ -212,25 +190,12 @@ async function openLecture(bookId,chapNum){
     go('p-lecture');return;
   }
 
-  /* Choisir le bon contenu selon le choix spicy/soft */
-  const key=spicyKey(bookId,chapNum);
-  const veutSoft=ch.spicy&&ch.contenuSoft&&spicyChoix[key]===true;
-  const contenu=veutSoft?ch.contenuSoft:ch.texte;
-
   document.getElementById('lecture-titre').textContent=b.title;
   document.getElementById('lecture-back-btn').onclick=function(){go('p-histoire');};
 
   var html='';
   html+='<div class="lecture-ch-num"><span class="lecture-star-side">✦</span>Chapitre '+ch.num+'<span class="lecture-star-side">✦</span></div>';
   if(ch.titre)html+='<div class="lecture-ch-title">'+ch.titre+'</div>';
-
-  if(ch.spicy&&ch.contenuSoft){
-    if(veutSoft){
-      html+='<div style="margin:0 0 20px;padding:10px 14px;background:rgba(126,159,212,.06);border:1px solid rgba(126,159,212,.2);border-radius:10px;font-size:12px;color:var(--text2)">🌸 Version douce</div>';
-    } else {
-      html+='<div style="margin:0 0 20px;padding:10px 14px;background:rgba(212,126,126,.06);border:1px solid rgba(212,126,126,.2);border-radius:10px;font-size:12px;color:var(--text2)">🌶 Version complète</div>';
-    }
-  }
 
   if(ch.citation){
     html+='<div class="lecture-citation"><div class="lecture-citation-texte">'+ch.citation+'</div>';

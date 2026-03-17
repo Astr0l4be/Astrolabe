@@ -277,15 +277,9 @@
     .pwa-install-btn{background:rgba(126,159,212,.2);border:1px solid rgba(126,159,212,.4);color:var(--accent);font-family:'Jost',sans-serif;font-size:11px;padding:7px 13px;border-radius:20px;cursor:pointer;white-space:nowrap;flex-shrink:0;}
     .pwa-close-btn{background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;flex-shrink:0;padding:0 2px;}
 
-    /* LISTE CHAPITRES — rangée avec toggle spicy inline */
+    /* LISTE CHAPITRES */
     #chapitres-list{padding-bottom:40px;}
-    .ch-lire-row{display:flex;align-items:stretch;gap:6px;margin:0 16px 12px;}
-    .ch-lire-row .btn-lire{margin:0;flex:1;min-height:50px;width:0;}
+    .ch-lire-row{display:flex;align-items:stretch;margin:0 16px 12px;}
+    .ch-lire-row .btn-lire{margin:0;flex:1;min-height:50px;}
     .ch-lire-row:last-child{margin-bottom:40px;}
     .ch-lire-titre{flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-    .ch-spicy-only{font-size:14px;padding:0 4px;flex-shrink:0;display:flex;align-items:center;}
-    .ch-soft-btn{flex-shrink:0;width:44px;border-radius:10px;border:1px solid rgba(212,126,126,.3);background:rgba(212,126,126,.08);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;}
-    .ch-soft-btn:hover{background:rgba(212,126,126,.18);}
-    .ch-soft-btn-on{border-color:rgba(126,159,212,.4);background:rgba(126,159,212,.12);}
-    .ch-soft-btn-on:hover{background:rgba(126,159,212,.22);}
-    .ch-soft-placeholder{flex-shrink:0;width:44px;}
