@@ -272,14 +272,14 @@ async function openLecture(bookId,chapNum){
   }
 
   document.getElementById('lecture-titre').textContent=b.title;
-  _afficherContenuLecture(bookId,chapNum);
   document.getElementById('lecture-back-btn').onclick=()=>go('p-histoire');
+  await _afficherContenuLecture(bookId,chapNum);
   document.querySelector('#p-lecture .page-scroll').scrollTop=0;
   go('p-lecture');
   setTimeout(applyLectureMode,50);
 }
 
-function _afficherContenuLecture(bookId,chapNum){
+async function _afficherContenuLecture(bookId,chapNum){
   const b=BOOKS.find(x=>x.id===bookId);if(!b)return;
   const ch=b.chapitres.find(c=>c.num===chapNum);if(!ch||!ch.texte)return;
 
