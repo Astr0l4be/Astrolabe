@@ -202,17 +202,21 @@ function openHistoire(id){
     const libre=ch.gratuit||ch.num<=(b.gratuit_jusqu_au||8);
     const key=spicyKey(b.id,ch.num);
     const hasToggle=ch.spicy&&ch.contenuSoft;
-    const veutSoft=spicyChoix[key]===true;
-    const toggleBtn=hasToggle?`<button class="ch-soft-btn ${veutSoft?'ch-soft-btn-on':''}" onclick="event.stopPropagation();spicyChoix['${key}']=!spicyChoix['${key}'];openHistoire('${b.id}')" title="${veutSoft?'Version douce':'Version complète'}">${veutSoft?'🌸':'🌶'}</button>`
-      :ch.spicy?`<span style="font-size:14px;padding:0 6px">🌶</span>`:'';
+    const veutSoft=hasToggle&&spicyChoix[key]===true;
+    // Le bouton toggle change juste le choix et recharge la liste
+    const toggleBtn=hasToggle
+      ?`<button class="ch-soft-btn ${veutSoft?'ch-soft-btn-on':''}" onclick="event.stopPropagation();spicyChoix['${key}']=spicyChoix['${key}']!==true;openHistoire('${b.id}')" title="${veutSoft?'Passer en version complète':'Passer en version douce'}">${veutSoft?'🌸':'🌶'}</button>`
+      :ch.spicy?`<span class="ch-spicy-only">🌶</span>`:'';
     return`<div class="ch-lire-row">
       <button class="btn-lire ${libre?'':'btn-lire-locked'}" onclick="openLecture('${b.id}',${ch.num})">
-        <span>Ch.${ch.num} · ${ch.titre}</span>
-        <span class="ch-badge ${libre?'':'ch-badge-ticket'}">${libre?'Gratuit':'🎟 1 ticket'}</span>
+        <span class="ch-lire-titre">Ch.${ch.num} · ${ch.titre}</span>
+        <span class="ch-badge ${libre?'':'ch-badge-ticket'}" style="flex-shrink:0">${libre?'Gratuit':'🎟 1 ticket'}</span>
       </button>${toggleBtn}
     </div>`;
   }).join('');
-  document.getElementById('histoire-back-btn').onclick=()=>go(prevPage);
+  // Retour : jamais vers p-histoire lui-même, ni p-lecture
+  const backDest=(prevPage==='p-histoire'||prevPage==='p-lecture')?'p-main':prevPage;
+  document.getElementById('histoire-back-btn').onclick=()=>go(backDest);
   go('p-histoire');
 }
 
@@ -240,8 +244,8 @@ function spicyKey(bookId,chapNum){return bookId+'-'+chapNum;}
 
 function toggleSpicy(bookId,chapNum){
   const key=spicyKey(bookId,chapNum);
-  spicyChoix[key]=!spicyChoix[key];
-  // Relire le chapitre avec le nouveau choix
+  // undefined ou false = version spicy (défaut), true = version soft
+  spicyChoix[key] = spicyChoix[key]!==true;
   _afficherContenuLecture(bookId,chapNum);
 }
 
