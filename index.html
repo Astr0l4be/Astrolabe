@@ -131,8 +131,13 @@
     <div class="simple-page">
       <div class="page-title">Mot de passe oublié</div>
       <div class="page-subtitle">Saisis ton adresse e-mail, on t'envoie un lien de réinitialisation.</div>
-      <div class="form-group"><label class="form-label">Adresse e-mail</label><input type="email" class="form-input" placeholder="ton@mail.com"></div>
-      <button class="btn btn-full btn-accent" onclick="go('p-main')">Envoyer</button>
+      <div class="form-group">
+        <label class="form-label">Adresse e-mail</label>
+        <input type="email" class="form-input" id="mdp-oublie-email" placeholder="ton@mail.com">
+        <span id="mdp-oublie-error" style="font-size:11px;color:var(--danger);display:none;margin-top:4px;display:none;"></span>
+        <span id="mdp-oublie-ok" style="font-size:12px;color:#7ec89a;display:none;margin-top:6px;line-height:1.6;display:none;">✦ E-mail envoyé ! Vérifie ta boîte mail (et tes spams).</span>
+      </div>
+      <button class="btn btn-full btn-accent" onclick="handleMdpOublie()">Envoyer</button>
     </div>
   </div>
 

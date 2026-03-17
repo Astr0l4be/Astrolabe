@@ -269,6 +269,33 @@ async function finishInscription() {
 
 
 /* ══════════════════════════════════════════════════════
+   MOT DE PASSE OUBLIÉ
+   ══════════════════════════════════════════════════════ */
+async function handleMdpOublie() {
+  const email = document.getElementById('mdp-oublie-email').value.trim();
+  const errEl = document.getElementById('mdp-oublie-error');
+  const okEl  = document.getElementById('mdp-oublie-ok');
+  if (errEl) errEl.style.display = 'none';
+  if (okEl)  okEl.style.display  = 'none';
+
+  if (!isValidEmail(email)) {
+    if (errEl) { errEl.textContent = 'Adresse e-mail invalide.'; errEl.style.display = 'block'; }
+    return;
+  }
+
+  const { error } = await db.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + '/?reset=1'
+  });
+
+  if (error) {
+    if (errEl) { errEl.textContent = 'Une erreur est survenue. Réessaie dans quelques instants.'; errEl.style.display = 'block'; }
+  } else {
+    if (okEl) okEl.style.display = 'block';
+  }
+}
+
+
+/* ══════════════════════════════════════════════════════
    CONNEXION / DÉCONNEXION
    ══════════════════════════════════════════════════════ */
 async function handleConnexion() {
@@ -388,8 +415,10 @@ function togglePwd(inputId, btnId) {
 async function supprimerCompteDefinitif() {
   try {
     if (compte.userId) {
+      const raison = document.getElementById('delete-raison')?.value?.trim() || null;
       await db.from('profils').update({
-        a_supprimer_le: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        a_supprimer_le: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        raison_suppression: raison
       }).eq('id', compte.userId);
     }
     await db.auth.signOut();

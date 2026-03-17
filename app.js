@@ -180,69 +180,7 @@ function refreshTWHistoire(){
   }
 }
 
-async function openLecture(bookId,chapNum){
-  const b=BOOKS.find(x=>x.id===bookId);if(!b)return;
-  await loadContenuChapitre(bookId,chapNum);
-  const ch=b.chapitres.find(c=>c.num===chapNum);if(!ch)return;
-
-  if(!ch.texte){
-    document.getElementById('lecture-body').innerHTML='<p style="text-align:center;color:var(--text3)">Chapitre à venir…</p>';
-    go('p-lecture');return;
-  }
-
-  document.getElementById('lecture-titre').textContent=b.title;
-  document.getElementById('lecture-back-btn').onclick=function(){go('p-histoire');};
-
-  var html='';
-  html+='<div class="lecture-ch-num"><span class="lecture-star-side">✦</span>Chapitre '+ch.num+'<span class="lecture-star-side">✦</span></div>';
-  if(ch.titre)html+='<div class="lecture-ch-title">'+ch.titre+'</div>';
-
-  if(ch.citation){
-    html+='<div class="lecture-citation"><div class="lecture-citation-texte">'+ch.citation+'</div>';
-    if(ch.citation_auteur)html+='<div class="lecture-citation-auteur">'+ch.citation_auteur+'</div>';
-    html+='</div>';
-  }
-
-  const contenuPropre=contenu
-    .replace(/<div[^>]*style="[^"]*text-align[^"]*"[^>]*>([\s\S]*?)<\/div>/gi,'$1')
-    .replace(/<div[^>]*>([\s\S]*?)<\/div>/gi,'$1')
-    .replace(/style="[^"]*"/gi,'')
-    .trim();
-
-  const paras=contenuPropre.split('\n\n');
-  for(var i=0;i<paras.length;i++){
-    var para=paras[i].trim();
-    if(!para)continue;
-    if(para.startsWith('<pov>')){
-      var nom=para.replace(/<\/?pov>/g,'').trim();
-      html+='<div class="lecture-pov">'+nom+'</div>';
-    } else if(para.startsWith('<img-bloc>')){
-      var url=para.replace(/<\/?img-bloc>/g,'').trim();
-      if(url)html+='<div class="lecture-img-bloc"><img src="'+url+'" alt=""></div>';
-    } else {
-      var isD=para.startsWith('—')||para.startsWith('-');
-      html+='<p class="'+(isD?'d':'')+'">'+para.replace(/\n/g,'<br>')+'</p>';
-    }
-  }
-
-  const showTWCh=compte.twrChapitre===true;
-  const histPrefs=optParHistoire[bookId];
-  const useTWCh=histPrefs?histPrefs.twrChapitre:showTWCh;
-  if(b.tw&&useTWCh){html='<div class="tw-box" style="margin:0 0 20px"><div class="tw-label">Trigger warnings</div><div class="tw-text">'+b.tw+'</div></div>'+html;}
-
-  document.getElementById('lecture-body').innerHTML=html;
-
-  const nav=document.getElementById('lecture-nav');
-  const prev=b.chapitres.find(c=>c.num===chapNum-1);
-  const next=b.chapitres.find(c=>c.num===chapNum+1);
-  nav.innerHTML='';
-  if(prev)nav.innerHTML+='<button class="btn btn-full" style="flex:1" onclick="openLecture(\''+bookId+'\','+prev.num+')">← Ch.'+prev.num+'</button>';
-  if(next)nav.innerHTML+='<button class="btn btn-full btn-accent" style="flex:1" onclick="openLecture(\''+bookId+'\','+next.num+')">Ch.'+next.num+' →</button>';
-
-  document.querySelector('#p-lecture .page-scroll').scrollTop=0;
-  go('p-lecture');
-  setTimeout(applyLectureMode,50);
-}
+// openLecture est définie dans lecture.js
 
 /* SEARCH */
 function handleSearch(val){
