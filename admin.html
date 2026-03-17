@@ -2445,6 +2445,11 @@ function setGratuit(val){
   document.getElementById('gratuit-gratuit').className='btn'+(val?' btn-accent':'');
   document.getElementById('gratuit-payant').className='btn'+(val?'':' btn-accent');
 }
+function fermerEditionChapitre(){
+  document.getElementById('edit-chapitre-form').style.display='none';
+  document.getElementById('chapitres-existants').style.display='block';
+  _editChapId=null;
+}
 function setNumerotation(val){
   document.getElementById('n-numerotation').value=val;
   document.getElementById('num-arabe').className='btn'+(val==='arabe'?' btn-accent':'');
