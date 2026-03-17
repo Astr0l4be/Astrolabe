@@ -315,7 +315,7 @@ function _chargerProfil(userId, profil) {
   compte.adulte        = profil.adulte  || false;
   compte.softSpicy     = profil.soft_spicy || false;
   compte.achatAutorise = profil.achat_autorise !== false;
-  compte.trancheAge    = profil.tranche_age || 'adulte';
+  compte.trancheAge    = profil.tranche_age || (calcAge(profil.date_naissance)>=18?'adulte':calcAge(profil.date_naissance)>=16?'ado':'junior');
   compte.twrHistoire   = profil.trigger_warnings_histoire !== false;
   compte.twrChapitre   = profil.trigger_warnings_chapitre === true;
   compte.estAdulteAge  = calcAge(profil.date_naissance) >= 18;
