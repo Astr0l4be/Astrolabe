@@ -1,11 +1,18 @@
-// Ouvre un chapitre dans une version précise ('soft' ou 'spicy') pour les 18+
-async function openLectureVersion(bookId, chapNum, version){
-  const b=BOOKS.find(x=>x.id===bookId);
-  if(!b)return;
-  // On force temporairement la tranche pour charger la bonne version
+function cocherVersion(bookId, chapNum, version, versionsChoisies){
+  const vc=versionsChoisies||window._versionsChoisies||{};
+  vc[chapNum]=version;
+  // Mettre à jour l'apparence des boutons
+  const btnSoft=document.getElementById('vbtn-soft-'+chapNum);
+  const btnSpicy=document.getElementById('vbtn-spicy-'+chapNum);
+  if(btnSoft) btnSoft.classList.toggle('ch-version-active', version==='soft');
+  if(btnSpicy) btnSpicy.classList.toggle('ch-version-active', version==='spicy');
+}
+
+async function ouvrirVersionChoisie(bookId, chapNum, versionsChoisies){
+  const vc=versionsChoisies||window._versionsChoisies||{};
+  const version=vc[chapNum]||'spicy';
   const trancheOriginale=compte.trancheAge;
   if(version==='soft') compte.trancheAge='ado';
-  else compte.trancheAge='adulte';
   await openLecture(bookId, chapNum);
   compte.trancheAge=trancheOriginale;
 }
