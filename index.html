@@ -727,6 +727,25 @@
     </div>
   </div>
 
+  <!-- POP-UP CHOIX VERSION NAV -->
+  <div class="modal-overlay" id="version-nav-popup" style="position:fixed;z-index:200" onclick="closeModal(event,'version-nav-popup')">
+    <div class="modal-box" style="text-align:center">
+      <button class="modal-close" onclick="closeM('version-nav-popup')">✕</button>
+      <div class="modal-title" style="margin-bottom:16px">Le chapitre suivant existe en version spicy et en version soft. Quelle version souhaites-tu lire ?</div>
+      <div style="display:flex;gap:16px;justify-content:center;margin-bottom:20px">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+          <div style="font-size:11px;letter-spacing:1px;color:var(--text2);text-transform:uppercase">Version soft</div>
+          <button onclick="closeM('version-nav-popup');ouvrirVersionChoisieNav(window._navBookId,window._navChapNum,'soft')" class="ch-version-btn ch-version-nav-big" title="Version douce">🌸</button>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+          <div style="font-size:11px;letter-spacing:1px;color:var(--text2);text-transform:uppercase">Version spicy</div>
+          <button onclick="closeM('version-nav-popup');ouvrirVersionChoisieNav(window._navBookId,window._navChapNum,'spicy')" class="ch-version-btn ch-version-nav-big" title="Version spicy">🌶</button>
+        </div>
+      </div>
+      <p style="font-size:11px;color:var(--text3);line-height:1.7;margin:0">Si tu ne souhaites pas que les chapitres spicy soient indiqués, tu peux régler cela dans les paramètres et choisir quelle version te sera proposée par défaut.</p>
+    </div>
+  </div>
+
 </div><!-- #app -->
 
 <div id="pwa-banner" class="hidden">

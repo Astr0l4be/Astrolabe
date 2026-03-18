@@ -61,6 +61,12 @@ async function ouvrirVersionChoisie(bookId, chapNum){
   compte.trancheAge=trancheOriginale;
 }
 
+function ouvrirPopupVersionNav(bookId, chapNum){
+  window._navBookId=bookId;
+  window._navChapNum=chapNum;
+  document.getElementById('version-nav-popup').classList.add('open');
+}
+
 async function ouvrirVersionChoisieNav(bookId, chapNum, version){
   const trancheOriginale=compte.trancheAge;
   if(version==='soft') compte.trancheAge='ado';
@@ -156,9 +162,8 @@ async function openLecture(bookId,chapNum){
   if(next){
     const nextEstSpicySoft=compte.trancheAge==='adulte' && b.adulte && b.versionSoft && next.spicy;
     if(nextEstSpicySoft && compte.afficherChoixVersion){
-      // Deux boutons avec choix de version
-      nav.innerHTML+=`<button class="btn btn-full btn-accent" style="flex:1" onclick="ouvrirVersionChoisieNav('${bookId}',${next.num},'soft')">🌸 Ch.${nextNum} →</button>`;
-      nav.innerHTML+=`<button class="btn btn-full btn-accent" style="flex:1" onclick="ouvrirVersionChoisieNav('${bookId}',${next.num},'spicy')">🌶 Ch.${nextNum} →</button>`;
+      // Un bouton qui ouvre le popup de choix
+      nav.innerHTML+=`<button class="btn btn-full btn-accent" style="flex:1" onclick="ouvrirPopupVersionNav('${bookId}',${next.num})">Ch.${nextNum} →</button>`;
     } else if(nextEstSpicySoft && !compte.afficherChoixVersion){
       // Ouvrir directement la version par défaut
       nav.innerHTML+=`<button class="btn btn-full btn-accent" style="flex:1" onclick="ouvrirVersionChoisieNav('${bookId}',${next.num},'${compte.versionDefaut||'spicy'}')">Ch.${nextNum} →</button>`;
