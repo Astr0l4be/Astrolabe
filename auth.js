@@ -30,6 +30,27 @@ function trancheFromAge(age) {
 }
 
 
+/* ── VÉRIFICATIONS EN TEMPS RÉEL (onblur) ── */
+async function verifierPseudo() {
+  const pseudo = document.getElementById('insc-pseudo').value.trim();
+  const errPseudo = document.getElementById('pseudo-error');
+  errPseudo.classList.remove('show');
+  if (!pseudo) return;
+  const { data, error } = await db.rpc('pseudo_existe', { p_pseudo: pseudo });
+  if (!error && data === true) errPseudo.classList.add('show');
+}
+
+async function verifierEmail() {
+  const email = document.getElementById('insc-mail').value.trim();
+  const errEmail = document.getElementById('email-error');
+  errEmail.classList.remove('show');
+  if (!email) return;
+  if (!isValidEmail(email)) { errEmail.classList.add('show'); return; }
+  const { data, error } = await db.rpc('email_existe', { p_email: email });
+  if (!error && data === true) errEmail.classList.add('show');
+}
+
+
 /* ── DATE DE NAISSANCE ── */
 const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 

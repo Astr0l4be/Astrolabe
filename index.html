@@ -150,7 +150,7 @@
       <div class="page-subtitle">Des histoires d'amour faites avec amour et safe ✦</div>
       <div class="form-group">
         <label class="form-label">Identifiant <span style="font-size:9px;color:var(--text3)">(affiché dans les commentaires)</span></label>
-        <input type="text" class="form-input" id="insc-pseudo" placeholder="Ton pseudo">
+        <input type="text" class="form-input" id="insc-pseudo" placeholder="Ton pseudo" onblur="verifierPseudo()">
         <span class="form-error" id="pseudo-error">Pseudo non disponible.</span>
       </div>
       <div class="form-group">
@@ -171,7 +171,7 @@
       </div>
       <div class="form-group">
         <label class="form-label">Adresse e-mail</label>
-        <input type="email" class="form-input" id="insc-mail" placeholder="ton@mail.com">
+        <input type="email" class="form-input" id="insc-mail" placeholder="ton@mail.com" onblur="verifierEmail()">
         <span class="form-error" id="email-error">E-mail invalide ou déjà associé à un compte.</span>
         <span class="form-hint">Astrolabe ne revend pas tes données.</span>
       </div>
