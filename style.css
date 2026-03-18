@@ -280,6 +280,8 @@
     /* LISTE CHAPITRES */
     #chapitres-list{padding-bottom:40px;}
     .ch-lire-row{display:flex;align-items:stretch;margin:0 16px 12px;}
-    .ch-lire-row .btn-lire{margin:0;flex:1;min-height:50px;}
+    .ch-lire-row .btn-lire{margin:0;flex:1;min-height:50px;min-width:0;}
     .ch-lire-row:last-child{margin-bottom:40px;}
-    .ch-lire-titre{flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .ch-lire-titre{flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;max-width:160px;}
+    .ch-version-btn{background:none;border:1px solid rgba(180,190,255,.2);border-radius:8px;width:32px;height:32px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s;}
+    .ch-version-btn:hover{background:rgba(180,190,255,.15);}

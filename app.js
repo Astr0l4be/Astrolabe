@@ -179,10 +179,19 @@ function openHistoire(id){
   const chapList=document.getElementById('chapitres-list');
   chapList.innerHTML=b.chapitres.map(function(ch){
     const libre=ch.gratuit||ch.num<=(b.gratuit_jusqu_au||8);
+    const estAdulte18=compte.trancheAge==='adulte' && b.adulte && b.versionSoft && ch.spicy;
+
+    const badge='<span class="ch-badge'+(libre?'':' ch-badge-ticket')+'" style="flex-shrink:0">'+(libre?'Gratuit':'🎟 1 ticket')+'</span>';
+    const versionBtns=estAdulte18
+      ?'<button class="ch-version-btn ch-version-soft" onclick="event.stopPropagation();openLectureVersion(\''+b.id+'\','+ch.num+',\'soft\')" title="Version douce">🌸</button>'
+       +'<button class="ch-version-btn ch-version-spicy" onclick="event.stopPropagation();openLectureVersion(\''+b.id+'\','+ch.num+',\'spicy\')" title="Version spicy">🌶</button>'
+      :'';
+
+    const onclick=estAdulte18?'':'onclick="openLecture(\''+b.id+'\','+ch.num+')"';
     return '<div class="ch-lire-row">'
-      +'<button class="btn-lire'+(libre?'':' btn-lire-locked')+'" onclick="openLecture(\''+b.id+'\','+ch.num+')">'  
+      +'<button class="btn-lire'+(libre?'':' btn-lire-locked')+'" '+onclick+'>'
       +'<span class="ch-lire-titre">Ch.'+ch.num+' · '+ch.titre+'</span>'
-      +'<span class="ch-badge'+(libre?'':' ch-badge-ticket')+'" style="flex-shrink:0">'+(libre?'Gratuit':'🎟 1 ticket')+'</span>'
+      +'<div style="display:flex;gap:6px;align-items:center;flex-shrink:0">'+badge+versionBtns+'</div>'
       +'</button>'
       +'</div>';
   }).join('');
