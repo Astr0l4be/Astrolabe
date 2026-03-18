@@ -110,14 +110,16 @@ async function handleInscription1() {
   if (mdp.length < 6) { errLen.classList.add('show'); return; }
   if (mdp !== mdp2)   { errMdp.classList.add('show');  return; }
 
-  // Vérification email valide + déjà utilisé dès l'étape 1
+  // Vérification format email
   if (!isValidEmail(email)) { errEmail.classList.add('show'); return; }
-  const { data: existingEmail } = await db.from('profils').select('id').eq('email', email).limit(1);
-  if (existingEmail && existingEmail.length > 0) { errEmail.classList.add('show'); return; }
+
+  // Vérification email déjà utilisé via une fonction Supabase sécurisée
+  const { data: emailCheck, error: emailErr } = await db.rpc('email_existe', { p_email: email });
+  if (!emailErr && emailCheck === true) { errEmail.classList.add('show'); return; }
 
   if (pseudo) {
-    const { data: existing } = await db.from('profils').select('id').eq('pseudo', pseudo).limit(1);
-    if (existing && existing.length > 0) { errPseudo.classList.add('show'); return; }
+    const { data: pseudoCheck, error: pseudoErr } = await db.rpc('pseudo_existe', { p_pseudo: pseudo });
+    if (!pseudoErr && pseudoCheck === true) { errPseudo.classList.add('show'); return; }
     compte.pseudo = pseudo;
   }
 
