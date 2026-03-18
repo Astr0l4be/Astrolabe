@@ -196,10 +196,6 @@ async function supprimerCompteParentRefus(userId) {
 async function finishInscription() {
   const email    = document.getElementById('insc-mail').value.trim();
   const mdp      = document.getElementById('insc-mdp').value;
-  const errEmail = document.getElementById('email-error');
-
-  if (!isValidEmail(email)) { errEmail.classList.add('show'); go('p-inscription1'); return; }
-
   const pseudo = document.getElementById('insc-pseudo').value.trim() || 'Astrolectrice';
   const tranche = trancheFromAge(compte.age);
 
@@ -268,6 +264,9 @@ async function finishInscription() {
 
     document.getElementById('compte-name').textContent = pseudo;
     updateTicketsDisplay(); syncCompteToggles(); updateTopbar();
+    renderGrid('book-grid', BOOKS);
+    renderGrid('search-grid', BOOKS);
+    renderGrid('hashtag-grid', BOOKS);
     document.getElementById('bienvenue-pseudo').textContent = pseudo;
     document.getElementById('bienvenue-popup').classList.add('open');
 
