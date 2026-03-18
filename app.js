@@ -117,20 +117,19 @@ async function loadContenuChapitre(bookId,chapNum){
     }
   }
 
-  // Cache
-  if(doitVoirSoft && ch.texte_soft!==null) return ch.texte_soft;
-  if(!doitVoirSoft && ch.texte!==null) return ch.texte;
-
-  // Chargement depuis Supabase
-  const {data}=await db.from('chapitres')
-    .select('contenu,contenu_soft,citation,citation_auteur')
-    .eq('histoire_id',bookId).eq('numero',chapNum).single();
-  if(data){
-    ch.texte=data.contenu||null;
-    ch.texte_soft=data.contenu_soft||null;
-    ch.citation=data.citation||null;
-    ch.citation_auteur=data.citation_auteur||null;
+  // Charger depuis Supabase si pas encore en cache
+  if(ch.texte===null){
+    const {data}=await db.from('chapitres')
+      .select('contenu,contenu_soft,citation,citation_auteur')
+      .eq('histoire_id',bookId).eq('numero',chapNum).single();
+    if(data){
+      ch.texte=data.contenu||null;
+      ch.texte_soft=data.contenu_soft||null;
+      ch.citation=data.citation||null;
+      ch.citation_auteur=data.citation_auteur||null;
+    }
   }
+  // Décision de version au moment de la lecture (pas mise en cache)
   return doitVoirSoft ? ch.texte_soft : ch.texte;
 }
 
