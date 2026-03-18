@@ -1,3 +1,49 @@
+
+/* ── OPTIONS SPICY/SOFT ── */
+function toggleInfoSpicy(){
+  const el=document.getElementById('info-spicy');
+  if(el) el.style.display=el.style.display==='none'?'block':'none';
+}
+
+function setAfficherChoixVersion(val){
+  compte.afficherChoixVersion=val;
+  const row=document.getElementById('row-version-defaut');
+  if(row) row.style.display=val?'none':'block';
+  savePrefs();
+}
+
+function setVersionDefaut(version){
+  compte.versionDefaut=version;
+  const btnSoft=document.getElementById('vdef-soft-btn');
+  const btnSpicy=document.getElementById('vdef-spicy-btn');
+  if(btnSoft) btnSoft.classList.toggle('ch-version-active', version==='soft');
+  if(btnSpicy) btnSpicy.classList.toggle('ch-version-active', version==='spicy');
+  savePrefs();
+}
+
+function setOptAfficherVersion(prefix, val){
+  const row=document.getElementById('opt-'+prefix+'-row-version-defaut');
+  if(row) row.style.display=val?'none':'block';
+}
+
+function setOptVersionDefaut(prefix, version){
+  const btnSoft=document.getElementById('opt-'+prefix+'-vdef-soft');
+  const btnSpicy=document.getElementById('opt-'+prefix+'-vdef-spicy');
+  if(btnSoft) btnSoft.classList.toggle('ch-version-active', version==='soft');
+  if(btnSpicy) btnSpicy.classList.toggle('ch-version-active', version==='spicy');
+}
+
+function syncVersionToggles(){
+  const togV=document.getElementById('toggle-afficher-version');
+  if(togV) togV.checked=compte.afficherChoixVersion;
+  const rowVD=document.getElementById('row-version-defaut');
+  if(rowVD) rowVD.style.display=compte.afficherChoixVersion?'none':'block';
+  const btnSoft=document.getElementById('vdef-soft-btn');
+  const btnSpicy=document.getElementById('vdef-spicy-btn');
+  if(btnSoft) btnSoft.classList.toggle('ch-version-active', compte.versionDefaut==='soft');
+  if(btnSpicy) btnSpicy.classList.toggle('ch-version-active', compte.versionDefaut!=='soft');
+}
+
 function cocherVersion(chapNum, version){
   if(!window._versionsChoisies) window._versionsChoisies={};
   window._versionsChoisies[chapNum]=version;
@@ -8,7 +54,14 @@ function cocherVersion(chapNum, version){
 }
 
 async function ouvrirVersionChoisie(bookId, chapNum){
-  const version=(window._versionsChoisies&&window._versionsChoisies[chapNum])||'spicy';
+  const version=(window._versionsChoisies&&window._versionsChoisies[chapNum])||compte.versionDefaut||'spicy';
+  const trancheOriginale=compte.trancheAge;
+  if(version==='soft') compte.trancheAge='ado';
+  await openLecture(bookId, chapNum);
+  compte.trancheAge=trancheOriginale;
+}
+
+async function ouvrirVersionChoisieNav(bookId, chapNum, version){
   const trancheOriginale=compte.trancheAge;
   if(version==='soft') compte.trancheAge='ado';
   await openLecture(bookId, chapNum);
@@ -100,7 +153,19 @@ async function openLecture(bookId,chapNum){
   const prevNum=prev?(b.numerotation==='romain'?toRoman(prev.num):prev.num):null;
   const nextNum=next?(b.numerotation==='romain'?toRoman(next.num):next.num):null;
   if(prev)nav.innerHTML+=`<button class="btn btn-full" style="flex:1" onclick="openLecture('${bookId}',${prev.num})">← Ch.${prevNum}</button>`;
-  if(next)nav.innerHTML+=`<button class="btn btn-full btn-accent" style="flex:1" onclick="openLecture('${bookId}',${next.num})">Ch.${nextNum} →</button>`;
+  if(next){
+    const nextEstSpicySoft=compte.trancheAge==='adulte' && b.adulte && b.versionSoft && next.spicy;
+    if(nextEstSpicySoft && compte.afficherChoixVersion){
+      // Deux boutons avec choix de version
+      nav.innerHTML+=`<button class="btn btn-full btn-accent" style="flex:1" onclick="ouvrirVersionChoisieNav('${bookId}',${next.num},'soft')">🌸 Ch.${nextNum} →</button>`;
+      nav.innerHTML+=`<button class="btn btn-full btn-accent" style="flex:1" onclick="ouvrirVersionChoisieNav('${bookId}',${next.num},'spicy')">🌶 Ch.${nextNum} →</button>`;
+    } else if(nextEstSpicySoft && !compte.afficherChoixVersion){
+      // Ouvrir directement la version par défaut
+      nav.innerHTML+=`<button class="btn btn-full btn-accent" style="flex:1" onclick="ouvrirVersionChoisieNav('${bookId}',${next.num},'${compte.versionDefaut||'spicy'}')">Ch.${nextNum} →</button>`;
+    } else {
+      nav.innerHTML+=`<button class="btn btn-full btn-accent" style="flex:1" onclick="openLecture('${bookId}',${next.num})">Ch.${nextNum} →</button>`;
+    }
+  }
 
   document.getElementById('lecture-back-btn').onclick=()=>go('p-histoire');
   document.querySelector('#p-lecture .page-scroll').scrollTop=0;
@@ -233,6 +298,7 @@ function syncCompteToggles(){
   setTexte(textesBlancs?'blanc':'bleu');
   initTailleBtns();
   renderBiblioContinuer();
+  syncVersionToggles();
 }
 
 /* OPTIONS LECTURE */
@@ -251,6 +317,12 @@ function _setOngletControls(prefix, prefs){
   _setOptTexte(prefix, tb?'blanc':'bleu');
   document.getElementById('opt-'+prefix+'-tw-histoire').checked=prefs.twrHistoire!==false;
   document.getElementById('opt-'+prefix+'-tw-chapitre').checked=prefs.twrChapitre===true;
+  const affV=prefs.afficherChoixVersion!==false;
+  const togAV=document.getElementById('opt-'+prefix+'-afficher-version');
+  if(togAV) togAV.checked=affV;
+  const rowVD=document.getElementById('opt-'+prefix+'-row-version-defaut');
+  if(rowVD) rowVD.style.display=affV?'none':'block';
+  setOptVersionDefaut(prefix, prefs.versionDefaut||'spicy');
   syncTailleBtns(prefix,t);
   const panel=document.getElementById('opt-panel-'+(prefix==='c'?'cette':'toutes'));
   if(panel)panel.dataset.taille=t;
@@ -262,6 +334,8 @@ function _getOngletValues(prefix){
     textesBlancs: document.getElementById('opt-'+prefix+'-btn-blanc').dataset.sel==='1',
     twrHistoire: document.getElementById('opt-'+prefix+'-tw-histoire').checked,
     twrChapitre: document.getElementById('opt-'+prefix+'-tw-chapitre').checked,
+    afficherChoixVersion: (document.getElementById('opt-'+prefix+'-afficher-version')||{checked:true}).checked,
+    versionDefaut: document.getElementById('opt-'+prefix+'-vdef-spicy')?.classList.contains('ch-version-active')?'spicy':'soft',
     taille: panel&&panel.dataset.taille?panel.dataset.taille:tailleLecture,
   };
 }
@@ -297,10 +371,10 @@ function afficherOnglet(onglet){
 function openOptionsPopup(bookId){
   currentHistoireId=bookId;
   // Remplir onglet "cette histoire" avec les prefs spécifiques ou les prefs générales par défaut
-  const prefsC=optParHistoire[bookId]||{modeJour,textesBlancs,twrHistoire:compte.twrHistoire,twrChapitre:compte.twrChapitre};
+  const prefsC=optParHistoire[bookId]||{modeJour,textesBlancs,twrHistoire:compte.twrHistoire,twrChapitre:compte.twrChapitre,afficherChoixVersion:compte.afficherChoixVersion,versionDefaut:compte.versionDefaut};
   _setOngletControls('c', prefsC);
   // Remplir onglet "toutes les histoires" avec les prefs générales
-  _setOngletControls('t', {modeJour,textesBlancs,twrHistoire:compte.twrHistoire,twrChapitre:compte.twrChapitre});
+  _setOngletControls('t', {modeJour,textesBlancs,twrHistoire:compte.twrHistoire,twrChapitre:compte.twrChapitre,afficherChoixVersion:compte.afficherChoixVersion,versionDefaut:compte.versionDefaut});
   // Ouvrir sur onglet "cette histoire"
   afficherOnglet('cette');
   openModal('options-popup');
@@ -326,6 +400,7 @@ function saveOptions(){
     const v=_getOngletValues('t');
     modeJour=v.modeJour; textesBlancs=v.textesBlancs; tailleLecture=v.taille||'normal';
     compte.twrHistoire=v.twrHistoire; compte.twrChapitre=v.twrChapitre;
+    compte.afficherChoixVersion=v.afficherChoixVersion; compte.versionDefaut=v.versionDefaut||'spicy';
     localStorage.setItem('tailleLecture',tailleLecture);
     toggleModeJour(v.modeJour); setTexte(v.textesBlancs?'blanc':'bleu');
     syncTailleBtns('compte',tailleLecture);

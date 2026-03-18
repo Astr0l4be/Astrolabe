@@ -3,7 +3,7 @@ const starsEl=document.getElementById('stars');
 for(let i=0;i<70;i++){const s=document.createElement('div');s.className='star';s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';s.style.setProperty('--d',(2+Math.random()*5)+'s');s.style.setProperty('--dl',(-Math.random()*5)+'s');s.style.width=s.style.height=(Math.random()>0.7?3:2)+'px';starsEl.appendChild(s);}
 
 /* ÉTAT */
-const compte={loggedIn:false,pseudo:'',tickets:0,userId:null,adulte:false,softSpicy:false,trancheAge:'adulte',twrHistoire:true,twrChapitre:false,avatar:'☽',age:16};
+const compte={loggedIn:false,pseudo:'',tickets:0,userId:null,adulte:false,softSpicy:false,trancheAge:'adulte',twrHistoire:true,twrChapitre:false,afficherChoixVersion:true,versionDefaut:'spicy',avatar:'☽',age:16};
 function addTickets(n){compte.tickets+=n;updateTicketsDisplay();}
 function updateTicketsDisplay(){
   const el=document.getElementById('compte-tickets');if(el)el.textContent=compte.tickets+' ✦';
@@ -184,10 +184,11 @@ function openHistoire(id){
   chapList.innerHTML=b.chapitres.map(function(ch){
     const libre=ch.gratuit||ch.num<=(b.gratuit_jusqu_au||8);
     const estAdulte18=compte.trancheAge==='adulte' && b.adulte && b.versionSoft && ch.spicy;
-    if(!vc[ch.num]) vc[ch.num]='spicy';
+    if(!vc[ch.num]) vc[ch.num]=compte.versionDefaut||'spicy';
 
     const badge='<span class="ch-badge'+(libre?'':' ch-badge-ticket')+'" style="flex-shrink:0;min-width:54px;text-align:center">'+(libre?'Gratuit':'🎟 1 ticket')+'</span>';
-    const versionBtns=estAdulte18
+    const montrerBtns=estAdulte18&&compte.afficherChoixVersion;
+    const versionBtns=montrerBtns
       ?'<span class="ch-version-btn" id="vbtn-soft-'+ch.num+'" onclick="event.stopPropagation();cocherVersion('+ch.num+',\'soft\')" title="Version douce">🌸</span>'
        +'<span class="ch-version-btn ch-version-active" id="vbtn-spicy-'+ch.num+'" onclick="event.stopPropagation();cocherVersion('+ch.num+',\'spicy\')" title="Version spicy">🌶</span>'
       :'';

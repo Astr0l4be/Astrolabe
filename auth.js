@@ -362,7 +362,9 @@ async function savePrefs() {
     adulte:                    compte.adulte,
     soft_spicy:                compte.softSpicy,
     trigger_warnings_histoire: compte.twrHistoire,
-    trigger_warnings_chapitre: compte.twrChapitre
+    trigger_warnings_chapitre: compte.twrChapitre,
+    afficher_choix_version:    compte.afficherChoixVersion,
+    version_defaut:            compte.versionDefaut
   }).eq('id', compte.userId);
 }
 
@@ -379,6 +381,8 @@ function _chargerProfil(userId, profil) {
   compte.trancheAge    = profil.tranche_age || (calcAge(profil.date_naissance)>=18?'adulte':calcAge(profil.date_naissance)>=16?'ado':'junior');
   compte.twrHistoire   = profil.trigger_warnings_histoire !== false;
   compte.twrChapitre   = profil.trigger_warnings_chapitre === true;
+  compte.afficherChoixVersion = profil.afficher_choix_version !== false;
+  compte.versionDefaut        = profil.version_defaut || 'spicy';
   compte.estAdulteAge  = calcAge(profil.date_naissance) >= 18;
   compte.est16Ans      = calcAge(profil.date_naissance) >= 16;
   document.getElementById('compte-name').textContent = compte.pseudo;
