@@ -186,7 +186,7 @@ function openHistoire(id){
     const estAdulte18=compte.trancheAge==='adulte' && b.adulte && b.versionSoft && ch.spicy;
     if(!vc[ch.num]) vc[ch.num]='spicy';
 
-    const badge='<span class="ch-badge'+(libre?'':' ch-badge-ticket')+'" style="flex-shrink:0">'+(libre?'Gratuit':'🎟 1 ticket')+'</span>';
+    const badge='<span class="ch-badge'+(libre?'':' ch-badge-ticket')+'" style="flex-shrink:0;min-width:54px;text-align:center">'+(libre?'Gratuit':'🎟 1 ticket')+'</span>';
     const versionBtns=estAdulte18
       ?'<span class="ch-version-btn" id="vbtn-soft-'+ch.num+'" onclick="event.stopPropagation();cocherVersion('+ch.num+',\'soft\')" title="Version douce">🌸</span>'
        +'<span class="ch-version-btn ch-version-active" id="vbtn-spicy-'+ch.num+'" onclick="event.stopPropagation();cocherVersion('+ch.num+',\'spicy\')" title="Version spicy">🌶</span>'
@@ -199,7 +199,7 @@ function openHistoire(id){
     return '<div class="ch-lire-row">'
       +'<button class="btn-lire'+(libre?'':' btn-lire-locked')+'" '+onclick+'>'
       +'<span class="ch-lire-titre">Ch.'+ch.num+' · '+ch.titre+'</span>'
-      +'<div style="display:flex;gap:6px;align-items:center;flex-shrink:0">'+badge+versionBtns+'</div>'
+      +'<div style="display:flex;gap:6px;align-items:center;flex-shrink:0">'+versionBtns+badge+'</div>'
       +'</button>'
       +'</div>';
   }).join('');
