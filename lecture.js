@@ -379,7 +379,8 @@ function afficherOnglet(onglet){
 function openOptionsPopup(bookId){
   currentHistoireId=bookId;
   // Remplir onglet "cette histoire" avec les prefs spécifiques ou les prefs générales par défaut
-  const prefsC=optParHistoire[bookId]||{modeJour,textesBlancs,twrHistoire:compte.twrHistoire,twrChapitre:compte.twrChapitre,afficherChoixVersion:compte.afficherChoixVersion,versionDefaut:compte.versionDefaut};
+  const prefsGlobales={modeJour,textesBlancs,twrHistoire:compte.twrHistoire,twrChapitre:compte.twrChapitre,afficherChoixVersion:compte.afficherChoixVersion,versionDefaut:compte.versionDefaut};
+  const prefsC=Object.assign({},prefsGlobales,optParHistoire[bookId]||{});
   _setOngletControls('c', prefsC);
   // Remplir onglet "toutes les histoires" avec les prefs générales
   _setOngletControls('t', {modeJour,textesBlancs,twrHistoire:compte.twrHistoire,twrChapitre:compte.twrChapitre,afficherChoixVersion:compte.afficherChoixVersion,versionDefaut:compte.versionDefaut});
