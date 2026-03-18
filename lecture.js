@@ -88,6 +88,7 @@ async function openLecture(bookId,chapNum){
     go('p-lecture');return;
   }
   document.getElementById('lecture-titre').textContent=b.title;
+  window._chapNumCourant=chapNum;
 
   // Numéro du chapitre — arabe ou romain
   const numAffiche=(b.numerotation==='romain')?toRoman(chapNum):chapNum;
@@ -440,6 +441,11 @@ function saveOptions(){
   }
   closeM('options-popup');
   refreshTWHistoire();
+  // Si on est sur la page chapitre, recharger le chapitre en cours avec les nouveaux paramètres
+  const surChapitre=document.getElementById('p-lecture')?.classList.contains('active');
+  if(surChapitre && currentHistoireId && window._chapNumCourant){
+    openLecture(currentHistoireId, window._chapNumCourant);
+  }
 }
 function ouvrirPopupResetOptions(){
   closeM('options-popup');
