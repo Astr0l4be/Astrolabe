@@ -119,8 +119,9 @@ async function loadContenuChapitre(bookId,chapNum){
 
   // 18+ : version forcée (popup nav ou bouton liste) sinon prefs histoire sinon versionDefaut
   if(compte.trancheAge==='adulte'){
+    const choixExplicite = window._versionsChoisies && window._versionsChoisies.hasOwnProperty(chapNum);
     const version = window._versionForcee
-      || (window._versionsChoisies && window._versionsChoisies[chapNum])
+      || (choixExplicite ? window._versionsChoisies[chapNum] : null)
       || window._versionDefautCourante
       || compte.versionDefaut
       || 'spicy';
@@ -193,7 +194,7 @@ function openHistoire(id){
   // État des versions cochées par chapitre (spicy par défaut)
   window._versionsChoisies={};
   window._versionForcee=null;
-  // Pré-remplir avec la versionDefaut de cette histoire si elle existe
+  // Calculer la version par défaut pour cette histoire
   const _prefsHist=typeof optParHistoire!=='undefined'?optParHistoire[b.id]:null;
   window._versionDefautCourante=(_prefsHist&&_prefsHist.versionDefaut)||compte.versionDefaut||'spicy';
   const vc=window._versionsChoisies;
@@ -202,7 +203,7 @@ function openHistoire(id){
   chapList.innerHTML=b.chapitres.map(function(ch){
     const libre=ch.gratuit||ch.num<=(b.gratuit_jusqu_au||8);
     const estAdulte18=compte.trancheAge==='adulte' && b.adulte && b.versionSoft && ch.spicy;
-    if(!vc[ch.num]) vc[ch.num]=compte.versionDefaut||'spicy';
+    // Ne pas pré-remplir vc[ch.num] ici — loadContenuChapitre utilisera _versionDefautCourante
 
     const badge='<span class="ch-badge'+(libre?'':' ch-badge-ticket')+'" style="flex-shrink:0;min-width:54px;text-align:center">'+(libre?'Gratuit':'🎟 1 ticket')+'</span>';
     const prefsHist=typeof optParHistoire!=='undefined'?optParHistoire[b.id]:null;
