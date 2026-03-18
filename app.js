@@ -60,13 +60,13 @@ async function loadHistoires(){
   if(error||!histoires)return;
   const {data:allTags}=await db.from('histoires_tags').select('histoire_id, tags(nom)');
   const {data:allTW}=await db.from('trigger_warnings_histoires').select('histoire_id, contenu');
-  const {data:allChaps}=await db.from('chapitres').select('id,histoire_id,numero,titre,gratuit').order('numero');
+  const {data:allChaps}=await db.from('chapitres').select('id,histoire_id,numero,titre,gratuit,spicy').order('numero');
   BOOKS=histoires.map(h=>{
     const tags=(allTags||[]).filter(t=>t.histoire_id===h.id).map(t=>t.tags?.nom).filter(Boolean);
     const tws=(allTW||[]).filter(t=>t.histoire_id===h.id).map(t=>t.contenu);
     const chapitres=(allChaps||[]).filter(ch=>ch.histoire_id===h.id).map(ch=>({
-      num:ch.numero,titre:ch.titre,gratuit:ch.gratuit,
-      texte:null,citation:null,citation_auteur:null
+      num:ch.numero,titre:ch.titre,gratuit:ch.gratuit,spicy:ch.spicy||false,
+      texte:null,texte_soft:null,citation:null,citation_auteur:null
     }));
     return{
       id:h.id,title:h.titre,color:'bc'+(Math.floor(Math.random()*8)+1),
@@ -95,16 +95,25 @@ async function loadHistoires(){
 async function loadContenuChapitre(bookId,chapNum){
   const b=BOOKS.find(x=>x.id===bookId);if(!b)return null;
   const ch=b.chapitres.find(c=>c.num===chapNum);if(!ch)return null;
-  if(ch.texte)return ch.texte;
+
+  // Détermine si on doit servir la version soft
+  const doitVoirSoft = compte.trancheAge==='ado' && b.adulte && b.versionSoft && b.adapteMoins18 && ch.spicy;
+
+  // Si le contenu est déjà en cache, on le retourne directement
+  if(doitVoirSoft && ch.texte_soft!==null) return ch.texte_soft;
+  if(!doitVoirSoft && ch.texte!==null) return ch.texte;
+
+  // Chargement depuis Supabase
   const {data}=await db.from('chapitres')
-    .select('contenu,citation,citation_auteur')
+    .select('contenu,contenu_soft,citation,citation_auteur')
     .eq('histoire_id',bookId).eq('numero',chapNum).single();
   if(data){
-    ch.texte=data.contenu;
+    ch.texte=data.contenu||null;
+    ch.texte_soft=data.contenu_soft||null;
     ch.citation=data.citation||null;
     ch.citation_auteur=data.citation_auteur||null;
   }
-  return ch.texte;
+  return doitVoirSoft ? ch.texte_soft : ch.texte;
 }
 
 /* NAV */
