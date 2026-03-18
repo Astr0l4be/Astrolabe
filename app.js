@@ -117,12 +117,13 @@ async function loadContenuChapitre(bookId,chapNum){
   // 16-18 ans : toujours soft
   if(compte.trancheAge==='ado' && b.adapteMoins18) return ch.texte_soft;
 
-  // 18+ : version forcée (popup nav ou bouton liste) sinon versionDefaut
+  // 18+ : version forcée (popup nav ou bouton liste) sinon prefs histoire sinon versionDefaut
   if(compte.trancheAge==='adulte'){
+    const prefsHist=typeof optParHistoire!=='undefined'?optParHistoire[bookId]:null;
+    const versionDefautEffective=(prefsHist&&prefsHist.versionDefaut)||compte.versionDefaut||'spicy';
     const version = window._versionForcee
       || (window._versionsChoisies && window._versionsChoisies[chapNum])
-      || compte.versionDefaut
-      || 'spicy';
+      || versionDefautEffective;
     return version==='soft' ? ch.texte_soft : ch.texte;
   }
 
