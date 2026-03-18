@@ -248,7 +248,9 @@ async function finishInscription() {
     const { data, error } = await db.auth.signUp({ email, password: mdp, options: { data: { pseudo } } });
     if (error) {
       if (error.message.includes('already registered') || error.message.includes('already been registered')) {
-        errEmail.classList.add('show'); go('p-inscription1');
+        const errEmail = document.getElementById('email-error');
+        if (errEmail) errEmail.classList.add('show');
+        go('p-inscription1');
       } else { alert('Oups ! ' + error.message); }
       if (finishBtn) finishBtn.style.opacity = '1';
       return;
