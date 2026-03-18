@@ -108,9 +108,11 @@ async function loadContenuChapitre(bookId,chapNum){
       // 16-18 ans : toujours soft
       doitVoirSoft = true;
     } else if(compte.trancheAge==='adulte'){
-      // 18+ : utilise la version choisie dans _versionsChoisies, sinon versionDefaut
+      // 18+ : consulte les prefs spécifiques à cette histoire si elles existent
+      const prefs=typeof optParHistoire!=='undefined'?optParHistoire[bookId]:null;
+      const versionDefautEffective=prefs?prefs.versionDefaut:compte.versionDefaut;
       const vc=window._versionsChoisies||{};
-      const version=vc[chapNum]||compte.versionDefaut||'spicy';
+      const version=vc[chapNum]||versionDefautEffective||'spicy';
       doitVoirSoft = version==='soft';
     }
   }
@@ -203,7 +205,9 @@ function openHistoire(id){
     if(!vc[ch.num]) vc[ch.num]=compte.versionDefaut||'spicy';
 
     const badge='<span class="ch-badge'+(libre?'':' ch-badge-ticket')+'" style="flex-shrink:0;min-width:54px;text-align:center">'+(libre?'Gratuit':'🎟 1 ticket')+'</span>';
-    const montrerBtns=estAdulte18&&!compte.afficherChoixVersion;
+    const prefsHist=typeof optParHistoire!=='undefined'?optParHistoire[b.id]:null;
+    const masquerPourCetteHistoire=prefsHist?prefsHist.afficherChoixVersion:compte.afficherChoixVersion;
+    const montrerBtns=estAdulte18&&!masquerPourCetteHistoire;
     const versionBtns=montrerBtns
       ?'<span class="ch-version-btn" id="vbtn-soft-'+ch.num+'" onclick="event.stopPropagation();cocherVersion('+ch.num+',\'soft\')" title="Version douce">🌸</span>'
        +'<span class="ch-version-btn ch-version-active" id="vbtn-spicy-'+ch.num+'" onclick="event.stopPropagation();cocherVersion('+ch.num+',\'spicy\')" title="Version spicy">🌶</span>'

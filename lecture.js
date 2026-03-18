@@ -325,7 +325,7 @@ function _setOngletControls(prefix, prefs){
   _setOptTexte(prefix, tb?'blanc':'bleu');
   document.getElementById('opt-'+prefix+'-tw-histoire').checked=prefs.twrHistoire!==false;
   document.getElementById('opt-'+prefix+'-tw-chapitre').checked=prefs.twrChapitre===true;
-  const affV=prefs.afficherChoixVersion!==false;
+  const affV=prefs.afficherChoixVersion===true;
   const togAV=document.getElementById('opt-'+prefix+'-afficher-version');
   if(togAV) togAV.checked=affV;
   const rowVD=document.getElementById('opt-'+prefix+'-row-version-defaut');
@@ -342,7 +342,7 @@ function _getOngletValues(prefix){
     textesBlancs: document.getElementById('opt-'+prefix+'-btn-blanc').dataset.sel==='1',
     twrHistoire: document.getElementById('opt-'+prefix+'-tw-histoire').checked,
     twrChapitre: document.getElementById('opt-'+prefix+'-tw-chapitre').checked,
-    afficherChoixVersion: (document.getElementById('opt-'+prefix+'-afficher-version')||{checked:true}).checked,
+    afficherChoixVersion: (document.getElementById('opt-'+prefix+'-afficher-version')||{checked:false}).checked,
     versionDefaut: document.getElementById('opt-'+prefix+'-vdef-spicy')?.classList.contains('ch-version-active')?'spicy':'soft',
     taille: panel&&panel.dataset.taille?panel.dataset.taille:tailleLecture,
   };
@@ -409,6 +409,7 @@ function saveOptions(){
     modeJour=v.modeJour; textesBlancs=v.textesBlancs; tailleLecture=v.taille||'normal';
     compte.twrHistoire=v.twrHistoire; compte.twrChapitre=v.twrChapitre;
     compte.afficherChoixVersion=v.afficherChoixVersion; compte.versionDefaut=v.versionDefaut||'spicy';
+    syncVersionToggles();
     localStorage.setItem('tailleLecture',tailleLecture);
     toggleModeJour(v.modeJour); setTexte(v.textesBlancs?'blanc':'bleu');
     syncTailleBtns('compte',tailleLecture);
