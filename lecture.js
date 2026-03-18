@@ -88,7 +88,6 @@ async function openLecture(bookId,chapNum){
     go('p-lecture');return;
   }
   document.getElementById('lecture-titre').textContent=b.title;
-  window._chapNumCourant=chapNum;
 
   // Numéro du chapitre — arabe ou romain
   const numAffiche=(b.numerotation==='romain')?toRoman(chapNum):chapNum;
@@ -386,7 +385,7 @@ function openOptionsPopup(bookId){
   // Remplir onglet "toutes les histoires" avec les prefs générales
   _setOngletControls('t', {modeJour,textesBlancs,twrHistoire:compte.twrHistoire,twrChapitre:compte.twrChapitre,afficherChoixVersion:compte.afficherChoixVersion,versionDefaut:compte.versionDefaut});
   // Ouvrir sur onglet "cette histoire"
-  afficherOnglet('cette');
+  afficherOnglet('toutes');
   openModal('options-popup');
 }
 
@@ -432,22 +431,16 @@ function saveOptions(){
       });
     }
   }
-  // Mettre à jour _versionDefautCourante immédiatement
-  if(optOnglet==='cette'){
-    const prefsC=optParHistoire[currentHistoireId];
-    if(prefsC) window._versionDefautCourante=prefsC.versionDefaut||compte.versionDefaut||'spicy';
-  } else {
-    window._versionDefautCourante=compte.versionDefaut||'spicy';
-  }
+  // Mettre à jour _versionDefautCourante — priorité aux prefs de cette histoire
+  const prefsHistCourante=optParHistoire[currentHistoireId];
+  window._versionDefautCourante=(prefsHistCourante&&prefsHistCourante.versionDefaut)||compte.versionDefaut||'spicy';
+
   closeM('options-popup');
   refreshTWHistoire();
-  // Si on est sur la page chapitre, recharger le chapitre en cours avec les nouveaux paramètres
+
+  // Si on est sur la page chapitre, recharger avec les nouveaux paramètres
   const surChapitre=document.getElementById('p-lecture')?.classList.contains('active');
   if(surChapitre && currentHistoireId && window._chapNumCourant){
-    // Mettre à jour _versionDefautCourante avant de recharger
-    const prefsHist=optParHistoire[currentHistoireId];
-    window._versionDefautCourante=(prefsHist&&prefsHist.versionDefaut)||compte.versionDefaut||'spicy';
-    // Vider le choix explicite du chapitre pour qu'il prenne la nouvelle valeur par défaut
     if(window._versionsChoisies) delete window._versionsChoisies[window._chapNumCourant];
     openLecture(currentHistoireId, window._chapNumCourant);
   }
