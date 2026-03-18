@@ -119,11 +119,11 @@ async function loadContenuChapitre(bookId,chapNum){
 
   // 18+ : version forcée (popup nav ou bouton liste) sinon prefs histoire sinon versionDefaut
   if(compte.trancheAge==='adulte'){
-    const prefsHist=typeof optParHistoire!=='undefined'?optParHistoire[bookId]:null;
-    const versionDefautEffective=(prefsHist&&prefsHist.versionDefaut)||compte.versionDefaut||'spicy';
     const version = window._versionForcee
       || (window._versionsChoisies && window._versionsChoisies[chapNum])
-      || versionDefautEffective;
+      || window._versionDefautCourante
+      || compte.versionDefaut
+      || 'spicy';
     return version==='soft' ? ch.texte_soft : ch.texte;
   }
 
@@ -193,6 +193,9 @@ function openHistoire(id){
   // État des versions cochées par chapitre (spicy par défaut)
   window._versionsChoisies={};
   window._versionForcee=null;
+  // Pré-remplir avec la versionDefaut de cette histoire si elle existe
+  const _prefsHist=typeof optParHistoire!=='undefined'?optParHistoire[b.id]:null;
+  window._versionDefautCourante=(_prefsHist&&_prefsHist.versionDefaut)||compte.versionDefaut||'spicy';
   const vc=window._versionsChoisies;
 
   const chapList=document.getElementById('chapitres-list');

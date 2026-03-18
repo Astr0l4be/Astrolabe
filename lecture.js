@@ -430,10 +430,15 @@ function saveOptions(){
       });
     }
   }
+  // Mettre à jour _versionDefautCourante immédiatement
+  if(optOnglet==='cette'){
+    const prefsC=optParHistoire[currentHistoireId];
+    if(prefsC) window._versionDefautCourante=prefsC.versionDefaut||compte.versionDefaut||'spicy';
+  } else {
+    window._versionDefautCourante=compte.versionDefaut||'spicy';
+  }
   closeM('options-popup');
   refreshTWHistoire();
-  // Rafraîchir la liste des chapitres pour appliquer immédiatement les nouveaux paramètres
-  if(currentHistoireId) openHistoire(currentHistoireId);
 }
 function ouvrirPopupResetOptions(){
   closeM('options-popup');
