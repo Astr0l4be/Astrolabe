@@ -55,10 +55,9 @@ function cocherVersion(chapNum, version){
 
 async function ouvrirVersionChoisie(bookId, chapNum){
   const version=(window._versionsChoisies&&window._versionsChoisies[chapNum])||compte.versionDefaut||'spicy';
-  const trancheOriginale=compte.trancheAge;
-  if(version==='soft') compte.trancheAge='ado';
+  window._versionForcee=version;
   await openLecture(bookId, chapNum);
-  compte.trancheAge=trancheOriginale;
+  window._versionForcee=null;
 }
 
 function ouvrirPopupVersionNav(bookId, chapNum){
@@ -68,10 +67,9 @@ function ouvrirPopupVersionNav(bookId, chapNum){
 }
 
 async function ouvrirVersionChoisieNav(bookId, chapNum, version){
-  const trancheOriginale=compte.trancheAge;
-  if(version==='soft') compte.trancheAge='ado';
+  window._versionForcee=version;
   await openLecture(bookId, chapNum);
-  compte.trancheAge=trancheOriginale;
+  window._versionForcee=null;
 }
 
 async function openLecture(bookId,chapNum){
@@ -160,7 +158,7 @@ async function openLecture(bookId,chapNum){
   const nextNum=next?(b.numerotation==='romain'?toRoman(next.num):next.num):null;
   if(prev)nav.innerHTML+=`<button class="btn btn-full" style="flex:1" onclick="openLecture('${bookId}',${prev.num})">← Ch.${prevNum}</button>`;
   if(next){
-    const nextEstSpicySoft=compte.trancheAge==='adulte' && b.adulte && b.versionSoft && next.spicy;
+    const nextEstSpicySoft=(compte.trancheAge==='adulte' || window._versionForcee) && b.adulte && b.versionSoft && next.spicy;
     if(nextEstSpicySoft && compte.afficherChoixVersion){
       // Un bouton qui ouvre le popup de choix
       nav.innerHTML+=`<button class="btn btn-full btn-accent" style="flex:1" onclick="ouvrirPopupVersionNav('${bookId}',${next.num})">Ch.${nextNum} →</button>`;

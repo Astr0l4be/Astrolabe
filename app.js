@@ -97,7 +97,10 @@ async function loadContenuChapitre(bookId,chapNum){
   const ch=b.chapitres.find(c=>c.num===chapNum);if(!ch)return null;
 
   // Détermine si on doit servir la version soft
-  const doitVoirSoft = compte.trancheAge==='ado' && b.adulte && b.versionSoft && b.adapteMoins18 && ch.spicy;
+  const versionForcee=window._versionForcee;
+  const doitVoirSoft = versionForcee
+    ? (versionForcee==='soft' && ch.spicy)
+    : (compte.trancheAge==='ado' && b.adulte && b.versionSoft && b.adapteMoins18 && ch.spicy);
 
   // Si le contenu est déjà en cache, on le retourne directement
   if(doitVoirSoft && ch.texte_soft!==null) return ch.texte_soft;
