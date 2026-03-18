@@ -96,28 +96,7 @@ async function loadContenuChapitre(bookId,chapNum){
   const b=BOOKS.find(x=>x.id===bookId);if(!b)return null;
   const ch=b.chapitres.find(c=>c.num===chapNum);if(!ch)return null;
 
-  // Détermine la version à afficher
-  const estSpicySoftDispo = b.adulte && b.versionSoft && ch.spicy;
-  let doitVoirSoft = false;
-
-  if(estSpicySoftDispo){
-    if(window._versionForcee){
-      // Version explicitement choisie via popup nav ou bouton liste
-      doitVoirSoft = window._versionForcee==='soft';
-    } else if(compte.trancheAge==='ado' && b.adapteMoins18){
-      // 16-18 ans : toujours soft
-      doitVoirSoft = true;
-    } else if(compte.trancheAge==='adulte'){
-      // 18+ : consulte les prefs spécifiques à cette histoire si elles existent
-      const prefs=typeof optParHistoire!=='undefined'?optParHistoire[bookId]:null;
-      const versionDefautEffective=prefs?prefs.versionDefaut:compte.versionDefaut;
-      const vc=window._versionsChoisies||{};
-      const version=vc[chapNum]||versionDefautEffective||'spicy';
-      doitVoirSoft = version==='soft';
-    }
-  }
-
-  // Charger depuis Supabase si pas encore en cache
+  // Charger les deux versions depuis Supabase si pas encore en cache
   if(ch.texte===null){
     const {data}=await db.from('chapitres')
       .select('contenu,contenu_soft,citation,citation_auteur')
@@ -129,9 +108,25 @@ async function loadContenuChapitre(bookId,chapNum){
       ch.citation_auteur=data.citation_auteur||null;
     }
   }
-  // Décision de version au moment de la lecture (pas mise en cache)
-  console.log('[VERSION]', bookId, chapNum, 'doitVoirSoft:', doitVoirSoft, 'afficherChoixVersion:', compte.afficherChoixVersion, 'versionDefaut:', compte.versionDefaut, '_versionForcee:', window._versionForcee, 'texte_soft:', ch.texte_soft ? 'OK' : 'NULL');
-  return doitVoirSoft ? ch.texte_soft : ch.texte;
+
+  // Décider quelle version servir
+  const estSpicySoftDispo = b.adulte && b.versionSoft && ch.spicy && ch.texte_soft;
+
+  if(!estSpicySoftDispo) return ch.texte;
+
+  // 16-18 ans : toujours soft
+  if(compte.trancheAge==='ado' && b.adapteMoins18) return ch.texte_soft;
+
+  // 18+ : version forcée (popup nav ou bouton liste) sinon versionDefaut
+  if(compte.trancheAge==='adulte'){
+    const version = window._versionForcee
+      || (window._versionsChoisies && window._versionsChoisies[chapNum])
+      || compte.versionDefaut
+      || 'spicy';
+    return version==='soft' ? ch.texte_soft : ch.texte;
+  }
+
+  return ch.texte;
 }
 
 /* NAV */
@@ -195,7 +190,8 @@ function openHistoire(id){
     else{if(twRevealBtn)twRevealBtn.style.display='block';if(document.getElementById('tw-text-reveal'))document.getElementById('tw-text-reveal').textContent=b.tw;}
   }
   // État des versions cochées par chapitre (spicy par défaut)
-  if(!window._versionsChoisies) window._versionsChoisies={};
+  window._versionsChoisies={};
+  window._versionForcee=null;
   const vc=window._versionsChoisies;
 
   const chapList=document.getElementById('chapitres-list');
