@@ -432,6 +432,8 @@ function saveOptions(){
   }
   closeM('options-popup');
   refreshTWHistoire();
+  // Rafraîchir la liste des chapitres pour appliquer immédiatement les nouveaux paramètres
+  if(currentHistoireId) openHistoire(currentHistoireId);
 }
 function ouvrirPopupResetOptions(){
   closeM('options-popup');
