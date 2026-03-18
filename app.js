@@ -130,6 +130,7 @@ async function loadContenuChapitre(bookId,chapNum){
     }
   }
   // Décision de version au moment de la lecture (pas mise en cache)
+  console.log('[VERSION]', bookId, chapNum, 'doitVoirSoft:', doitVoirSoft, 'afficherChoixVersion:', compte.afficherChoixVersion, 'versionDefaut:', compte.versionDefaut, '_versionForcee:', window._versionForcee, 'texte_soft:', ch.texte_soft ? 'OK' : 'NULL');
   return doitVoirSoft ? ch.texte_soft : ch.texte;
 }
 
