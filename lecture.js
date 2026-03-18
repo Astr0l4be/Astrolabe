@@ -67,6 +67,11 @@ function ouvrirPopupVersionNav(bookId, chapNum){
 }
 
 async function ouvrirVersionChoisieNav(bookId, chapNum, version){
+  // Mémoriser le choix dans _versionsChoisies pour mettre à jour la liste des chapitres
+  if(!window._versionsChoisies) window._versionsChoisies={};
+  window._versionsChoisies[chapNum]=version;
+  // Mettre à jour visuellement les boutons dans la liste si elle est visible
+  cocherVersion(chapNum, version);
   window._versionForcee=version;
   await openLecture(bookId, chapNum);
   window._versionForcee=null;
