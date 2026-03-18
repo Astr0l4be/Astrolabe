@@ -444,6 +444,11 @@ function saveOptions(){
   // Si on est sur la page chapitre, recharger le chapitre en cours avec les nouveaux paramètres
   const surChapitre=document.getElementById('p-lecture')?.classList.contains('active');
   if(surChapitre && currentHistoireId && window._chapNumCourant){
+    // Mettre à jour _versionDefautCourante avant de recharger
+    const prefsHist=optParHistoire[currentHistoireId];
+    window._versionDefautCourante=(prefsHist&&prefsHist.versionDefaut)||compte.versionDefaut||'spicy';
+    // Vider le choix explicite du chapitre pour qu'il prenne la nouvelle valeur par défaut
+    if(window._versionsChoisies) delete window._versionsChoisies[window._chapNumCourant];
     openLecture(currentHistoireId, window._chapNumCourant);
   }
 }
