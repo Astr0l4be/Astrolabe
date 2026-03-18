@@ -1,16 +1,14 @@
-function cocherVersion(bookId, chapNum, version, versionsChoisies){
-  const vc=versionsChoisies||window._versionsChoisies||{};
-  vc[chapNum]=version;
-  // Mettre à jour l'apparence des boutons
+function cocherVersion(chapNum, version){
+  if(!window._versionsChoisies) window._versionsChoisies={};
+  window._versionsChoisies[chapNum]=version;
   const btnSoft=document.getElementById('vbtn-soft-'+chapNum);
   const btnSpicy=document.getElementById('vbtn-spicy-'+chapNum);
   if(btnSoft) btnSoft.classList.toggle('ch-version-active', version==='soft');
   if(btnSpicy) btnSpicy.classList.toggle('ch-version-active', version==='spicy');
 }
 
-async function ouvrirVersionChoisie(bookId, chapNum, versionsChoisies){
-  const vc=versionsChoisies||window._versionsChoisies||{};
-  const version=vc[chapNum]||'spicy';
+async function ouvrirVersionChoisie(bookId, chapNum){
+  const version=(window._versionsChoisies&&window._versionsChoisies[chapNum])||'spicy';
   const trancheOriginale=compte.trancheAge;
   if(version==='soft') compte.trancheAge='ado';
   await openLecture(bookId, chapNum);

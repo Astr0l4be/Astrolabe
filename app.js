@@ -177,39 +177,32 @@ function openHistoire(id){
     else{if(twRevealBtn)twRevealBtn.style.display='block';if(document.getElementById('tw-text-reveal'))document.getElementById('tw-text-reveal').textContent=b.tw;}
   }
   // État des versions cochées par chapitre (spicy par défaut)
-  const versionsChoisies={};
+  if(!window._versionsChoisies) window._versionsChoisies={};
+  const vc=window._versionsChoisies;
 
   const chapList=document.getElementById('chapitres-list');
   chapList.innerHTML=b.chapitres.map(function(ch){
     const libre=ch.gratuit||ch.num<=(b.gratuit_jusqu_au||8);
     const estAdulte18=compte.trancheAge==='adulte' && b.adulte && b.versionSoft && ch.spicy;
-    if(!versionsChoisies[ch.num]) versionsChoisies[ch.num]='spicy';
+    if(!vc[ch.num]) vc[ch.num]='spicy';
 
     const badge='<span class="ch-badge'+(libre?'':' ch-badge-ticket')+'" style="flex-shrink:0">'+(libre?'Gratuit':'🎟 1 ticket')+'</span>';
+    const versionBtns=estAdulte18
+      ?'<span class="ch-version-btn" id="vbtn-soft-'+ch.num+'" onclick="event.stopPropagation();cocherVersion('+ch.num+',\'soft\')" title="Version douce">🌸</span>'
+       +'<span class="ch-version-btn ch-version-active" id="vbtn-spicy-'+ch.num+'" onclick="event.stopPropagation();cocherVersion('+ch.num+',\'spicy\')" title="Version spicy">🌶</span>'
+      :'';
 
-    if(estAdulte18){
-      return '<div class="ch-lire-row">'
-        +'<button class="btn-lire'+(libre?'':' btn-lire-locked')+'" onclick="ouvrirVersionChoisie(\''+b.id+'\','+ch.num+',versionsChoisies)">'
-        +'<span class="ch-lire-titre">Ch.'+ch.num+' · '+ch.titre+'</span>'
-        +'<div style="display:flex;gap:6px;align-items:center;flex-shrink:0">'
-        +badge
-        +'<button class="ch-version-btn" id="vbtn-soft-'+ch.num+'" onclick="event.stopPropagation();cocherVersion(\''+b.id+'\','+ch.num+',\'soft\',versionsChoisies)" title="Version douce">🌸</button>'
-        +'<button class="ch-version-btn ch-version-active" id="vbtn-spicy-'+ch.num+'" onclick="event.stopPropagation();cocherVersion(\''+b.id+'\','+ch.num+',\'spicy\',versionsChoisies)" title="Version spicy">🌶</button>'
-        +'</div>'
-        +'</button>'
-        +'</div>';
-    }
+    const onclick=estAdulte18
+      ?'onclick="ouvrirVersionChoisie(\''+b.id+'\','+ch.num+')\"'
+      :'onclick="openLecture(\''+b.id+'\','+ch.num+')"';
 
     return '<div class="ch-lire-row">'
-      +'<button class="btn-lire'+(libre?'':' btn-lire-locked')+'" onclick="openLecture(\''+b.id+'\','+ch.num+')">'
+      +'<button class="btn-lire'+(libre?'':' btn-lire-locked')+'" '+onclick+'>'
       +'<span class="ch-lire-titre">Ch.'+ch.num+' · '+ch.titre+'</span>'
-      +badge
+      +'<div style="display:flex;gap:6px;align-items:center;flex-shrink:0">'+badge+versionBtns+'</div>'
       +'</button>'
       +'</div>';
   }).join('');
-
-  // Rendre versionsChoisies accessible aux fonctions inline
-  window._versionsChoisies=versionsChoisies;
   const backDest=(prevPage==='p-histoire'||prevPage==='p-lecture')?'p-main':prevPage;
   document.getElementById('histoire-back-btn').onclick=function(){go(backDest);};
   go('p-histoire');
