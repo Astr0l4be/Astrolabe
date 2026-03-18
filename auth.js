@@ -96,16 +96,24 @@ async function handleInscription1() {
   const mdp      = document.getElementById('insc-mdp').value;
   const mdp2     = document.getElementById('insc-mdp2').value;
   const pseudo   = document.getElementById('insc-pseudo').value.trim();
+  const email    = document.getElementById('insc-mail').value.trim();
   const errMdp   = document.getElementById('mdp-error');
   const errLen   = document.getElementById('mdp-length-error');
   const errPseudo = document.getElementById('pseudo-error');
+  const errEmail = document.getElementById('email-error');
 
   errMdp.classList.remove('show');
   errLen.classList.remove('show');
   errPseudo.classList.remove('show');
+  errEmail.classList.remove('show');
 
   if (mdp.length < 6) { errLen.classList.add('show'); return; }
   if (mdp !== mdp2)   { errMdp.classList.add('show');  return; }
+
+  // Vérification email valide + déjà utilisé dès l'étape 1
+  if (!isValidEmail(email)) { errEmail.classList.add('show'); return; }
+  const { data: existingEmail } = await db.from('profils').select('id').eq('email', email).limit(1);
+  if (existingEmail && existingEmail.length > 0) { errEmail.classList.add('show'); return; }
 
   if (pseudo) {
     const { data: existing } = await db.from('profils').select('id').eq('pseudo', pseudo).limit(1);
@@ -117,13 +125,15 @@ async function handleInscription1() {
   compte.age    = age;
   compte.dobVal = dobVal;
 
+  // Appliquer la tranche immédiatement pour que le filtre du catalogue soit correct
   const tranche = trancheFromAge(age);
+  compte.trancheAge = tranche;
 
   switch (tranche) {
     case 'refuse': go('p-inscription-refuse');  break;
-    case 'junior': go('p-inscription-accord');  break;  // page accord parental 13-16
-    case 'ado':    go('p-inscription2');         break;  // prefs TW (sans contenu adulte)
-    case 'adulte': go('p-inscription3');         break;  // prefs TW + option adulte
+    case 'junior': go('p-inscription-accord');  break;
+    case 'ado':    go('p-inscription2');         break;
+    case 'adulte': go('p-inscription3');         break;
   }
 }
 
