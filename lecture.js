@@ -54,10 +54,9 @@ function cocherVersion(chapNum, version){
 }
 
 async function ouvrirVersionChoisie(bookId, chapNum){
-  const version=(window._versionsChoisies&&window._versionsChoisies[chapNum])||compte.versionDefaut||'spicy';
-  window._versionForcee=version;
+  // _versionsChoisies est déjà mis à jour par cocherVersion
+  // loadContenuChapitre le lira directement
   await openLecture(bookId, chapNum);
-  window._versionForcee=null;
 }
 
 function ouvrirPopupVersionNav(bookId, chapNum){

@@ -96,13 +96,26 @@ async function loadContenuChapitre(bookId,chapNum){
   const b=BOOKS.find(x=>x.id===bookId);if(!b)return null;
   const ch=b.chapitres.find(c=>c.num===chapNum);if(!ch)return null;
 
-  // Détermine si on doit servir la version soft
-  const versionForcee=window._versionForcee;
-  const doitVoirSoft = versionForcee
-    ? (versionForcee==='soft' && ch.spicy)
-    : (compte.trancheAge==='ado' && b.adulte && b.versionSoft && b.adapteMoins18 && ch.spicy);
+  // Détermine la version à afficher
+  const estSpicySoftDispo = b.adulte && b.versionSoft && ch.spicy;
+  let doitVoirSoft = false;
 
-  // Si le contenu est déjà en cache, on le retourne directement
+  if(estSpicySoftDispo){
+    if(window._versionForcee){
+      // Version explicitement choisie via popup nav ou bouton liste
+      doitVoirSoft = window._versionForcee==='soft';
+    } else if(compte.trancheAge==='ado' && b.adapteMoins18){
+      // 16-18 ans : toujours soft
+      doitVoirSoft = true;
+    } else if(compte.trancheAge==='adulte'){
+      // 18+ : utilise la version choisie dans _versionsChoisies, sinon versionDefaut
+      const vc=window._versionsChoisies||{};
+      const version=vc[chapNum]||compte.versionDefaut||'spicy';
+      doitVoirSoft = version==='soft';
+    }
+  }
+
+  // Cache
   if(doitVoirSoft && ch.texte_soft!==null) return ch.texte_soft;
   if(!doitVoirSoft && ch.texte!==null) return ch.texte;
 
