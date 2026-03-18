@@ -15,11 +15,18 @@ function setAfficherChoixVersion(val){
 
 function setVersionDefaut(version){
   compte.versionDefaut=version;
+  window._versionDefautCourante=version;
   const btnSoft=document.getElementById('vdef-soft-btn');
   const btnSpicy=document.getElementById('vdef-spicy-btn');
   if(btnSoft) btnSoft.classList.toggle('ch-version-active', version==='soft');
   if(btnSpicy) btnSpicy.classList.toggle('ch-version-active', version==='spicy');
   savePrefs();
+  // Recharger le chapitre en cours si on y est
+  const surChapitre=document.getElementById('p-lecture')?.classList.contains('active');
+  if(surChapitre && currentHistoireId && window._chapNumCourant){
+    if(window._versionsChoisies) delete window._versionsChoisies[window._chapNumCourant];
+    openLecture(currentHistoireId, window._chapNumCourant);
+  }
 }
 
 function setOptAfficherVersion(prefix, val){
