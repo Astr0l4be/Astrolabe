@@ -20,7 +20,10 @@ let BOOKS=[];
 
 function bookCardHTML(b){
   const img=b.cover?`<img src="${b.cover}" alt="${b.title}" loading="lazy">`:'';
-  return`<div class="book-card ${b.color}" onclick="openHistoire('${b.id}')">${img}<div class="book-card-label">${b.title}</div></div>`;
+  const icones=(b.adulte&&compte.trancheAge==='adulte')
+    ?`<div class="book-card-icones">${b.versionSoft?'<span class="book-card-icone">🌸</span>':''}<span class="book-card-icone">🌶</span></div>`
+    :'';
+  return`<div class="book-card ${b.color}" onclick="openHistoire('${b.id}')" style="position:relative">${img}${icones}<div class="book-card-label">${b.title}</div></div>`;
 }
 
 function livreVisible(b){
@@ -119,9 +122,8 @@ async function loadContenuChapitre(bookId,chapNum){
 
   // 18+ : version forcée (popup nav ou bouton liste) sinon prefs histoire sinon versionDefaut
   if(compte.trancheAge==='adulte'){
-    const choixExplicite = window._versionsChoisies && window._versionsChoisies.hasOwnProperty(chapNum);
     const version = window._versionForcee
-      || (choixExplicite ? window._versionsChoisies[chapNum] : null)
+      || (window._versionsChoisies && window._versionsChoisies[chapNum])
       || window._versionDefautCourante
       || compte.versionDefaut
       || 'spicy';
@@ -182,6 +184,13 @@ function openHistoire(id){
   document.getElementById('histoire-author').textContent=b.author?'par '+b.author:'';
   document.getElementById('histoire-tags').innerHTML=b.tags.map(t=>`<span class="histoire-tag"># ${t}</span>`).join('');
   document.getElementById('histoire-desc').innerHTML=b.desc;
+
+  // Bandeau spicy/soft pour les 18+
+  const bandeauSpicy=document.getElementById('bandeau-spicy');
+  if(bandeauSpicy){
+    bandeauSpicy.style.display=(compte.trancheAge==='adulte' && b.adulte && b.versionSoft)?'block':'none';
+  }
+
   const twBox=document.getElementById('tw-box');
   const twRevealBtn=document.getElementById('tw-reveal-btn');
   const twBoxReveal=document.getElementById('tw-box-reveal');
@@ -194,7 +203,7 @@ function openHistoire(id){
   // État des versions cochées par chapitre (spicy par défaut)
   window._versionsChoisies={};
   window._versionForcee=null;
-  // Calculer la version par défaut pour cette histoire
+  // Pré-remplir avec la versionDefaut de cette histoire si elle existe
   const _prefsHist=typeof optParHistoire!=='undefined'?optParHistoire[b.id]:null;
   window._versionDefautCourante=(_prefsHist&&_prefsHist.versionDefaut)||compte.versionDefaut||'spicy';
   const vc=window._versionsChoisies;
@@ -203,7 +212,7 @@ function openHistoire(id){
   chapList.innerHTML=b.chapitres.map(function(ch){
     const libre=ch.gratuit||ch.num<=(b.gratuit_jusqu_au||8);
     const estAdulte18=compte.trancheAge==='adulte' && b.adulte && b.versionSoft && ch.spicy;
-    // Ne pas pré-remplir vc[ch.num] ici — loadContenuChapitre utilisera _versionDefautCourante
+    if(!vc[ch.num]) vc[ch.num]=compte.versionDefaut||'spicy';
 
     const badge='<span class="ch-badge'+(libre?'':' ch-badge-ticket')+'" style="flex-shrink:0;min-width:54px;text-align:center">'+(libre?'Gratuit':'🎟 1 ticket')+'</span>';
     const prefsHist=typeof optParHistoire!=='undefined'?optParHistoire[b.id]:null;

@@ -87,6 +87,8 @@
     .book-card{aspect-ratio:2/3;border-radius:8px;border:1px solid rgba(180,190,255,.08);display:flex;align-items:flex-end;overflow:hidden;cursor:pointer;transition:transform .2s,border-color .2s;position:relative;}
     .book-card:hover{transform:scale(1.04);border-color:rgba(180,190,255,.2);}
     .book-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+    .book-card-icones{position:absolute;top:6px;right:6px;display:flex;flex-direction:column;gap:3px;align-items:center;}
+    .book-card-icone{font-size:14px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6));}
     .book-card-label{width:100%;padding:5px 6px 6px;background:linear-gradient(to top,rgba(10,12,25,.95),transparent);font-size:9px;color:rgba(200,210,255,.85);text-align:center;line-height:1.4;position:relative;z-index:1;}
     .bc1{background:linear-gradient(160deg,#1e2a4a,#2d1f4a)} .bc2{background:linear-gradient(160deg,#1f3540,#1a2b40)} .bc3{background:linear-gradient(160deg,#3a1f3a,#2a1f4a)} .bc4{background:linear-gradient(160deg,#1a3040,#1a2538)} .bc5{background:linear-gradient(160deg,#2a1a3a,#1f2a3a)} .bc6{background:linear-gradient(160deg,#1f3a2a,#1a2838)} .bc7{background:linear-gradient(160deg,#3a2a1a,#2a1a2a)} .bc8{background:linear-gradient(160deg,#1a2a4a,#2a1f3a)}
 
