@@ -7,8 +7,9 @@ function toggleInfoSpicy(){
 
 function setAfficherChoixVersion(val){
   compte.afficherChoixVersion=val;
+  // val=true signifie MASQUER → montrer le toggle de version par défaut
   const row=document.getElementById('row-version-defaut');
-  if(row) row.style.display=val?'none':'block';
+  if(row) row.style.display=val?'block':'none';
   savePrefs();
 }
 
@@ -23,7 +24,7 @@ function setVersionDefaut(version){
 
 function setOptAfficherVersion(prefix, val){
   const row=document.getElementById('opt-'+prefix+'-row-version-defaut');
-  if(row) row.style.display=val?'none':'block';
+  if(row) row.style.display=val?'block':'none';
 }
 
 function setOptVersionDefaut(prefix, version){
@@ -37,7 +38,7 @@ function syncVersionToggles(){
   const togV=document.getElementById('toggle-afficher-version');
   if(togV) togV.checked=compte.afficherChoixVersion;
   const rowVD=document.getElementById('row-version-defaut');
-  if(rowVD) rowVD.style.display=compte.afficherChoixVersion?'none':'block';
+  if(rowVD) rowVD.style.display=compte.afficherChoixVersion?'block':'none';
   const btnSoft=document.getElementById('vdef-soft-btn');
   const btnSpicy=document.getElementById('vdef-spicy-btn');
   if(btnSoft) btnSoft.classList.toggle('ch-version-active', compte.versionDefaut==='soft');
@@ -163,10 +164,10 @@ async function openLecture(bookId,chapNum){
   if(prev)nav.innerHTML+=`<button class="btn btn-full" style="flex:1" onclick="openLecture('${bookId}',${prev.num})">← Ch.${prevNum}</button>`;
   if(next){
     const nextEstSpicySoft=(compte.trancheAge==='adulte' || window._versionForcee) && b.adulte && b.versionSoft && next.spicy;
-    if(nextEstSpicySoft && compte.afficherChoixVersion){
+    if(nextEstSpicySoft && !compte.afficherChoixVersion){
       // Un bouton qui ouvre le popup de choix
       nav.innerHTML+=`<button class="btn btn-full btn-accent" style="flex:1" onclick="ouvrirPopupVersionNav('${bookId}',${next.num})">Ch.${nextNum} →</button>`;
-    } else if(nextEstSpicySoft && !compte.afficherChoixVersion){
+    } else if(nextEstSpicySoft && compte.afficherChoixVersion){
       // Ouvrir directement la version par défaut
       nav.innerHTML+=`<button class="btn btn-full btn-accent" style="flex:1" onclick="ouvrirVersionChoisieNav('${bookId}',${next.num},'${compte.versionDefaut||'spicy'}')">Ch.${nextNum} →</button>`;
     } else {
@@ -328,7 +329,7 @@ function _setOngletControls(prefix, prefs){
   const togAV=document.getElementById('opt-'+prefix+'-afficher-version');
   if(togAV) togAV.checked=affV;
   const rowVD=document.getElementById('opt-'+prefix+'-row-version-defaut');
-  if(rowVD) rowVD.style.display=affV?'none':'block';
+  if(rowVD) rowVD.style.display=affV?'block':'none';
   setOptVersionDefaut(prefix, prefs.versionDefaut||'spicy');
   syncTailleBtns(prefix,t);
   const panel=document.getElementById('opt-panel-'+(prefix==='c'?'cette':'toutes'));

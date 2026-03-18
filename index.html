@@ -448,10 +448,10 @@
         <div class="toggle-row"><span class="toggle-label">Trigger warnings (chapitres)</span><label class="tgl"><input type="checkbox" id="toggle-tw-chapitre" onchange="compte.twrChapitre=this.checked;savePrefs()"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
         <div class="divider"></div>
         <div class="toggle-row">
-          <span class="toggle-label">Afficher option spicy/soft sur les chapitres <button onclick="toggleInfoSpicy()" style="background:none;border:1px solid rgba(180,190,255,.3);border-radius:50%;width:16px;height:16px;font-size:9px;cursor:pointer;color:var(--accent);line-height:1;padding:0;vertical-align:middle">?</button></span>
-          <label class="tgl"><input type="checkbox" id="toggle-afficher-version" checked onchange="setAfficherChoixVersion(this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
+          <span class="toggle-label">Masquer les options spicy/soft sur les chapitres <button onclick="toggleInfoSpicy()" style="background:none;border:1px solid rgba(180,190,255,.3);border-radius:50%;width:16px;height:16px;font-size:9px;cursor:pointer;color:var(--accent);line-height:1;padding:0;vertical-align:middle">?</button></span>
+          <label class="tgl"><input type="checkbox" id="toggle-afficher-version" onchange="setAfficherChoixVersion(this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
         </div>
-        <div id="info-spicy" style="display:none;font-size:11px;color:var(--text2);line-height:1.7;margin:4px 0 10px;padding:10px 12px;background:rgba(126,159,212,.07);border-radius:8px;">Certaines histoires proposent des versions softs de chapitres spicy. Si tu ne veux pas que le contenu spicy soit indiqué sur la liste des chapitres, tu peux cocher « non » et indiquer quelle version entre soft et spicy sera affichée par défaut.</div>
+        <div id="info-spicy" style="display:none;font-size:11px;color:var(--text2);line-height:1.7;margin:4px 0 10px;padding:10px 12px;background:rgba(126,159,212,.07);border-radius:8px;">Certaines histoires proposent des versions softs de chapitres spicy. Si tu ne veux pas que les options spicy/soft soient indiquées sur la liste des chapitres, active cette option et choisis quelle version sera affichée par défaut.</div>
         <div id="row-version-defaut" style="display:none">
           <div class="toggle-row" style="justify-content:space-between;align-items:center">
             <span class="toggle-label">Version par défaut</span>
@@ -628,8 +628,8 @@
         <div class="toggle-row"><span class="toggle-label">TW par histoire</span><label class="tgl"><input type="checkbox" id="opt-c-tw-histoire"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
         <div class="toggle-row"><span class="toggle-label">TW par chapitre</span><label class="tgl"><input type="checkbox" id="opt-c-tw-chapitre"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
         <div class="toggle-row">
-          <span class="toggle-label">Afficher option spicy/soft <button onclick="toggleInfoSpicy()" style="background:none;border:1px solid rgba(180,190,255,.3);border-radius:50%;width:16px;height:16px;font-size:9px;cursor:pointer;color:var(--accent);line-height:1;padding:0;vertical-align:middle">?</button></span>
-          <label class="tgl"><input type="checkbox" id="opt-c-afficher-version" checked onchange="setOptAfficherVersion('c',this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
+          <span class="toggle-label">Masquer les options spicy/soft <button onclick="toggleInfoSpicy()" style="background:none;border:1px solid rgba(180,190,255,.3);border-radius:50%;width:16px;height:16px;font-size:9px;cursor:pointer;color:var(--accent);line-height:1;padding:0;vertical-align:middle">?</button></span>
+          <label class="tgl"><input type="checkbox" id="opt-c-afficher-version" onchange="setOptAfficherVersion('c',this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
         </div>
         <div id="opt-c-row-version-defaut" style="display:none">
           <div class="toggle-row" style="justify-content:space-between;align-items:center">
@@ -665,8 +665,8 @@
         <div class="toggle-row"><span class="toggle-label">TW par histoire</span><label class="tgl"><input type="checkbox" id="opt-t-tw-histoire"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
         <div class="toggle-row"><span class="toggle-label">TW par chapitre</span><label class="tgl"><input type="checkbox" id="opt-t-tw-chapitre"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
         <div class="toggle-row">
-          <span class="toggle-label">Afficher option spicy/soft <button onclick="toggleInfoSpicy()" style="background:none;border:1px solid rgba(180,190,255,.3);border-radius:50%;width:16px;height:16px;font-size:9px;cursor:pointer;color:var(--accent);line-height:1;padding:0;vertical-align:middle">?</button></span>
-          <label class="tgl"><input type="checkbox" id="opt-t-afficher-version" checked onchange="setOptAfficherVersion('t',this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
+          <span class="toggle-label">Masquer les options spicy/soft <button onclick="toggleInfoSpicy()" style="background:none;border:1px solid rgba(180,190,255,.3);border-radius:50%;width:16px;height:16px;font-size:9px;cursor:pointer;color:var(--accent);line-height:1;padding:0;vertical-align:middle">?</button></span>
+          <label class="tgl"><input type="checkbox" id="opt-t-afficher-version" onchange="setOptAfficherVersion('t',this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
         </div>
         <div id="opt-t-row-version-defaut" style="display:none">
           <div class="toggle-row" style="justify-content:space-between;align-items:center">
