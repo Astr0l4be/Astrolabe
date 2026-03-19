@@ -58,8 +58,20 @@ function renderGrid(id,books){
   el.innerHTML=books.filter(b=>livreVisible(b)).map(b=>bookCardHTML(b)).join('');
 }
 
+/* ── PROGRESSION LECTURE ── */
+function getLectureProgress(bookId){
+  const data=localStorage.getItem('lecture_progress_'+bookId);
+  return data?JSON.parse(data):{dernierChapitre:null,lus:[]};
+}
+function setLectureProgress(bookId, chapNum){
+  const prog=getLectureProgress(bookId);
+  prog.dernierChapitre=chapNum;
+  if(!prog.lus.includes(chapNum)) prog.lus.push(chapNum);
+  localStorage.setItem('lecture_progress_'+bookId, JSON.stringify(prog));
+}
+
 async function loadHistoires(){
-  const {data:histoires,error}=await db.from('histoires').select('*').eq('statut','publie').order('created_at',{ascending:false});
+  const {data:histoires,error}=await db.from('histoires').select('*').in('statut',['publie','pause','termine']).order('created_at',{ascending:false});
   if(error||!histoires)return;
   const {data:allTags}=await db.from('histoires_tags').select('histoire_id, tags(nom)');
   const {data:allTW}=await db.from('trigger_warnings_histoires').select('histoire_id, contenu');
@@ -77,7 +89,7 @@ async function loadHistoires(){
       tags,tw:tws.join(', ')||null,desc:h.resume||'',
       adulte:h.adulte||false,versionSoft:h.version_soft||false,
       adapteMoins18:h.adapte_moins18||false,adapteMoins16:h.adapte_moins16||false,
-      gratuit_jusqu_au:h.gratuit_jusqu_au||8,numerotation:h.numerotation||'arabe',chapitres
+      gratuit_jusqu_au:h.gratuit_jusqu_au||8,numerotation:h.numerotation||'arabe',statut:h.statut||'publie',chapitres
     };
   });
   renderGrid('book-grid',BOOKS);
@@ -208,10 +220,29 @@ function openHistoire(id){
   window._versionDefautCourante=(_prefsHist&&_prefsHist.versionDefaut)||compte.versionDefaut||'spicy';
   const vc=window._versionsChoisies;
 
+  // Bouton commencer/continuer/recommencer
+  const prog=getLectureProgress(b.id);
+  const btnWrap=document.getElementById('btn-lecture-wrap');
+  if(btnWrap){
+    const premierCh=b.chapitres[0];
+    const estTermine=b.statut==='termine';
+    let lblBtn,chapBtn;
+    if(!prog.dernierChapitre){
+      lblBtn='✦ Commencer la lecture';chapBtn=premierCh?premierCh.num:1;
+    } else if(estTermine && prog.lus.includes(b.chapitres[b.chapitres.length-1]?.num)){
+      lblBtn='↺ Recommencer la lecture';chapBtn=premierCh?premierCh.num:1;
+    } else {
+      lblBtn='→ Continuer la lecture · Ch.'+prog.dernierChapitre;chapBtn=prog.dernierChapitre;
+    }
+    btnWrap.innerHTML='<button class="btn btn-full btn-accent" style="font-size:13px;padding:14px" onclick="openLecture(''+b.id+'','+chapBtn+')">'+lblBtn+'</button>';
+  }
+
   const chapList=document.getElementById('chapitres-list');
   chapList.innerHTML=b.chapitres.map(function(ch){
     const libre=ch.gratuit||ch.num<=(b.gratuit_jusqu_au||8);
     const estAdulte18=compte.trancheAge==='adulte' && b.adulte && b.versionSoft && ch.spicy;
+    const estLu=prog.lus.includes(ch.num);
+    const estDernier=prog.dernierChapitre===ch.num;
     if(!vc[ch.num]) vc[ch.num]=compte.versionDefaut||'spicy';
 
     const badge='<span class="ch-badge'+(libre?'':' ch-badge-ticket')+'" style="flex-shrink:0;min-width:54px;text-align:center">'+(libre?'Gratuit':'🎟 1 ticket')+'</span>';
@@ -227,8 +258,11 @@ function openHistoire(id){
       ?'onclick="ouvrirVersionChoisie(\''+b.id+'\','+ch.num+')\"'
       :'onclick="openLecture(\''+b.id+'\','+ch.num+')"';
 
+    const marquePage=estDernier?'<span class="ch-marque-page" title="Dernière lecture">🔖</span>':'';
+    const opaciteLu=estLu&&!estDernier?'opacity:0.55;':'';
     return '<div class="ch-lire-row">'
-      +'<button class="btn-lire'+(libre?'':' btn-lire-locked')+'" '+onclick+'>'
+      +marquePage
+      +'<button class="btn-lire'+(libre?'':' btn-lire-locked')+'" style="'+opaciteLu+'" '+onclick+'>'
       +'<span class="ch-lire-titre">Ch.'+ch.num+' · '+ch.titre+'</span>'
       +'<div style="display:flex;gap:6px;align-items:center;flex-shrink:0">'+versionBtns+badge+'</div>'
       +'</button>'

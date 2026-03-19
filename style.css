@@ -289,4 +289,5 @@
     .ch-version-btn{background:none;border:1px solid rgba(180,190,255,.2);border-radius:8px;width:32px;height:32px;font-size:16px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s, border-color .2s;opacity:0.45;}
     .ch-version-btn:hover{background:rgba(180,190,255,.15);opacity:0.8;}
     .ch-version-btn.ch-version-active{border-color:var(--accent);background:rgba(126,159,212,.18);opacity:1;}
+    .ch-marque-page{font-size:18px;flex-shrink:0;display:flex;align-items:center;padding:0 4px 0 0;}
     .ch-version-nav-big{width:64px;height:64px;font-size:32px;border-radius:14px;}
