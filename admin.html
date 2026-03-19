@@ -75,6 +75,7 @@
     .histoire-item-meta{font-size:11px;color:var(--text3);}
     .histoire-item-status{font-size:10px;padding:2px 8px;border-radius:10px;flex-shrink:0;}
     .status-publie{background:rgba(126,212,160,.15);color:var(--success);}
+    .status-encours{background:rgba(159,126,212,.15);color:#9f7ed4;}
     .status-brouillon{background:rgba(180,190,230,.1);color:var(--text3);}
     .status-termine{background:rgba(126,159,212,.15);color:var(--accent);}
     .status-pause{background:rgba(212,180,126,.15);color:#d4b47e;}
@@ -180,7 +181,7 @@
           <span>Toutes les histoires</span>
           <div style="display:flex;gap:8px">
             <button class="btn btn-sm filter-btn active" onclick="filterHistoires('all',this)">Toutes</button>
-            <button class="btn btn-sm filter-btn" onclick="filterHistoires('publie',this)" style="background:rgba(126,212,160,.1);border-color:rgba(126,212,160,.3);color:var(--success)">Publiées</button>
+            <button class="btn btn-sm filter-btn" onclick="filterHistoires('en-cours',this)" style="background:rgba(159,126,212,.1);border-color:rgba(159,126,212,.3);color:#9f7ed4">En cours</button>
             <button class="btn btn-sm filter-btn" onclick="filterHistoires('pause',this)" style="background:rgba(212,180,126,.1);border-color:rgba(212,180,126,.3);color:#d4b47e">En pause</button>
             <button class="btn btn-sm filter-btn" onclick="filterHistoires('termine',this)" style="background:rgba(126,159,212,.1);border-color:rgba(126,159,212,.3);color:var(--accent)">Terminées</button>
             <button class="btn btn-sm filter-btn" onclick="filterHistoires('brouillon',this)">Brouillons</button>
@@ -294,7 +295,7 @@
                 <label class="form-label">Statut</label>
                 <div style="display:flex;gap:8px">
                   <button type="button" class="btn" id="edit-statut-brouillon" onclick="setEditStatut('brouillon')" style="flex:1">Brouillon</button>
-                  <button type="button" class="btn" id="edit-statut-publie" onclick="setEditStatut('publie')" style="flex:1">Publié</button>
+                  <button type="button" class="btn" id="edit-statut-encours" onclick="setEditStatut('en-cours')" style="flex:1">En cours</button>
                   <button type="button" class="btn" id="edit-statut-pause" onclick="setEditStatut('pause')" style="flex:1">En pause</button>
                   <button type="button" class="btn" id="edit-statut-termine" onclick="setEditStatut('termine')" style="flex:1">Terminé</button>
                 </div>
@@ -467,7 +468,7 @@
             <label class="form-label">Statut</label>
             <div style="display:flex;gap:8px">
               <button type="button" class="btn btn-accent" id="statut-brouillon" onclick="setStatut('brouillon')" style="flex:1">Brouillon</button>
-              <button type="button" class="btn" id="statut-publie" onclick="setStatut('publie')" style="flex:1">Publié</button>
+              <button type="button" class="btn" id="statut-encours" onclick="setStatut('en-cours')" style="flex:1">En cours</button>
               <button type="button" class="btn" id="statut-pause" onclick="setStatut('pause')" style="flex:1">En pause</button>
               <button type="button" class="btn" id="statut-termine" onclick="setStatut('termine')" style="flex:1">Terminé</button>
             </div>
@@ -1307,7 +1308,7 @@ function filterHistoires(filtre,btn){
 function renderHistoiresList(){
   let filtered=histoires;
   if(currentFilter==='corbeille') filtered=histoires.filter(h=>h.corbeille===true);
-  else if(currentFilter==='publie') filtered=histoires.filter(h=>!h.corbeille&&h.statut==='publie');
+  else if(currentFilter==='en-cours') filtered=histoires.filter(h=>!h.corbeille&&h.statut==='en-cours');
   else if(currentFilter==='brouillon') filtered=histoires.filter(h=>!h.corbeille&&h.statut==='brouillon');
   else if(currentFilter==='pause') filtered=histoires.filter(h=>!h.corbeille&&h.statut==='pause');
   else if(currentFilter==='termine') filtered=histoires.filter(h=>!h.corbeille&&h.statut==='termine');
@@ -1325,11 +1326,11 @@ function renderHistoiresList(){
         <div class="histoire-item-title">${h.titre}</div>
         <div class="histoire-item-meta">${h.auteur_pseudo?'par '+h.auteur_pseudo+' · ':''}<strong>${h._chapCount}</strong> chapitre(s)</div>
       </div>
-      <span class="histoire-item-status ${h.statut==='publie'?'status-publie':h.statut==='pause'?'status-pause':h.statut==='termine'?'status-termine':'status-brouillon'}">${h.statut==='publie'?'Publié':h.statut==='pause'?'En pause':h.statut==='termine'?'Terminé':'Brouillon'}</span>
+      <span class="histoire-item-status ${h.statut==='en-cours'?'status-encours':h.statut==='pause'?'status-pause':h.statut==='termine'?'status-termine':'status-brouillon'}">${h.statut==='en-cours'?'En cours':h.statut==='pause'?'En pause':h.statut==='termine'?'Terminé':'Brouillon'}</span>
       ${isCorbeille
         ?`<button class="btn btn-sm btn-success" onclick="event.stopPropagation();restaurerHistoire('${h.id}')">Restaurer</button>
            <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();supprimerDefinitivement('${h.id}')">Suppr. déf.</button>`
-        :`<button class="btn btn-sm" onclick="event.stopPropagation();cycleStatut('${h.id}','${h.statut}')" style="background:rgba(180,190,230,.1);border-color:rgba(180,190,230,.2)">${h.statut==='publie'?'Dépublier':h.statut==='pause'?'Publier':h.statut==='termine'?'Republier':'Publier'}</button>`
+        :`<button class="btn btn-sm" onclick="event.stopPropagation();cycleStatut('${h.id}','${h.statut}')" style="background:rgba(180,190,230,.1);border-color:rgba(180,190,230,.2)">${h.statut==='en-cours'?'Mettre en brouillon':h.statut==='pause'?'Reprendre':h.statut==='termine'?'Reprendre':'Mettre en cours'}</button>`
       }
     </div>
   `).join('');
@@ -1401,7 +1402,7 @@ async function showHistoireDetail(id){
           </div>
         </div>
         ${h.auteur_pseudo?`<div style="font-size:12px;color:var(--text3);margin-bottom:6px">par ${h.auteur_pseudo}</div>`:''}
-        <span class="histoire-item-status ${h.statut==='publie'?'status-publie':h.statut==='pause'?'status-pause':h.statut==='termine'?'status-termine':'status-brouillon'}">${h.statut==='publie'?'Publié':h.statut==='pause'?'En pause':h.statut==='termine'?'Terminé':'Brouillon'}</span>
+        <span class="histoire-item-status ${h.statut==='en-cours'?'status-encours':h.statut==='pause'?'status-pause':h.statut==='termine'?'status-termine':'status-brouillon'}">${h.statut==='en-cours'?'En cours':h.statut==='pause'?'En pause':h.statut==='termine'?'Terminé':'Brouillon'}</span>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px">
@@ -1444,7 +1445,7 @@ async function showHistoireDetail(id){
       ${(chaps||[]).map((ch,i)=>`<div class="chapitre-item"><div class="ch-num">${ch.numero}</div><div class="ch-info"><div class="ch-title">${ch.titre}</div><div class="ch-meta">${ch.gratuit?'Gratuit':'Payant'} · ${ch.contenu?ch.contenu.trim().split(' ').length.toLocaleString('fr')+' mots':'vide'}</div></div><div style="display:flex;gap:4px"><button class="btn btn-sm" onclick="deplacerChapitre('${ch.id}','${h.id}',-1)" ${i===0?'disabled style="opacity:.3"':''}>▲</button><button class="btn btn-sm" onclick="deplacerChapitre('${ch.id}','${h.id}',1)" ${i===(chaps.length-1)?'disabled style="opacity:.3"':''}>▼</button><button class="btn btn-sm btn-accent" onclick="ouvrirEditionChapitreDepuisFiche('${ch.id}','${h.id}')">✏️</button><button class="btn btn-sm btn-danger" onclick="supprimerChapitreEtRecharger('${ch.id}','${h.id}')">Suppr.</button></div></div>`).join('')||'<p style="font-size:12px;color:var(--text3)">Aucun chapitre.</p>'}
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn btn-full" onclick="cycleStatut('${h.id}','${h.statut}')" style="flex:1;background:rgba(180,190,230,.1);border-color:rgba(180,190,230,.2)">${h.statut==='publie'?'Dépublier':h.statut==='pause'?'Publier':h.statut==='termine'?'Republier':'Publier'}</button>
+      <button class="btn btn-full" onclick="cycleStatut('${h.id}','${h.statut}')" style="flex:1;background:rgba(180,190,230,.1);border-color:rgba(180,190,230,.2)">${h.statut==='en-cours'?'Mettre en brouillon':h.statut==='pause'?'Reprendre':h.statut==='termine'?'Reprendre':'Mettre en cours'}</button>
     </div>
     <div style="margin-top:10px">
       <button class="btn btn-full btn-danger" onclick="supprimerDefinitivementDepuisFiche('${h.id}')" style="opacity:.7;font-size:11px">🗑 Supprimer définitivement</button>
@@ -1474,7 +1475,7 @@ async function ouvrirEditionHistoire(id){
   document.getElementById('edit-statut-val').value=h.statut||'brouillon';
   document.getElementById('edit-adulte-non').className='btn'+(h.adulte?'':' btn-accent');
   document.getElementById('edit-adulte-oui').className='btn'+(h.adulte?' btn-accent':'');
-  ['brouillon','publie','pause','termine'].forEach(s=>{
+  ['brouillon','en-cours','pause','termine'].forEach(s=>{
     const btn=document.getElementById('edit-statut-'+s);
     if(btn) btn.className='btn'+(h.statut===s?' btn-accent':'');
   });
@@ -1634,7 +1635,7 @@ async function sauvegarderHistoire(){
 
 function setEditStatut(val){
   document.getElementById('edit-statut-val').value=val;
-  ['brouillon','publie','pause','termine'].forEach(s=>{
+  ['brouillon','en-cours','pause','termine'].forEach(s=>{
     const btn=document.getElementById('edit-statut-'+s);
     if(btn) btn.className='btn'+(val===s?' btn-accent':'');
   });
@@ -1651,15 +1652,15 @@ function selectAuteurEdit(val,label){
 }
 
 async function toggleStatut(id,statut){
-  const nouveau=statut==='publie'?'brouillon':'publie';
+  const nouveau=statut==='en-cours'?'brouillon':'en-cours';
   await db.from('histoires').update({statut:nouveau}).eq('id',id);
   await loadHistoires();
   showHistoireDetail(id);
 }
 
 async function cycleStatut(id, statut){
-  // brouillon -> publie -> pause -> termine -> publie
-  const next = statut==='publie'?'brouillon':statut==='brouillon'?'publie':statut==='pause'?'publie':'publie';
+  // brouillon -> en-cours -> pause -> termine
+  const next = statut==='en-cours'?'brouillon':statut==='brouillon'?'en-cours':statut==='pause'?'en-cours':'en-cours';
   await db.from('histoires').update({statut:next}).eq('id',id);
   const h=histoires.find(x=>x.id===id);
   if(h){ h.statut=next; renderHistoires(); }
@@ -2193,7 +2194,7 @@ async function showAuteurDetail(id){
   const {data:allChaps}=await db.from('chapitres').select('id,histoire_id,contenu');
   const histIds=(hists||[]).map(h=>h.id);
   const chapsAuteur=(allChaps||[]).filter(ch=>histIds.includes(ch.histoire_id));
-  const nbPubliees=(hists||[]).filter(h=>h.statut==='publie').length;
+  const nbPubliees=(hists||[]).filter(h=>h.statut==='en-cours').length;
   const totalMots=chapsAuteur.reduce((acc,ch)=>acc+(ch.contenu?ch.contenu.trim().split(' ').length:0),0);
 
   document.getElementById('auteurs-card').style.display='none';
@@ -2216,7 +2217,7 @@ async function showAuteurDetail(id){
       </div>
       <div style="background:rgba(126,212,160,.06);border:1px solid rgba(126,212,160,.2);border-radius:10px;padding:12px;text-align:center">
         <div style="font-size:22px;font-weight:600;color:var(--success)">${nbPubliees}</div>
-        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px">Publiées</div>
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px">En cours</div>
       </div>
       <div style="background:rgba(167,143,212,.06);border:1px solid rgba(167,143,212,.2);border-radius:10px;padding:12px;text-align:center">
         <div style="font-size:22px;font-weight:600;color:var(--accent2)">${totalMots.toLocaleString('fr')}</div>
@@ -2237,7 +2238,7 @@ async function showAuteurDetail(id){
               <span title="Commentaires">💬 0</span>
             </div>
           </div>
-          <span class="histoire-item-status ${h.statut==='publie'?'status-publie':h.statut==='pause'?'status-pause':h.statut==='termine'?'status-termine':'status-brouillon'}">${h.statut==='publie'?'Publié':h.statut==='pause'?'En pause':h.statut==='termine'?'Terminé':'Brouillon'}</span>
+          <span class="histoire-item-status ${h.statut==='en-cours'?'status-encours':h.statut==='pause'?'status-pause':h.statut==='termine'?'status-termine':'status-brouillon'}">${h.statut==='en-cours'?'En cours':h.statut==='pause'?'En pause':h.statut==='termine'?'Terminé':'Brouillon'}</span>
         </div>`).join('')}`
     :'<p style="font-size:12px;color:var(--text3)">Aucune histoire pour l\'instant.</p>'}
   `;
@@ -2456,7 +2457,7 @@ function setEditOption(id,val){
 }
 function setStatut(val){
   document.getElementById('n-statut').value=val;
-  ['brouillon','publie','pause','termine'].forEach(s=>{
+  ['brouillon','en-cours','pause','termine'].forEach(s=>{
     const btn=document.getElementById('statut-'+s);
     if(btn) btn.className='btn'+(val===s?' btn-accent':'');
   });
