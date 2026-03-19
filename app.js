@@ -313,6 +313,11 @@ function _renderChapitresList(b, vc, marquePageNum){
 }
 
 async function sauvegarderMarquePage(bookId,chapNum){
+  // Toujours sauvegarder en localStorage d'abord
+  const mp=JSON.parse(localStorage.getItem('marque_pages')||'{}');
+  mp[bookId]=chapNum;
+  localStorage.setItem('marque_pages',JSON.stringify(mp));
+  // Puis tenter Supabase si connecté
   if(compte.loggedIn&&compte.userId){
     try{
       await db.from('marque_pages').upsert({
@@ -323,7 +328,4 @@ async function sauvegarderMarquePage(bookId,chapNum){
       },{onConflict:'user_id,histoire_id'});
     }catch(e){}
   }
-  const mp=JSON.parse(localStorage.getItem('marque_pages')||'{}');
-  mp[bookId]=chapNum;
-  localStorage.setItem('marque_pages',JSON.stringify(mp));
 }
