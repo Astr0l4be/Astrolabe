@@ -445,13 +445,15 @@ function saveOptions(){
   // Vérifier si on est sur le chapitre AVANT de fermer le popup
   const surChapitre=document.getElementById('p-lecture')?.classList.contains('active');
   const chapARecharger=(surChapitre && currentHistoireId && window._chapNumCourant);
+  const chapId=currentHistoireId;
+  const chapNum=window._chapNumCourant;
 
   closeM('options-popup');
   refreshTWHistoire();
 
   if(chapARecharger){
-    if(window._versionsChoisies) delete window._versionsChoisies[window._chapNumCourant];
-    openLecture(currentHistoireId, window._chapNumCourant);
+    if(window._versionsChoisies) delete window._versionsChoisies[chapNum];
+    setTimeout(()=>openLecture(chapId, chapNum), 50);
   }
 }
 function ouvrirPopupResetOptions(){
