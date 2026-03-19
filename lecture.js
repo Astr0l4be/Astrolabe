@@ -206,11 +206,18 @@ async function openLecture(bookId,chapNum){
 
   if(_savedPara!==null&&parseInt(_savedPara)>0){
     setTimeout(()=>{
+      const scroller=document.querySelector('#p-lecture .page-scroll');
+      const savedScroll=parseInt(_savedPara);
+      // Trouver le premier paragraphe après la position sauvegardée
+      const paragraphes=Array.from(document.querySelectorAll('#lecture-body p, #lecture-body .lecture-pov, #lecture-body .lecture-citation'));
+      let cible=null;
+      for(let i=0;i<paragraphes.length;i++){
+        if(paragraphes[i].offsetTop>=savedScroll){cible=paragraphes[i];break;}
+      }
+      // Supprimer ancien trait
       const ancienTrait=document.getElementById('reprise-trait');
       if(ancienTrait) ancienTrait.remove();
-      const paraIndex=parseInt(_savedPara);
-      const paragraphes=document.querySelectorAll('#lecture-body p, #lecture-body .lecture-pov, #lecture-body .lecture-citation');
-      const cible=paragraphes[paraIndex];
+      // Placer le trait et scroller
       if(cible){
         const trait=document.createElement('div');
         trait.id='reprise-trait';
@@ -220,8 +227,7 @@ async function openLecture(bookId,chapNum){
         label.style.cssText='position:absolute;left:50%;transform:translateX(-50%);top:-9px;background:var(--bg);padding:0 10px;font-size:10px;color:var(--accent);opacity:0.7;letter-spacing:1px;white-space:nowrap;font-family:"Jost",sans-serif;';
         trait.appendChild(label);
         cible.parentNode.insertBefore(trait,cible);
-        const scroller=document.querySelector('#p-lecture .page-scroll');
-        scroller.scrollTop=trait.offsetTop-60;
+        scroller.scrollTop=savedScroll;
       }
     },120);
   }
@@ -513,14 +519,7 @@ function refreshChapitresList(bookId){
 function _sauvegarderScrollPosition(bookId,chapNum){
   const scroller=document.querySelector('#p-lecture .page-scroll');
   if(!scroller) return;
-  // Utiliser scrollTop directement — plus fiable que getBoundingClientRect
-  const scrollTop=scroller.scrollTop;
-  const paragraphes=document.querySelectorAll('#lecture-body p, #lecture-body .lecture-pov, #lecture-body .lecture-citation');
-  let indexVisible=0;
-  for(let i=0;i<paragraphes.length;i++){
-    if(paragraphes[i].offsetTop>=scrollTop){indexVisible=i;break;}
-  }
-  localStorage.setItem('scroll_'+bookId+'_'+chapNum,indexVisible);
+  localStorage.setItem('scroll_'+bookId+'_'+chapNum, Math.round(scroller.scrollTop));
 }
 
 function ouvrirPopupResetOptions(){
