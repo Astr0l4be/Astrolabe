@@ -59,7 +59,7 @@ function renderGrid(id,books){
 }
 
 async function loadHistoires(){
-  const {data:histoires,error}=await db.from('histoires').select('*').neq('statut','brouillon').order('created_at',{ascending:false});
+  const {data:histoires,error}=await db.from('histoires').select('*').eq('statut','publie').order('created_at',{ascending:false});
   if(error||!histoires)return;
   const {data:allTags}=await db.from('histoires_tags').select('histoire_id, tags(nom)');
   const {data:allTW}=await db.from('trigger_warnings_histoires').select('histoire_id, contenu');
@@ -208,32 +208,16 @@ function openHistoire(id){
   window._versionDefautCourante=(_prefsHist&&_prefsHist.versionDefaut)||compte.versionDefaut||'spicy';
   const vc=window._versionsChoisies;
 
-  const chapList=document.getElementById('chapitres-list');
-  chapList.innerHTML=b.chapitres.map(function(ch){
-    const libre=ch.gratuit||ch.num<=(b.gratuit_jusqu_au||8);
-    const estAdulte18=compte.trancheAge==='adulte' && b.adulte && b.versionSoft && ch.spicy;
-    if(!vc[ch.num]) vc[ch.num]=compte.versionDefaut||'spicy';
-
-    const badge='<span class="ch-badge'+(libre?'':' ch-badge-ticket')+'" style="flex-shrink:0;min-width:54px;text-align:center">'+(libre?'Gratuit':'🎟 1 ticket')+'</span>';
-    const prefsHist=typeof optParHistoire!=='undefined'?optParHistoire[b.id]:null;
-    const masquerPourCetteHistoire=prefsHist?prefsHist.afficherChoixVersion:compte.afficherChoixVersion;
-    const montrerBtns=estAdulte18&&!masquerPourCetteHistoire;
-    const versionBtns=montrerBtns
-      ?'<span class="ch-version-btn" id="vbtn-soft-'+ch.num+'" onclick="event.stopPropagation();cocherVersion('+ch.num+',\'soft\')" title="Version douce">🌸</span>'
-       +'<span class="ch-version-btn ch-version-active" id="vbtn-spicy-'+ch.num+'" onclick="event.stopPropagation();cocherVersion('+ch.num+',\'spicy\')" title="Version spicy">🌶</span>'
-      :'';
-
-    const onclick=estAdulte18
-      ?'onclick="ouvrirVersionChoisie(\''+b.id+'\','+ch.num+')\"'
-      :'onclick="openLecture(\''+b.id+'\','+ch.num+')"';
-
-    return '<div class="ch-lire-row">'
-      +'<button class="btn-lire'+(libre?'':' btn-lire-locked')+'" '+onclick+'>'
-      +'<span class="ch-lire-titre">Ch.'+ch.num+' · '+ch.titre+'</span>'
-      +'<div style="display:flex;gap:6px;align-items:center;flex-shrink:0">'+versionBtns+badge+'</div>'
-      +'</button>'
-      +'</div>';
-  }).join('');
+  // Marque-page : base de données si connecté, localStorage sinon
+  let _mpNum=null;
+  if(compte.loggedIn&&compte.userId){
+    db.from('marque_pages').select('chapitre_num').eq('user_id',compte.userId).eq('histoire_id',id).single()
+      .then(({data})=>{ _renderChapitresList(b,vc,data?data.chapitre_num:null); });
+  } else {
+    const _mp=JSON.parse(localStorage.getItem('marque_pages')||'{}');
+    _mpNum=_mp[id]||null;
+  }
+  _renderChapitresList(b,vc,_mpNum);
   const backDest=(prevPage==='p-histoire'||prevPage==='p-lecture')?'p-main':prevPage;
   document.getElementById('histoire-back-btn').onclick=function(){go(backDest);};
   go('p-histoire');
@@ -292,3 +276,54 @@ function installPWA(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.
 function closePWABanner(){pwaBanner.classList.add('hidden');}
 window.addEventListener('appinstalled',()=>closePWABanner());
 if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
+
+
+/* ══════════════════════════════════════════════════════
+   MARQUE-PAGE & RENDU LISTE CHAPITRES
+   ══════════════════════════════════════════════════════ */
+
+function _renderChapitresList(b, vc, marquePageNum){
+  const chapList=document.getElementById('chapitres-list');
+  if(!chapList) return;
+  const prefsHist=(typeof optParHistoire!=='undefined')?optParHistoire[b.id]:null;
+  const masquer=prefsHist?prefsHist.afficherChoixVersion:compte.afficherChoixVersion;
+  chapList.innerHTML=b.chapitres.map(function(ch){
+    const libre=ch.gratuit||ch.num<=(b.gratuit_jusqu_au||8);
+    const estAdulte18=compte.trancheAge==='adulte'&&b.adulte&&b.versionSoft&&ch.spicy;
+    if(!vc[ch.num]) vc[ch.num]=compte.versionDefaut||'spicy';
+    const badge='<span class="ch-badge'+(libre?'':' ch-badge-ticket')+'" style="flex-shrink:0;min-width:54px;text-align:center">'+(libre?'Gratuit':'\u{1F3AB} 1 ticket')+'</span>';
+    const montrerBtns=estAdulte18&&!masquer;
+    const versionActive=vc[ch.num]||'spicy';
+    const versionBtns=montrerBtns
+      ?'<span class="ch-version-btn'+(versionActive==='soft'?' ch-version-active':'')+'" id="vbtn-soft-'+ch.num+'" onclick="event.stopPropagation();cocherVersion('+ch.num+',\'soft\')" title="Version douce">\u{1F338}</span>'
+       +'<span class="ch-version-btn'+(versionActive==='spicy'?' ch-version-active':'')+'" id="vbtn-spicy-'+ch.num+'" onclick="event.stopPropagation();cocherVersion('+ch.num+',\'spicy\')" title="Version spicy">\u{1F336}</span>'
+      :'';
+    const onclick=estAdulte18
+      ?'onclick="ouvrirVersionChoisie(\''+b.id+'\','+ch.num+')"'
+      :'onclick="openLecture(\''+b.id+'\','+ch.num+')"';
+    const marquePage=(ch.num===marquePageNum)
+      ?'<span style="font-size:13px;flex-shrink:0" title="Dernière lecture">\u{1F516}</span>'
+      :'';
+    return '<div class="ch-lire-row">'
+      +'<button class="btn-lire'+(libre?'':' btn-lire-locked')+'" '+onclick+'>'
+      +'<span style="display:flex;align-items:center;gap:6px;flex:1;min-width:0">'+marquePage+'<span class="ch-lire-titre">Ch.'+ch.num+' · '+ch.titre+'</span></span>'
+      +'<div style="display:flex;gap:6px;align-items:center;flex-shrink:0">'+versionBtns+badge+'</div>'
+      +'</button>'
+      +'</div>';
+  }).join('');
+}
+
+async function sauvegarderMarquePage(bookId,chapNum){
+  if(compte.loggedIn&&compte.userId){
+    await db.from('marque_pages').upsert({
+      user_id:compte.userId,
+      histoire_id:bookId,
+      chapitre_num:chapNum,
+      updated_at:new Date().toISOString()
+    },{onConflict:'user_id,histoire_id'});
+  } else {
+    const mp=JSON.parse(localStorage.getItem('marque_pages')||'{}');
+    mp[bookId]=chapNum;
+    localStorage.setItem('marque_pages',JSON.stringify(mp));
+  }
+}

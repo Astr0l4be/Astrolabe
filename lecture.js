@@ -97,6 +97,9 @@ async function openLecture(bookId,chapNum){
   document.getElementById('lecture-titre').textContent=b.title;
   window._chapNumCourant=chapNum;
 
+  // Sauvegarder marque-page
+  if(typeof sauvegarderMarquePage==='function') sauvegarderMarquePage(bookId,chapNum);
+
   // Numéro du chapitre — arabe ou romain
   const numAffiche=(b.numerotation==='romain')?toRoman(chapNum):chapNum;
   let html=`<div class="lecture-ch-num"><span class="lecture-star-side">✦</span>Chapitre ${numAffiche}<span class="lecture-star-side">✦</span></div>`;
@@ -183,10 +186,42 @@ async function openLecture(bookId,chapNum){
     }
   }
 
-  document.getElementById('lecture-back-btn').onclick=()=>go('p-histoire');
+  document.getElementById('lecture-back-btn').onclick=()=>{
+    _sauvegarderScrollPosition(bookId,chapNum);
+    go('p-histoire');
+  };
+  const _scrollKey='scroll_'+bookId+'_'+chapNum;
+  const _savedPara=localStorage.getItem(_scrollKey);
   document.querySelector('#p-lecture .page-scroll').scrollTop=0;
   go('p-lecture');
   setTimeout(()=>applyLectureModeForHistoire(bookId),50);
+
+  // Restaurer position et afficher trait de reprise
+  if(_savedPara!==null&&parseInt(_savedPara)>0){
+    setTimeout(()=>{
+      // Supprimer un éventuel trait précédent
+      const ancienTrait=document.getElementById('reprise-trait');
+      if(ancienTrait) ancienTrait.remove();
+
+      const paraIndex=parseInt(_savedPara);
+      const paragraphes=document.querySelectorAll('#lecture-body p, #lecture-body .lecture-pov, #lecture-body .lecture-citation');
+      const cible=paragraphes[paraIndex];
+      if(cible){
+        const trait=document.createElement('div');
+        trait.id='reprise-trait';
+        trait.style.cssText='width:100%;height:1px;background:var(--accent);opacity:0.45;margin:4px 0 14px;position:relative;flex-shrink:0;';
+        const label=document.createElement('span');
+        label.textContent='✦ reprise de lecture';
+        label.style.cssText='position:absolute;left:50%;transform:translateX(-50%);top:-9px;background:var(--bg);padding:0 10px;font-size:10px;color:var(--accent);opacity:0.7;letter-spacing:1px;white-space:nowrap;font-family:"Jost",sans-serif;';
+        trait.appendChild(label);
+        cible.parentNode.insertBefore(trait,cible);
+        const scroller=document.querySelector('#p-lecture .page-scroll');
+        const traitRect=trait.getBoundingClientRect();
+        const scrollerRect=scroller.getBoundingClientRect();
+        scroller.scrollTop+=(traitRect.top-scrollerRect.top)-60;
+      }
+    },120);
+  }
 
   // Taille du texte
   const lb2=document.getElementById('lecture-body');
@@ -457,44 +492,34 @@ function saveOptions(){
   }
 }
 
+/* ── RAFRAÎCHISSEMENT LISTE CHAPITRES ── */
 function refreshChapitresList(bookId){
   const b=BOOKS.find(x=>x.id===bookId);
   if(!b) return;
-  const chapList=document.getElementById('chapitres-list');
-  if(!chapList) return;
-
-  // Lire les prefs actives : spécifiques à cette histoire si elles existent, sinon globales
-  const prefsHist=(typeof optParHistoire!=='undefined')?optParHistoire[bookId]:null;
-  const masquer=prefsHist?prefsHist.afficherChoixVersion:compte.afficherChoixVersion;
-  const vDefaut=(prefsHist&&prefsHist.versionDefaut)||compte.versionDefaut||'spicy';
-
   if(!window._versionsChoisies) window._versionsChoisies={};
-  const vc=window._versionsChoisies;
+  if(typeof _renderChapitresList==='function'){
+    if(compte.loggedIn&&compte.userId){
+      db.from('marque_pages').select('chapitre_num').eq('user_id',compte.userId).eq('histoire_id',bookId).single()
+        .then(({data})=>{ _renderChapitresList(b,window._versionsChoisies,data?data.chapitre_num:null); });
+    } else {
+      const mp=JSON.parse(localStorage.getItem('marque_pages')||'{}');
+      _renderChapitresList(b,window._versionsChoisies,mp[bookId]||null);
+    }
+  }
+}
 
-  chapList.innerHTML=b.chapitres.map(function(ch){
-    const libre=ch.gratuit||ch.num<=(b.gratuit_jusqu_au||8);
-    const estAdulte18=compte.trancheAge==='adulte'&&b.adulte&&b.versionSoft&&ch.spicy;
-    if(!vc[ch.num]) vc[ch.num]=vDefaut;
-
-    const badge='<span class="ch-badge'+(libre?'':' ch-badge-ticket')+'" style="flex-shrink:0;min-width:54px;text-align:center">'+(libre?'Gratuit':'🎟 1 ticket')+'</span>';
-    const montrerBtns=estAdulte18&&!masquer;
-    const versionActive=vc[ch.num]||vDefaut;
-    const versionBtns=montrerBtns
-      ?'<span class="ch-version-btn'+(versionActive==='soft'?' ch-version-active':'')+'" id="vbtn-soft-'+ch.num+'" onclick="event.stopPropagation();cocherVersion('+ch.num+',\'soft\')" title="Version douce">🌸</span>'
-       +'<span class="ch-version-btn'+(versionActive==='spicy'?' ch-version-active':'')+'" id="vbtn-spicy-'+ch.num+'" onclick="event.stopPropagation();cocherVersion('+ch.num+',\'spicy\')" title="Version spicy">🌶</span>'
-      :'';
-
-    const onclick=estAdulte18
-      ?'onclick="ouvrirVersionChoisie(\''+bookId+'\','+ch.num+')"'
-      :'onclick="openLecture(\''+bookId+'\','+ch.num+')"';
-
-    return '<div class="ch-lire-row">'
-      +'<button class="btn-lire'+(libre?'':' btn-lire-locked')+'" '+onclick+'>'
-      +'<span class="ch-lire-titre">Ch.'+ch.num+' · '+ch.titre+'</span>'
-      +'<div style="display:flex;gap:6px;align-items:center;flex-shrink:0">'+versionBtns+badge+'</div>'
-      +'</button>'
-      +'</div>';
-  }).join('');
+/* ── SAUVEGARDE POSITION SCROLL ── */
+function _sauvegarderScrollPosition(bookId,chapNum){
+  const scroller=document.querySelector('#p-lecture .page-scroll');
+  if(!scroller) return;
+  const scrollerRect=scroller.getBoundingClientRect();
+  const paragraphes=document.querySelectorAll('#lecture-body p, #lecture-body .lecture-pov, #lecture-body .lecture-citation');
+  let indexVisible=0;
+  for(let i=0;i<paragraphes.length;i++){
+    const r=paragraphes[i].getBoundingClientRect();
+    if(r.top>=scrollerRect.top-10){indexVisible=i;break;}
+  }
+  if(indexVisible>0) localStorage.setItem('scroll_'+bookId+'_'+chapNum,indexVisible);
 }
 
 function ouvrirPopupResetOptions(){
