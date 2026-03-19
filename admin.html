@@ -76,6 +76,8 @@
     .histoire-item-status{font-size:10px;padding:2px 8px;border-radius:10px;flex-shrink:0;}
     .status-publie{background:rgba(126,212,160,.15);color:var(--success);}
     .status-brouillon{background:rgba(180,190,230,.1);color:var(--text3);}
+    .status-termine{background:rgba(126,159,212,.15);color:var(--accent);}
+    .status-pause{background:rgba(212,180,126,.15);color:#d4b47e;}
 
     /* ALERT */
     .alert{padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:16px;display:none;}
@@ -179,6 +181,8 @@
           <div style="display:flex;gap:8px">
             <button class="btn btn-sm filter-btn active" onclick="filterHistoires('all',this)">Toutes</button>
             <button class="btn btn-sm filter-btn" onclick="filterHistoires('publie',this)" style="background:rgba(126,212,160,.1);border-color:rgba(126,212,160,.3);color:var(--success)">Publiées</button>
+            <button class="btn btn-sm filter-btn" onclick="filterHistoires('pause',this)" style="background:rgba(212,180,126,.1);border-color:rgba(212,180,126,.3);color:#d4b47e">En pause</button>
+            <button class="btn btn-sm filter-btn" onclick="filterHistoires('termine',this)" style="background:rgba(126,159,212,.1);border-color:rgba(126,159,212,.3);color:var(--accent)">Terminées</button>
             <button class="btn btn-sm filter-btn" onclick="filterHistoires('brouillon',this)">Brouillons</button>
             <button class="btn btn-sm filter-btn" onclick="filterHistoires('corbeille',this)" style="background:rgba(212,126,126,.1);border-color:rgba(212,126,126,.3);color:var(--danger)">🗑 Corbeille</button>
           </div>
@@ -291,6 +295,8 @@
                 <div style="display:flex;gap:8px">
                   <button type="button" class="btn" id="edit-statut-brouillon" onclick="setEditStatut('brouillon')" style="flex:1">Brouillon</button>
                   <button type="button" class="btn" id="edit-statut-publie" onclick="setEditStatut('publie')" style="flex:1">Publié</button>
+                  <button type="button" class="btn" id="edit-statut-pause" onclick="setEditStatut('pause')" style="flex:1">En pause</button>
+                  <button type="button" class="btn" id="edit-statut-termine" onclick="setEditStatut('termine')" style="flex:1">Terminé</button>
                 </div>
                 <input type="hidden" id="edit-statut-val" value="brouillon">
               </div>
@@ -462,6 +468,8 @@
             <div style="display:flex;gap:8px">
               <button type="button" class="btn btn-accent" id="statut-brouillon" onclick="setStatut('brouillon')" style="flex:1">Brouillon</button>
               <button type="button" class="btn" id="statut-publie" onclick="setStatut('publie')" style="flex:1">Publié</button>
+              <button type="button" class="btn" id="statut-pause" onclick="setStatut('pause')" style="flex:1">En pause</button>
+              <button type="button" class="btn" id="statut-termine" onclick="setStatut('termine')" style="flex:1">Terminé</button>
             </div>
             <input type="hidden" id="n-statut" value="brouillon">
           </div>
@@ -1301,6 +1309,8 @@ function renderHistoiresList(){
   if(currentFilter==='corbeille') filtered=histoires.filter(h=>h.corbeille===true);
   else if(currentFilter==='publie') filtered=histoires.filter(h=>!h.corbeille&&h.statut==='publie');
   else if(currentFilter==='brouillon') filtered=histoires.filter(h=>!h.corbeille&&h.statut==='brouillon');
+  else if(currentFilter==='pause') filtered=histoires.filter(h=>!h.corbeille&&h.statut==='pause');
+  else if(currentFilter==='termine') filtered=histoires.filter(h=>!h.corbeille&&h.statut==='termine');
   else filtered=histoires.filter(h=>!h.corbeille);
 
   if(!filtered.length){
@@ -1315,11 +1325,11 @@ function renderHistoiresList(){
         <div class="histoire-item-title">${h.titre}</div>
         <div class="histoire-item-meta">${h.auteur_pseudo?'par '+h.auteur_pseudo+' · ':''}<strong>${h._chapCount}</strong> chapitre(s)</div>
       </div>
-      <span class="histoire-item-status ${h.statut==='publie'?'status-publie':'status-brouillon'}">${h.statut==='publie'?'Publié':'Brouillon'}</span>
+      <span class="histoire-item-status ${h.statut==='publie'?'status-publie':h.statut==='pause'?'status-pause':h.statut==='termine'?'status-termine':'status-brouillon'}">${h.statut==='publie'?'Publié':h.statut==='pause'?'En pause':h.statut==='termine'?'Terminé':'Brouillon'}</span>
       ${isCorbeille
         ?`<button class="btn btn-sm btn-success" onclick="event.stopPropagation();restaurerHistoire('${h.id}')">Restaurer</button>
            <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();supprimerDefinitivement('${h.id}')">Suppr. déf.</button>`
-        :`<button class="btn btn-sm btn-${h.statut==='publie'?'danger':'success'}" onclick="event.stopPropagation();toggleStatut('${h.id}','${h.statut}')">${h.statut==='publie'?'Dépublier':'Publier'}</button>`
+        :`<button class="btn btn-sm" onclick="event.stopPropagation();cycleStatut('${h.id}','${h.statut}')" style="background:rgba(180,190,230,.1);border-color:rgba(180,190,230,.2)">${h.statut==='publie'?'Dépublier':h.statut==='pause'?'Publier':h.statut==='termine'?'Republier':'Publier'}</button>`
       }
     </div>
   `).join('');
@@ -1391,7 +1401,7 @@ async function showHistoireDetail(id){
           </div>
         </div>
         ${h.auteur_pseudo?`<div style="font-size:12px;color:var(--text3);margin-bottom:6px">par ${h.auteur_pseudo}</div>`:''}
-        <span class="histoire-item-status ${h.statut==='publie'?'status-publie':'status-brouillon'}">${h.statut==='publie'?'Publié':'Brouillon'}</span>
+        <span class="histoire-item-status ${h.statut==='publie'?'status-publie':h.statut==='pause'?'status-pause':h.statut==='termine'?'status-termine':'status-brouillon'}">${h.statut==='publie'?'Publié':h.statut==='pause'?'En pause':h.statut==='termine'?'Terminé':'Brouillon'}</span>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px">
@@ -1434,7 +1444,7 @@ async function showHistoireDetail(id){
       ${(chaps||[]).map((ch,i)=>`<div class="chapitre-item"><div class="ch-num">${ch.numero}</div><div class="ch-info"><div class="ch-title">${ch.titre}</div><div class="ch-meta">${ch.gratuit?'Gratuit':'Payant'} · ${ch.contenu?ch.contenu.trim().split(' ').length.toLocaleString('fr')+' mots':'vide'}</div></div><div style="display:flex;gap:4px"><button class="btn btn-sm" onclick="deplacerChapitre('${ch.id}','${h.id}',-1)" ${i===0?'disabled style="opacity:.3"':''}>▲</button><button class="btn btn-sm" onclick="deplacerChapitre('${ch.id}','${h.id}',1)" ${i===(chaps.length-1)?'disabled style="opacity:.3"':''}>▼</button><button class="btn btn-sm btn-accent" onclick="ouvrirEditionChapitreDepuisFiche('${ch.id}','${h.id}')">✏️</button><button class="btn btn-sm btn-danger" onclick="supprimerChapitreEtRecharger('${ch.id}','${h.id}')">Suppr.</button></div></div>`).join('')||'<p style="font-size:12px;color:var(--text3)">Aucun chapitre.</p>'}
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn btn-full ${h.statut==='publie'?'btn-danger':'btn-success'}" onclick="toggleStatut('${h.id}','${h.statut}')" style="flex:1">${h.statut==='publie'?'Dépublier':'Publier'}</button>
+      <button class="btn btn-full" onclick="cycleStatut('${h.id}','${h.statut}')" style="flex:1;background:rgba(180,190,230,.1);border-color:rgba(180,190,230,.2)">${h.statut==='publie'?'Dépublier':h.statut==='pause'?'Publier':h.statut==='termine'?'Republier':'Publier'}</button>
     </div>
     <div style="margin-top:10px">
       <button class="btn btn-full btn-danger" onclick="supprimerDefinitivementDepuisFiche('${h.id}')" style="opacity:.7;font-size:11px">🗑 Supprimer définitivement</button>
@@ -1464,8 +1474,10 @@ async function ouvrirEditionHistoire(id){
   document.getElementById('edit-statut-val').value=h.statut||'brouillon';
   document.getElementById('edit-adulte-non').className='btn'+(h.adulte?'':' btn-accent');
   document.getElementById('edit-adulte-oui').className='btn'+(h.adulte?' btn-accent':'');
-  document.getElementById('edit-statut-brouillon').className='btn'+(h.statut==='brouillon'?' btn-accent':'');
-  document.getElementById('edit-statut-publie').className='btn'+(h.statut==='publie'?' btn-accent':'');
+  ['brouillon','publie','pause','termine'].forEach(s=>{
+    const btn=document.getElementById('edit-statut-'+s);
+    if(btn) btn.className='btn'+(h.statut===s?' btn-accent':'');
+  });
   // Options conditionnelles adulte
   document.getElementById('edit-options-adulte').style.display=h.adulte?'block':'none';
   document.getElementById('edit-options-non-adulte').style.display=h.adulte?'none':'block';
@@ -1622,8 +1634,10 @@ async function sauvegarderHistoire(){
 
 function setEditStatut(val){
   document.getElementById('edit-statut-val').value=val;
-  document.getElementById('edit-statut-brouillon').className='btn'+(val==='brouillon'?' btn-accent':'');
-  document.getElementById('edit-statut-publie').className='btn'+(val==='publie'?' btn-accent':'');
+  ['brouillon','publie','pause','termine'].forEach(s=>{
+    const btn=document.getElementById('edit-statut-'+s);
+    if(btn) btn.className='btn'+(val===s?' btn-accent':'');
+  });
 }
 function toggleAuteurEditDropdown(){
   const list=document.getElementById('auteur-edit-list');
@@ -1641,6 +1655,14 @@ async function toggleStatut(id,statut){
   await db.from('histoires').update({statut:nouveau}).eq('id',id);
   await loadHistoires();
   showHistoireDetail(id);
+}
+
+async function cycleStatut(id, statut){
+  // brouillon -> publie -> pause -> termine -> publie
+  const next = statut==='publie'?'brouillon':statut==='brouillon'?'publie':statut==='pause'?'publie':'publie';
+  await db.from('histoires').update({statut:next}).eq('id',id);
+  const h=histoires.find(x=>x.id===id);
+  if(h){ h.statut=next; renderHistoires(); }
 }
 
 /* LOAD HISTOIRES SELECT */
@@ -2215,7 +2237,7 @@ async function showAuteurDetail(id){
               <span title="Commentaires">💬 0</span>
             </div>
           </div>
-          <span class="histoire-item-status ${h.statut==='publie'?'status-publie':'status-brouillon'}">${h.statut==='publie'?'Publié':'Brouillon'}</span>
+          <span class="histoire-item-status ${h.statut==='publie'?'status-publie':h.statut==='pause'?'status-pause':h.statut==='termine'?'status-termine':'status-brouillon'}">${h.statut==='publie'?'Publié':h.statut==='pause'?'En pause':h.statut==='termine'?'Terminé':'Brouillon'}</span>
         </div>`).join('')}`
     :'<p style="font-size:12px;color:var(--text3)">Aucune histoire pour l\'instant.</p>'}
   `;
@@ -2434,8 +2456,10 @@ function setEditOption(id,val){
 }
 function setStatut(val){
   document.getElementById('n-statut').value=val;
-  document.getElementById('statut-brouillon').className='btn'+(val==='brouillon'?' btn-accent':'');
-  document.getElementById('statut-publie').className='btn'+(val==='publie'?' btn-accent':'');
+  ['brouillon','publie','pause','termine'].forEach(s=>{
+    const btn=document.getElementById('statut-'+s);
+    if(btn) btn.className='btn'+(val===s?' btn-accent':'');
+  });
 }
 function setChSpicy(val){
   document.getElementById('ch-spicy').value=String(val);
