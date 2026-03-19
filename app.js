@@ -59,7 +59,7 @@ function renderGrid(id,books){
 }
 
 async function loadHistoires(){
-  const {data:histoires,error}=await db.from('histoires').select('*').eq('statut','publie').order('created_at',{ascending:false});
+  const {data:histoires,error}=await db.from('histoires').select('*').neq('statut','brouillon').order('created_at',{ascending:false});
   if(error||!histoires)return;
   const {data:allTags}=await db.from('histoires_tags').select('histoire_id, tags(nom)');
   const {data:allTW}=await db.from('trigger_warnings_histoires').select('histoire_id, contenu');
