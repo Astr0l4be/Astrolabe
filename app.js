@@ -234,7 +234,7 @@ function openHistoire(id){
     } else {
       lblBtn='→ Continuer la lecture · Ch.'+prog.dernierChapitre;chapBtn=prog.dernierChapitre;
     }
-    btnWrap.innerHTML='<button class="btn btn-full btn-accent" style="font-size:13px;padding:14px" onclick="openLecture(''+b.id+'','+chapBtn+')">'+lblBtn+'</button>';
+    btnWrap.innerHTML='<button class="btn btn-full btn-accent" style="font-size:13px;padding:14px" onclick="openLecture(\''+b.id+'\','+chapBtn+')">'+lblBtn+'</button>';
   }
 
   const chapList=document.getElementById('chapitres-list');
