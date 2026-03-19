@@ -443,16 +443,16 @@ function saveOptions(){
   const prefsHistCourante=optParHistoire[currentHistoireId];
   window._versionDefautCourante=(prefsHistCourante&&prefsHistCourante.versionDefaut)||compte.versionDefaut||'spicy';
 
-  // Vérifier si on est sur le chapitre AVANT de fermer le popup
-  const surChapitre=document.getElementById('p-lecture')?.classList.contains('active');
-  const chapARecharger=(surChapitre && currentHistoireId && window._chapNumCourant);
-
   closeM('options-popup');
   refreshTWHistoire();
 
-  if(chapARecharger){
-    if(window._versionsChoisies) delete window._versionsChoisies[window._chapNumCourant];
-    openLecture(currentHistoireId, window._chapNumCourant);
+  // Recharger le chapitre dans tous les cas si on y est
+  const surChapitre=document.getElementById('p-lecture')?.classList.contains('active');
+  if(surChapitre && currentHistoireId && window._chapNumCourant){
+    const chapId=currentHistoireId;
+    const chapNum=window._chapNumCourant;
+    if(window._versionsChoisies) delete window._versionsChoisies[chapNum];
+    setTimeout(function(){ openLecture(chapId, chapNum); }, 0);
   }
 }
 function ouvrirPopupResetOptions(){
