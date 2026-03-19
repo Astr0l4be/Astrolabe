@@ -281,6 +281,9 @@ function _renderChapitresList(b, vc, marquePageNum){
   if(!chapList) return;
   const prefsHist=(typeof optParHistoire!=='undefined')?optParHistoire[b.id]:null;
   const masquer=prefsHist?prefsHist.afficherChoixVersion:compte.afficherChoixVersion;
+  // Mettre à jour le bouton lecture rapide
+  _updateBtnLectureRapide(b);
+
   chapList.innerHTML=b.chapitres.map(function(ch){
     const libre=ch.gratuit||ch.num<=(b.gratuit_jusqu_au||8);
     const estAdulte18=compte.trancheAge==='adulte'&&b.adulte&&b.versionSoft&&ch.spicy;
@@ -324,5 +327,54 @@ async function sauvegarderMarquePage(bookId,chapNum){
         updated_at:new Date().toISOString()
       },{onConflict:'user_id,histoire_id'});
     }catch(e){}
+  }
+}
+
+
+/* ══════════════════════════════════════════════════════
+   BOUTON LECTURE RAPIDE
+   ══════════════════════════════════════════════════════ */
+
+function _updateBtnLectureRapide(b){
+  const btn=document.getElementById('btn-lecture-rapide');
+  if(!btn||!b) return;
+
+  const lus=JSON.parse(localStorage.getItem('chapitres_lus_'+b.id)||'[]');
+  const marquePages=JSON.parse(localStorage.getItem('marque_pages')||'{}');
+  const dernierChapLu=marquePages[b.id]||null;
+
+  // Aucun chapitre lu → Commencer
+  if(!lus.length||!dernierChapLu){
+    btn.textContent='✦ Commencer l'histoire';
+    btn.style.display='block';
+    window._lectureRapideChap=b.chapitres.length?b.chapitres[0].num:1;
+    return;
+  }
+
+  // Histoire terminée ET dernier chapitre fini → Recommencer
+  const dernierChap=b.chapitres[b.chapitres.length-1];
+  const dernierFini=localStorage.getItem('chapitre_fini_'+b.id+'_'+dernierChap.num)==='1';
+  if(b.statut==='termine'&&dernierFini){
+    btn.textContent='✦ Recommencer la lecture';
+    btn.style.display='block';
+    window._lectureRapideChap=b.chapitres[0].num;
+    return;
+  }
+
+  // Chapitre marqué fini → ouvrir le suivant, sinon reprendre le dernier lu
+  const chapFini=localStorage.getItem('chapitre_fini_'+b.id+'_'+dernierChapLu)==='1';
+  if(chapFini){
+    const chapSuivant=b.chapitres.find(c=>c.num===dernierChapLu+1);
+    window._lectureRapideChap=chapSuivant?chapSuivant.num:dernierChapLu;
+  } else {
+    window._lectureRapideChap=dernierChapLu;
+  }
+  btn.textContent='✦ Continuer la lecture';
+  btn.style.display='block';
+}
+
+function lancerLectureRapide(){
+  if(currentHistoireId&&window._lectureRapideChap!=null){
+    openLecture(currentHistoireId, window._lectureRapideChap);
   }
 }

@@ -210,6 +210,21 @@ async function openLecture(bookId,chapNum){
   go('p-lecture');
   setTimeout(()=>applyLectureModeForHistoire(bookId),50);
 
+  // Détecter la fin du chapitre (scroll à moins de 200px de la fin)
+  const _scroller=document.querySelector('#p-lecture .page-scroll');
+  if(_scroller){
+    const _onScroll=()=>{
+      const distanceFin=_scroller.scrollHeight-_scroller.scrollTop-_scroller.clientHeight;
+      if(distanceFin<200){
+        localStorage.setItem('chapitre_fini_'+bookId+'_'+chapNum,'1');
+        _scroller.removeEventListener('scroll',_onScroll);
+      }
+    };
+    _scroller.removeEventListener('scroll',_scroller._lastScrollHandler||null);
+    _scroller._lastScrollHandler=_onScroll;
+    _scroller.addEventListener('scroll',_onScroll);
+  }
+
   if(_savedScroll!==null){
     setTimeout(()=>{
       const scroller=document.querySelector('#p-lecture .page-scroll');
