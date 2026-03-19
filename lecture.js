@@ -199,26 +199,26 @@ async function openLecture(bookId,chapNum){
     go('p-histoire');
   };
   const _scrollKey='scroll_'+bookId+'_'+chapNum;
-  const _savedPara=localStorage.getItem(_scrollKey);
-  document.querySelector('#p-lecture .page-scroll').scrollTop=0;
+  const _savedScroll=localStorage.getItem(_scrollKey);
+  // Ne remettre à zéro que s'il n'y a pas de position sauvegardée
+  if(!_savedScroll) document.querySelector('#p-lecture .page-scroll').scrollTop=0;
   go('p-lecture');
   setTimeout(()=>applyLectureModeForHistoire(bookId),50);
 
-  if(_savedPara!==null&&parseInt(_savedPara)>0){
+  if(_savedScroll!==null){
     setTimeout(()=>{
       const scroller=document.querySelector('#p-lecture .page-scroll');
-      const savedScroll=parseInt(_savedPara);
+      const savedScroll=parseInt(_savedScroll);
+      // Supprimer ancien trait
+      const ancienTrait=document.getElementById('reprise-trait');
+      if(ancienTrait) ancienTrait.remove();
       // Trouver le premier paragraphe après la position sauvegardée
       const paragraphes=Array.from(document.querySelectorAll('#lecture-body p, #lecture-body .lecture-pov, #lecture-body .lecture-citation'));
       let cible=null;
       for(let i=0;i<paragraphes.length;i++){
         if(paragraphes[i].offsetTop>=savedScroll){cible=paragraphes[i];break;}
       }
-      // Supprimer ancien trait
-      const ancienTrait=document.getElementById('reprise-trait');
-      if(ancienTrait) ancienTrait.remove();
-      // Placer le trait et scroller
-      if(cible){
+      if(cible&&savedScroll>50){
         const trait=document.createElement('div');
         trait.id='reprise-trait';
         trait.style.cssText='width:100%;height:1px;background:var(--accent);opacity:0.45;margin:4px 0 14px;position:relative;flex-shrink:0;';
@@ -227,9 +227,9 @@ async function openLecture(bookId,chapNum){
         label.style.cssText='position:absolute;left:50%;transform:translateX(-50%);top:-9px;background:var(--bg);padding:0 10px;font-size:10px;color:var(--accent);opacity:0.7;letter-spacing:1px;white-space:nowrap;font-family:"Jost",sans-serif;';
         trait.appendChild(label);
         cible.parentNode.insertBefore(trait,cible);
-        scroller.scrollTop=savedScroll;
       }
-    },120);
+      scroller.scrollTop=savedScroll;
+    },150);
   }
 
   // Taille du texte
