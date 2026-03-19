@@ -449,12 +449,54 @@ function saveOptions(){
 
   closeM('options-popup');
   refreshTWHistoire();
+  refreshChapitresList(currentHistoireId);
 
   if(chapARecharger){
     if(window._versionsChoisies) delete window._versionsChoisies[window._chapNumCourant];
     openLecture(currentHistoireId, window._chapNumCourant);
   }
 }
+
+function refreshChapitresList(bookId){
+  const b=BOOKS.find(x=>x.id===bookId);
+  if(!b) return;
+  const chapList=document.getElementById('chapitres-list');
+  if(!chapList) return;
+
+  // Lire les prefs actives : spécifiques à cette histoire si elles existent, sinon globales
+  const prefsHist=(typeof optParHistoire!=='undefined')?optParHistoire[bookId]:null;
+  const masquer=prefsHist?prefsHist.afficherChoixVersion:compte.afficherChoixVersion;
+  const vDefaut=(prefsHist&&prefsHist.versionDefaut)||compte.versionDefaut||'spicy';
+
+  if(!window._versionsChoisies) window._versionsChoisies={};
+  const vc=window._versionsChoisies;
+
+  chapList.innerHTML=b.chapitres.map(function(ch){
+    const libre=ch.gratuit||ch.num<=(b.gratuit_jusqu_au||8);
+    const estAdulte18=compte.trancheAge==='adulte'&&b.adulte&&b.versionSoft&&ch.spicy;
+    if(!vc[ch.num]) vc[ch.num]=vDefaut;
+
+    const badge='<span class="ch-badge'+(libre?'':' ch-badge-ticket')+'" style="flex-shrink:0;min-width:54px;text-align:center">'+(libre?'Gratuit':'🎟 1 ticket')+'</span>';
+    const montrerBtns=estAdulte18&&!masquer;
+    const versionActive=vc[ch.num]||vDefaut;
+    const versionBtns=montrerBtns
+      ?'<span class="ch-version-btn'+(versionActive==='soft'?' ch-version-active':'')+'" id="vbtn-soft-'+ch.num+'" onclick="event.stopPropagation();cocherVersion('+ch.num+',\'soft\')" title="Version douce">🌸</span>'
+       +'<span class="ch-version-btn'+(versionActive==='spicy'?' ch-version-active':'')+'" id="vbtn-spicy-'+ch.num+'" onclick="event.stopPropagation();cocherVersion('+ch.num+',\'spicy\')" title="Version spicy">🌶</span>'
+      :'';
+
+    const onclick=estAdulte18
+      ?'onclick="ouvrirVersionChoisie(\''+bookId+'\','+ch.num+')"'
+      :'onclick="openLecture(\''+bookId+'\','+ch.num+')"';
+
+    return '<div class="ch-lire-row">'
+      +'<button class="btn-lire'+(libre?'':' btn-lire-locked')+'" '+onclick+'>'
+      +'<span class="ch-lire-titre">Ch.'+ch.num+' · '+ch.titre+'</span>'
+      +'<div style="display:flex;gap:6px;align-items:center;flex-shrink:0">'+versionBtns+badge+'</div>'
+      +'</button>'
+      +'</div>';
+  }).join('');
+}
+
 function ouvrirPopupResetOptions(){
   closeM('options-popup');
   openModal('reset-options-popup');
