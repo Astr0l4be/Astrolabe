@@ -208,14 +208,9 @@ function openHistoire(id){
   window._versionDefautCourante=(_prefsHist&&_prefsHist.versionDefaut)||compte.versionDefaut||'spicy';
   const vc=window._versionsChoisies;
 
-  let _mpNum=null;
-  if(compte.loggedIn&&compte.userId){
-    db.from('marque_pages').select('chapitre_num').eq('user_id',compte.userId).eq('histoire_id',id).single()
-      .then(({data})=>{ _renderChapitresList(b,vc,data?data.chapitre_num:null); });
-  } else {
-    const _mp=JSON.parse(localStorage.getItem('marque_pages')||'{}');
-    _mpNum=_mp[id]||null;
-  }
+  // Toujours lire le localStorage pour affichage immédiat
+  const _mp=JSON.parse(localStorage.getItem('marque_pages')||'{}');
+  const _mpNum=_mp[id]||null;
   _renderChapitresList(b,vc,_mpNum);
   const backDest=(prevPage==='p-histoire'||prevPage==='p-lecture')?'p-main':prevPage;
   document.getElementById('histoire-back-btn').onclick=function(){go(backDest);};
