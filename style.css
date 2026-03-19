@@ -193,6 +193,8 @@
     .btn-lire:hover{background:rgba(126,159,212,.2);}
     .btn-lire:last-child{margin-bottom:32px;} /* overridé par ch-lire-row */
     .btn-lire-locked{background:rgba(140,150,195,.06);border-color:rgba(140,150,195,.15);color:var(--text3);}
+    .btn-lire-lu{background:rgba(159,126,212,.12);border-color:rgba(159,126,212,.3);color:rgba(200,180,255,.85);}
+    .btn-lire-lu:hover{background:rgba(159,126,212,.22);}
     .ch-badge{font-size:10px;padding:2px 8px;border-radius:12px;background:rgba(126,159,212,.15);color:var(--accent);}
     .ch-badge-ticket{background:rgba(167,143,212,.12);color:var(--accent2);}
 

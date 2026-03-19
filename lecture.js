@@ -100,6 +100,11 @@ async function openLecture(bookId,chapNum){
   // Sauvegarder marque-page
   if(typeof sauvegarderMarquePage==='function') sauvegarderMarquePage(bookId,chapNum);
 
+  // Marquer le chapitre comme lu
+  const _clKey='chapitres_lus_'+bookId;
+  const _lus=JSON.parse(localStorage.getItem(_clKey)||'[]');
+  if(_lus.indexOf(chapNum)===-1){ _lus.push(chapNum); localStorage.setItem(_clKey,JSON.stringify(_lus)); }
+
   // Numéro du chapitre — arabe ou romain
   const numAffiche=(b.numerotation==='romain')?toRoman(chapNum):chapNum;
   let html=`<div class="lecture-ch-num"><span class="lecture-star-side">✦</span>Chapitre ${numAffiche}<span class="lecture-star-side">✦</span></div>`;
