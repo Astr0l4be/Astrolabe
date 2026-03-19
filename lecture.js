@@ -188,6 +188,13 @@ async function openLecture(bookId,chapNum){
 
   document.getElementById('lecture-back-btn').onclick=()=>{
     _sauvegarderScrollPosition(bookId,chapNum);
+    // Rafraîchir la liste des chapitres avec le nouveau marque-page
+    const _mp=JSON.parse(localStorage.getItem('marque_pages')||'{}');
+    const _mpNum=_mp[bookId]||null;
+    if(typeof _renderChapitresList==='function'){
+      const _b=BOOKS.find(x=>x.id===bookId);
+      if(_b) _renderChapitresList(_b,window._versionsChoisies||{},_mpNum);
+    }
     go('p-histoire');
   };
   const _scrollKey='scroll_'+bookId+'_'+chapNum;
