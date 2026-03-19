@@ -291,18 +291,18 @@ function _renderChapitresList(b, vc, marquePageNum){
     const libre=ch.gratuit||ch.num<=(b.gratuit_jusqu_au||8);
     const estAdulte18=compte.trancheAge==='adulte'&&b.adulte&&b.versionSoft&&ch.spicy;
     if(!vc[ch.num]) vc[ch.num]=compte.versionDefaut||'spicy';
-    const badge='<span class="ch-badge'+(libre?'':' ch-badge-ticket')+'" style="flex-shrink:0;min-width:54px;text-align:center">'+(libre?'Gratuit':'\u{1F3AB} 1 ticket')+'</span>';
+    const badge='<span class="ch-badge'+(libre?'':' ch-badge-ticket')+'" style="flex-shrink:0;min-width:54px;text-align:center">'+(libre?'Gratuit':'🎟 1 ticket')+'</span>';
     const montrerBtns=estAdulte18&&!masquer;
     const versionActive=vc[ch.num]||'spicy';
     const versionBtns=montrerBtns
-      ?'<span class="ch-version-btn'+(versionActive==='soft'?' ch-version-active':'')+'" id="vbtn-soft-'+ch.num+'" onclick="event.stopPropagation();cocherVersion('+ch.num+',\'soft\')" title="Version douce">\u{1F338}</span>'
-       +'<span class="ch-version-btn'+(versionActive==='spicy'?' ch-version-active':'')+'" id="vbtn-spicy-'+ch.num+'" onclick="event.stopPropagation();cocherVersion('+ch.num+',\'spicy\')" title="Version spicy">\u{1F336}</span>'
+      ?'<span class="ch-version-btn'+(versionActive==='soft'?' ch-version-active':'')+'" id="vbtn-soft-'+ch.num+'" onclick="event.stopPropagation();cocherVersion('+ch.num+',\'soft\')" title="Version douce">🌸</span>'
+       +'<span class="ch-version-btn'+(versionActive==='spicy'?' ch-version-active':'')+'" id="vbtn-spicy-'+ch.num+'" onclick="event.stopPropagation();cocherVersion('+ch.num+',\'spicy\')" title="Version spicy">🌶</span>'
       :'';
     const onclick=estAdulte18
       ?'onclick="ouvrirVersionChoisie(\''+b.id+'\','+ch.num+')"'
       :'onclick="openLecture(\''+b.id+'\','+ch.num+')"';
     const marquePage=(ch.num===marquePageNum)
-      ?'<span style="font-size:13px;flex-shrink:0" title="Dernière lecture">\u{1F516}</span>'
+      ?'<span style="font-size:13px;flex-shrink:0" title="Dernière lecture">🔖</span>'
       :'';
     return '<div class="ch-lire-row">'
       +'<button class="btn-lire'+(libre?'':' btn-lire-locked')+'" '+onclick+'>'
