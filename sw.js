@@ -1,4 +1,4 @@
-const CACHE = 'astrolabe-v2';
+const CACHE = 'astrolabe-v3';
 const ASSETS = [
   '/',
   '/index.html',
