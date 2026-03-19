@@ -208,7 +208,6 @@ function openHistoire(id){
   window._versionDefautCourante=(_prefsHist&&_prefsHist.versionDefaut)||compte.versionDefaut||'spicy';
   const vc=window._versionsChoisies;
 
-  // Marque-page : base de données si connecté, localStorage sinon
   let _mpNum=null;
   if(compte.loggedIn&&compte.userId){
     db.from('marque_pages').select('chapitre_num').eq('user_id',compte.userId).eq('histoire_id',id).single()
@@ -315,15 +314,16 @@ function _renderChapitresList(b, vc, marquePageNum){
 
 async function sauvegarderMarquePage(bookId,chapNum){
   if(compte.loggedIn&&compte.userId){
-    await db.from('marque_pages').upsert({
-      user_id:compte.userId,
-      histoire_id:bookId,
-      chapitre_num:chapNum,
-      updated_at:new Date().toISOString()
-    },{onConflict:'user_id,histoire_id'});
-  } else {
-    const mp=JSON.parse(localStorage.getItem('marque_pages')||'{}');
-    mp[bookId]=chapNum;
-    localStorage.setItem('marque_pages',JSON.stringify(mp));
+    try{
+      await db.from('marque_pages').upsert({
+        user_id:compte.userId,
+        histoire_id:bookId,
+        chapitre_num:chapNum,
+        updated_at:new Date().toISOString()
+      },{onConflict:'user_id,histoire_id'});
+    }catch(e){}
   }
+  const mp=JSON.parse(localStorage.getItem('marque_pages')||'{}');
+  mp[bookId]=chapNum;
+  localStorage.setItem('marque_pages',JSON.stringify(mp));
 }
