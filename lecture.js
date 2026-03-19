@@ -96,7 +96,6 @@ async function openLecture(bookId,chapNum){
   }
   document.getElementById('lecture-titre').textContent=b.title;
   window._chapNumCourant=chapNum;
-  setLectureProgress(bookId, chapNum);
 
   // Numéro du chapitre — arabe ou romain
   const numAffiche=(b.numerotation==='romain')?toRoman(chapNum):chapNum;
@@ -446,14 +445,18 @@ function saveOptions(){
 
   // Vérifier si on est sur le chapitre AVANT de fermer le popup
   const surChapitre=document.getElementById('p-lecture')?.classList.contains('active');
-  const chapARecharger=(surChapitre && currentHistoireId && window._chapNumCourant);
+  const surHistoire=document.getElementById('p-histoire')?.classList.contains('active');
+  const chapId=currentHistoireId;
+  const chapNum=window._chapNumCourant;
 
   closeM('options-popup');
   refreshTWHistoire();
 
-  if(chapARecharger){
-    if(window._versionsChoisies) delete window._versionsChoisies[window._chapNumCourant];
-    openLecture(currentHistoireId, window._chapNumCourant);
+  if(surChapitre && chapId && chapNum){
+    if(window._versionsChoisies) delete window._versionsChoisies[chapNum];
+    setTimeout(function(){ openLecture(chapId, chapNum); }, 0);
+  } else if(surHistoire && chapId){
+    setTimeout(function(){ openHistoire(chapId); }, 0);
   }
 }
 function ouvrirPopupResetOptions(){
