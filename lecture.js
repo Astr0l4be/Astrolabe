@@ -196,13 +196,10 @@ async function openLecture(bookId,chapNum){
   go('p-lecture');
   setTimeout(()=>applyLectureModeForHistoire(bookId),50);
 
-  // Restaurer position et afficher trait de reprise
   if(_savedPara!==null&&parseInt(_savedPara)>0){
     setTimeout(()=>{
-      // Supprimer un éventuel trait précédent
       const ancienTrait=document.getElementById('reprise-trait');
       if(ancienTrait) ancienTrait.remove();
-
       const paraIndex=parseInt(_savedPara);
       const paragraphes=document.querySelectorAll('#lecture-body p, #lecture-body .lecture-pov, #lecture-body .lecture-citation');
       const cible=paragraphes[paraIndex];
@@ -492,7 +489,6 @@ function saveOptions(){
   }
 }
 
-/* ── RAFRAÎCHISSEMENT LISTE CHAPITRES ── */
 function refreshChapitresList(bookId){
   const b=BOOKS.find(x=>x.id===bookId);
   if(!b) return;
@@ -508,7 +504,6 @@ function refreshChapitresList(bookId){
   }
 }
 
-/* ── SAUVEGARDE POSITION SCROLL ── */
 function _sauvegarderScrollPosition(bookId,chapNum){
   const scroller=document.querySelector('#p-lecture .page-scroll');
   if(!scroller) return;
