@@ -786,6 +786,17 @@
         <div class="toggle-row"><span class="toggle-label">Trigger warnings (histoires)</span><label class="tgl"><input type="checkbox" id="toggle-tw-histoire" checked onchange="compte.twrHistoire=this.checked;savePrefs()"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
         <div class="toggle-row"><span class="toggle-label">Trigger warnings (chapitres)</span><label class="tgl"><input type="checkbox" id="toggle-tw-chapitre" onchange="compte.twrChapitre=this.checked;savePrefs()"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
         <div class="divider"></div>
+        <!-- FILTRE TRIGGER WARNINGS -->
+        <div class="toggle-row" style="cursor:pointer" onclick="toggleTWFiltrePanel()">
+          <span class="toggle-label">Filtrer les Trigger Warnings</span>
+          <span id="tw-filtre-chevron" style="color:var(--accent);font-size:14px;transition:transform .2s">›</span>
+        </div>
+        <div id="tw-filtre-panel" style="display:none;padding:10px 0 6px">
+          <p style="font-size:11px;color:var(--text3);line-height:1.6;margin-bottom:10px">Les histoires contenant les triggers cochés seront masquées du catalogue.</p>
+          <div id="tw-filtre-liste" style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-size:11px;color:var(--text3);font-style:italic">Chargement…</span>
+          </div>
+        </div>
         <div class="toggle-row">
           <span class="toggle-label">Masquer les options spicy/soft sur les chapitres <button onclick="toggleInfoSpicy()" style="background:none;border:1px solid rgba(180,190,255,.3);border-radius:50%;width:16px;height:16px;font-size:9px;cursor:pointer;color:var(--accent);line-height:1;padding:0;vertical-align:middle">?</button></span>
           <label class="tgl"><input type="checkbox" id="toggle-afficher-version" onchange="setAfficherChoixVersion(this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>

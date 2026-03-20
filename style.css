@@ -199,6 +199,12 @@
     .pal-icon{font-size:14px;line-height:1;}
     .pal-plus{font-size:11px;font-weight:700;color:var(--accent);line-height:1;margin-left:1px;}
 
+    /* FILTRE TW */
+    .tw-filtre-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(180,190,255,.06);cursor:pointer;}
+    .tw-filtre-row:last-child{border-bottom:none;}
+    .tw-filtre-row input{accent-color:var(--accent);flex-shrink:0;}
+    .tw-filtre-row span{font-size:12px;color:var(--text2);line-height:1.5;}
+
     /* CGU INSCRIPTION */
     .cgu-scroll-box{height:260px;overflow-y:auto;border:1px solid rgba(180,190,255,.15);border-radius:12px;background:rgba(140,150,195,.06);padding:16px;margin-bottom:10px;}
     .cgu-scroll-box::-webkit-scrollbar{width:3px;}
