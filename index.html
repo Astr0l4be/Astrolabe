@@ -381,7 +381,12 @@
     </div>
     <div class="page-scroll">
       <div class="histoire-banner" id="histoire-banner"></div>
-      <div class="histoire-title" id="histoire-title"></div>
+      <div class="histoire-title-wrap">
+        <div class="histoire-title" id="histoire-title"></div>
+        <button id="pal-btn" class="btn-pal" onclick="clickPAL()" style="display:none" title="Ajouter à ma Pile à Lire">
+          <span class="pal-icon">📚</span><span class="pal-plus" id="pal-plus">+</span>
+        </button>
+      </div>
       <div class="histoire-author" id="histoire-author"></div>
       <div class="histoire-tags" id="histoire-tags"></div>
       <div id="bandeau-spicy" style="display:none;margin:0 16px 14px;padding:14px 16px;background:linear-gradient(135deg,rgba(212,126,126,.12),rgba(126,159,212,.12));border:1px solid rgba(212,126,126,.3);border-radius:12px;font-size:12px;color:var(--text);line-height:1.8;text-align:center;letter-spacing:.3px;"><span style="font-size:20px;display:block;margin-bottom:6px">🌶 🌸</span>Cette histoire contient des scènes spicy et existe aussi en version soft.<br>Tu peux choisir la version que tu préfères dans les paramètres !<br><span style="color:var(--accent);font-size:11px;letter-spacing:.5px">✦ Bonne lecture ! ✦</span></div>
@@ -760,6 +765,21 @@
         </div>
       </div>
       <p style="font-size:11px;color:var(--text3);line-height:1.7;margin:0">Si tu ne souhaites pas que les chapitres spicy soient indiqués, tu peux régler cela dans les paramètres et choisir quelle version te sera proposée par défaut.</p>
+    </div>
+  </div>
+
+  <!-- POP-UP PILE À LIRE -->
+  <div class="modal-overlay" id="pal-popup" style="position:fixed;z-index:200" onclick="closeModal(event,'pal-popup')">
+    <div class="modal-box" style="text-align:center">
+      <button class="modal-close" onclick="closeM('pal-popup')">✕</button>
+      <div style="font-size:36px;margin-bottom:12px">📚</div>
+      <div class="modal-title">Pile à Lire</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.7">Ajouter ce livre à ta Pile à Lire ?</p>
+      <div style="display:flex;gap:10px;margin-bottom:20px">
+        <button class="btn btn-full btn-accent" onclick="confirmerPAL()">Oui ✦</button>
+        <button class="btn btn-full" onclick="closeM('pal-popup')">Non</button>
+      </div>
+      <button onclick="desactiverPopupPAL()" style="background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer;font-family:'Jost',sans-serif;text-decoration:underline;">Ne plus afficher ce message</button>
     </div>
   </div>
 

@@ -385,6 +385,86 @@ function refuserAboSuggestion() {
   localStorage.setItem('abo_refus', JSON.stringify(refus));
 }
 
+/* ══════════════════════════════════════════════════════
+   PILE À LIRE (PAL)
+   ══════════════════════════════════════════════════════ */
+
+let _estEnPAL = false;
+
+async function loadPAL(histoireId) {
+  const btn = document.getElementById('pal-btn');
+  if (!btn) return;
+
+  if (!compte.loggedIn || !compte.userId) {
+    btn.style.display = 'none';
+    return;
+  }
+
+  btn.style.display = 'flex';
+  const { data } = await db.from('pile_a_lire')
+    .select('id')
+    .eq('histoire_id', histoireId)
+    .eq('user_id', compte.userId)
+    .single();
+
+  _estEnPAL = !!data;
+  _renderPALBtn();
+}
+
+function _renderPALBtn() {
+  const plus = document.getElementById('pal-plus');
+  const btn = document.getElementById('pal-btn');
+  if (!btn) return;
+  if (_estEnPAL) {
+    btn.classList.add('btn-pal-actif');
+    if (plus) plus.textContent = '✓';
+    btn.title = 'Dans ma Pile à Lire';
+  } else {
+    btn.classList.remove('btn-pal-actif');
+    if (plus) plus.textContent = '+';
+    btn.title = 'Ajouter à ma Pile à Lire';
+  }
+}
+
+function clickPAL() {
+  if (!compte.loggedIn || !compte.userId) return;
+  // Si déjà en PAL → retirer directement sans popup
+  if (_estEnPAL) { retirerPAL(); return; }
+  // Si popup désactivé → ajouter directement
+  const popupDesactive = localStorage.getItem('pal_popup_off') === '1';
+  if (popupDesactive) { ajouterPAL(); return; }
+  // Sinon afficher le popup de confirmation
+  openModal('pal-popup');
+}
+
+async function ajouterPAL() {
+  if (_estEnPAL) return;
+  await db.from('pile_a_lire')
+    .insert({ user_id: compte.userId, histoire_id: currentHistoireId });
+  _estEnPAL = true;
+  _renderPALBtn();
+}
+
+async function retirerPAL() {
+  await db.from('pile_a_lire')
+    .delete()
+    .eq('histoire_id', currentHistoireId)
+    .eq('user_id', compte.userId);
+  _estEnPAL = false;
+  _renderPALBtn();
+}
+
+async function confirmerPAL() {
+  closeM('pal-popup');
+  await ajouterPAL();
+}
+
+function desactiverPopupPAL() {
+  localStorage.setItem('pal_popup_off', '1');
+  closeM('pal-popup');
+  ajouterPAL(); // on ajoute quand même au PAL
+}
+
 function openHistoire(id){
   currentHistoireId=id;
   const cur=document.querySelector('.page.active');if(cur)prevPage=cur.id;
@@ -427,6 +507,7 @@ function openHistoire(id){
   _updateBtnLectureRapide(b);
   loadNoteHistoire(id).catch(()=>{});
   loadAbonnement(id).catch(()=>{});
+  loadPAL(id).catch(()=>{});
   const backDest=(prevPage==='p-histoire'||prevPage==='p-lecture')?'p-main':prevPage;
   document.getElementById('histoire-back-btn').onclick=function(){go(backDest);};
   go('p-histoire');

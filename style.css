@@ -188,6 +188,15 @@
     .tw-label{font-size:9px;letter-spacing:2px;color:var(--accent2);text-transform:uppercase;margin-bottom:4px;}
     .tw-text{font-size:11px;color:rgba(200,190,240,.8);line-height:1.6;}
     .histoire-desc{font-size:12px;color:var(--text2);line-height:1.8;padding:0 16px 16px;}
+    /* PILE À LIRE */
+    .histoire-title-wrap{position:relative;display:flex;align-items:center;justify-content:center;padding:0 48px 8px;}
+    .histoire-title-wrap .histoire-title{padding:0;flex:1;text-align:center;}
+    .btn-pal{position:absolute;right:16px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;background:rgba(140,150,195,.1);border:1px solid rgba(180,190,255,.2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s,border-color .2s;flex-shrink:0;padding:0;gap:0;}
+    .btn-pal:hover{background:rgba(126,159,212,.2);border-color:rgba(126,159,212,.4);}
+    .btn-pal.btn-pal-actif{background:rgba(126,159,212,.18);border-color:rgba(126,159,212,.5);}
+    .pal-icon{font-size:14px;line-height:1;}
+    .pal-plus{font-size:11px;font-weight:700;color:var(--accent);line-height:1;margin-left:1px;}
+
     /* ABONNEMENT HISTOIRE */
     .btn-abo{width:100%;padding:11px;background:rgba(140,150,195,.08);border:1px solid rgba(180,190,255,.18);border-radius:12px;color:var(--text2);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.5px;cursor:pointer;transition:background .2s,border-color .2s,color .2s;text-align:center;}
     .btn-abo:hover{background:rgba(126,159,212,.15);border-color:rgba(126,159,212,.35);color:var(--text);}
