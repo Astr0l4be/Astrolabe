@@ -38,7 +38,7 @@
         </div>
       </div>
       <button class="btn" id="btn-connexion" onclick="go('p-connexion-modal')">Connexion</button>
-      <button class="btn btn-accent" id="btn-moncompte-top" style="display:none;align-items:center;gap:6px;padding:8px 18px" onclick="go('p-moncompte')"><span id="topbar-avatar" style="font-size:14px">☽</span> Mon compte <span id="topbar-avatar2" style="font-size:14px;transform:scaleX(-1);display:inline-block">☽</span></button>
+      <button class="btn btn-accent" id="btn-moncompte-top" style="display:none;align-items:center;gap:6px;padding:8px 18px;position:relative" onclick="go('p-moncompte')"><span id="topbar-avatar" style="font-size:14px">☽</span> Mon compte <span id="topbar-avatar2" style="font-size:14px;transform:scaleX(-1);display:inline-block">☽</span><span id="notif-badge" style="display:none;position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:#e07070;"></span></button>
     </div>
     <!-- Pop-up déconnexion topbar -->
     <div class="modal-overlay" id="deco-popup-main" onclick="closeModal(event,'deco-popup-main')" style="position:fixed;z-index:200">
@@ -884,6 +884,18 @@
 
         <div class="divider"></div>
         <!-- SUPPRESSION -->
+        <!-- ALERTES SIGNALEMENT -->
+        <div id="alerte-signalement-bloc" style="display:none;margin-bottom:16px;padding:14px 16px;background:rgba(212,126,126,.08);border:1px solid rgba(212,126,126,.3);border-radius:12px;">
+          <div style="font-size:13px;font-weight:600;color:var(--danger);margin-bottom:6px;">⚠ Commentaire signalé</div>
+          <div id="alerte-signalement-texte" style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:10px;"></div>
+          <div style="font-size:11px;color:var(--text3);line-height:1.6;">Un ou plusieurs de tes commentaires ont été signalés par la communauté et sont en attente de vérification. Si le contenu est conforme aux règles d'Astrolabe, il sera rétabli.</div>
+        </div>
+        <div class="divider"></div>
+        <!-- SIGNALER UN BUG -->
+        <div style="padding:4px 0 12px">
+          <button class="btn btn-full" style="font-size:12px;color:var(--text2);border-color:rgba(180,190,255,.2)" onclick="openModal('bug-report-popup')">🐛 Signaler un bug ou un problème</button>
+        </div>
+        <div class="divider"></div>
         <div style="text-align:center;padding:8px 0 4px">
           <button onclick="go('p-mentions-legales')" style="background:none;border:none;color:var(--text3);font-family:'Jost',sans-serif;font-size:11px;cursor:pointer;letter-spacing:.5px;text-decoration:underline;">Politique de confidentialité & CGU</button>
         </div>
@@ -1357,6 +1369,40 @@
       <button class="btn btn-accent com-submit-btn" onclick="soumettreReponse()">Répondre ✦</button>
     </div>
     <div id="com-reponse-error" class="com-error" style="display:none"></div>
+  </div>
+</div>
+
+<!-- MODAL BUG REPORT -->
+<div class="modal-overlay" id="bug-report-popup" style="position:fixed;z-index:200" onclick="closeModal(event,'bug-report-popup')">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeM('bug-report-popup')">✕</button>
+    <div class="modal-title">Signaler un problème</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.7">Tu as trouvé un bug ou rencontré un problème ? Décris-le ici, ça m'aide beaucoup ✦</p>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;color:var(--text3);letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px">Sur quelle page ?</label>
+      <select id="bug-page-select" style="width:100%;background:rgba(180,190,255,.07);border:1px solid rgba(180,190,255,.18);border-radius:10px;padding:10px 12px;color:var(--text);font-family:'Jost',sans-serif;font-size:13px;appearance:none;">
+        <option value="">— Choisir —</option>
+        <option value="accueil">Page d'accueil / catalogue</option>
+        <option value="histoire">Page d'une histoire</option>
+        <option value="lecture">Lecture d'un chapitre</option>
+        <option value="mon-compte">Mon compte</option>
+        <option value="inscription">Inscription / connexion</option>
+        <option value="autre">Autre</option>
+      </select>
+    </div>
+    <div style="margin-bottom:8px">
+      <label style="font-size:11px;color:var(--text3);letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px">Description du problème</label>
+      <textarea id="bug-description" class="com-input" placeholder="Décris le bug ou le problème rencontré…" maxlength="2000" rows="4"></textarea>
+      <div style="display:flex;justify-content:flex-end;margin-top:4px">
+        <span id="bug-char-count" class="com-char-count">0 / 2000</span>
+      </div>
+    </div>
+    <div id="bug-error" class="com-error" style="display:none"></div>
+    <div id="bug-ok" style="display:none;font-size:13px;color:#7ecf7e;text-align:center;padding:10px 0">✦ Merci ! Ton signalement a bien été envoyé.</div>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn btn-full btn-accent" id="bug-submit-btn" onclick="soumettreSignalementBug()">Envoyer ✦</button>
+      <button class="btn btn-full" onclick="closeM('bug-report-popup')">Annuler</button>
+    </div>
   </div>
 </div>
 

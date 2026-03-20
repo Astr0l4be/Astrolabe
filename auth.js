@@ -513,6 +513,9 @@ async function checkSession() {
 
   _chargerProfil(session.user.id, profil);
 
+  // Vérifier les alertes signalement dès la connexion
+  if(typeof checkAlertesSignalement==='function') checkAlertesSignalement().catch(()=>{});
+
   const age = calcAge(profil.date_naissance);
 
   // Popup anniversaire 16 ans

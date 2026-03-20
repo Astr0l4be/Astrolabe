@@ -431,3 +431,7 @@
     #p-lecture.mode-jour-lecture .com-card{border-bottom-color:rgba(26,21,16,.08);}
     #p-lecture.mode-jour-lecture .com-pseudo{color:#1a1510;}
     #p-lecture.mode-jour-lecture .com-texte{color:#3a3020;}
+
+    /* ── SIGNALEMENT & BUG REPORT ── */
+    #bug-page-select option{background:var(--bg2);color:var(--text);}
+    #bug-page-select:focus{outline:none;border-color:rgba(126,159,212,.5);}

@@ -421,3 +421,94 @@ function _formatDate(iso) {
   if (diff < 2592000) return Math.floor(diff / 86400) + 'j';
   return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
 }
+
+/* ══════════════════════════════════════════════════════
+   BUG REPORT
+   ══════════════════════════════════════════════════════ */
+
+async function soumettreSignalementBug() {
+  if (!compte.loggedIn || !compte.userId) return;
+
+  const page = document.getElementById('bug-page-select')?.value || '';
+  const desc = document.getElementById('bug-description')?.value.trim() || '';
+  const errEl = document.getElementById('bug-error');
+  const okEl = document.getElementById('bug-ok');
+  const btn = document.getElementById('bug-submit-btn');
+
+  if (errEl) errEl.style.display = 'none';
+  if (okEl) okEl.style.display = 'none';
+
+  if (desc.length < 10) {
+    if (errEl) { errEl.textContent = 'Décris le problème en au moins 10 caractères.'; errEl.style.display = 'block'; }
+    return;
+  }
+
+  if (btn) { btn.disabled = true; btn.textContent = '…'; }
+
+  const { error } = await db.from('bug_reports').insert({
+    user_id: compte.userId,
+    pseudo: compte.pseudo,
+    page: page || null,
+    description: desc
+  });
+
+  if (btn) { btn.disabled = false; btn.textContent = 'Envoyer ✦'; }
+
+  if (error) {
+    if (errEl) { errEl.textContent = 'Une erreur est survenue. Réessaie.'; errEl.style.display = 'block'; }
+    return;
+  }
+
+  // Succès
+  if (okEl) okEl.style.display = 'block';
+  const descEl = document.getElementById('bug-description');
+  if (descEl) { descEl.value = ''; _updateCharCount('bug-description', 'bug-char-count'); }
+  const pageEl = document.getElementById('bug-page-select');
+  if (pageEl) pageEl.value = '';
+  setTimeout(() => closeM('bug-report-popup'), 2000);
+}
+
+// Compteur bug description
+document.addEventListener('DOMContentLoaded', () => {
+  const bugDesc = document.getElementById('bug-description');
+  if (bugDesc) bugDesc.addEventListener('input', () => _updateCharCount('bug-description', 'bug-char-count'));
+});
+
+/* ══════════════════════════════════════════════════════
+   ALERTE SIGNALEMENT — chargée à l'ouverture de Mon Compte
+   ══════════════════════════════════════════════════════ */
+
+async function checkAlertesSignalement() {
+  if (!compte.loggedIn || !compte.userId) return;
+
+  // Commentaires de l'utilisateur qui sont signalés (masqués)
+  const { data, error } = await db
+    .from('commentaires')
+    .select('id, contenu, signale')
+    .eq('user_id', compte.userId)
+    .eq('signale', true);
+
+  const bloc = document.getElementById('alerte-signalement-bloc');
+  const badge = document.getElementById('notif-badge');
+
+  if (error || !data || !data.length) {
+    if (bloc) bloc.style.display = 'none';
+    if (badge) badge.style.display = 'none';
+    return;
+  }
+
+  // Afficher l'alerte dans Mon Compte
+  if (bloc) {
+    bloc.style.display = 'block';
+    const texteEl = document.getElementById('alerte-signalement-texte');
+    if (texteEl) {
+      const nb = data.length;
+      texteEl.textContent = nb === 1
+        ? '1 de tes commentaires est en attente de vérification.'
+        : `${nb} de tes commentaires sont en attente de vérification.`;
+    }
+  }
+
+  // Afficher le badge rouge sur le bouton Mon Compte
+  if (badge) badge.style.display = 'block';
+}
