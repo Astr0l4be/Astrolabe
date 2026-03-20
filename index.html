@@ -81,11 +81,17 @@
       <div class="section-label">Histoires</div>
       <div class="book-grid" id="book-grid"></div>
       <div class="main-footer">
-        <button onclick="go('p-mentions-legales')" class="footer-link">Mentions légales</button>
-        <span class="footer-sep">·</span>
-        <button onclick="go('p-mentions-legales')" class="footer-link">CGU</button>
-        <span class="footer-sep">·</span>
-        <button onclick="openModal('cookie-detail-popup')" class="footer-link">Cookies</button>
+        <div class="footer-divider"></div>
+        <div class="footer-links">
+          <button onclick="go('p-mentions-legales')" class="footer-link">Mentions légales</button>
+          <span class="footer-sep">·</span>
+          <button onclick="go('p-mentions-legales')" class="footer-link">CGU</button>
+          <span class="footer-sep">·</span>
+          <button onclick="openModal('cookie-detail-popup')" class="footer-link">Cookies</button>
+          <span class="footer-sep">·</span>
+          <button onclick="openModal('confidentialite-popup')" class="footer-link">Confidentialité</button>
+        </div>
+        <p class="footer-copy">© Astrolabe · Histoires d'amour safe et sincères</p>
       </div>
     </div>
     <div class="modal-overlay" id="p-connexion-modal" onclick="closeModal(event,'p-connexion-modal')">
@@ -941,6 +947,40 @@
         <button class="btn btn-full btn-accent" onclick="accepterAboSuggestion()">Oui ✦</button>
         <button class="btn btn-full" onclick="refuserAboSuggestion()">Non</button>
       </div>
+    </div>
+  </div>
+
+  <!-- POP-UP POLITIQUE DE CONFIDENTIALITÉ -->
+  <div class="modal-overlay" id="confidentialite-popup" style="position:fixed;z-index:500" onclick="closeModal(event,'confidentialite-popup')">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeM('confidentialite-popup')">✕</button>
+      <div class="modal-title" style="font-size:18px">Politique de confidentialité</div>
+
+      <p style="font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:14px">Nous collectons et traitons certaines données personnelles des utilisateurs pour permettre l'accès au site et à ses fonctionnalités. Les informations collectées incluent :</p>
+
+      <ul style="font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:14px;padding-left:18px">
+        <li>Adresse e-mail et date de naissance pour créer un compte et vérifier l'âge.</li>
+        <li>Données de paiement uniquement lorsque vous souscrivez à un abonnement ou achetez du contenu payant.</li>
+      </ul>
+
+      <p style="font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:8px">Ces données sont hébergées et traitées par un prestataire tiers sécurisé (Supabase et le service de paiement utilisé). Elles ne sont jamais vendues à des tiers et ne servent qu'à :</p>
+
+      <ul style="font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:14px;padding-left:18px">
+        <li>Permettre l'accès aux contenus et fonctionnalités</li>
+        <li>Gérer les abonnements et transactions</li>
+        <li>Assurer la sécurité et la bonne utilisation du site</li>
+      </ul>
+
+      <p style="font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:8px">Conformément au RGPD, vous disposez :</p>
+
+      <ul style="font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:14px;padding-left:18px">
+        <li>D'un droit d'accès, de rectification et de suppression de vos données</li>
+        <li>Du droit de retirer votre consentement à tout moment</li>
+      </ul>
+
+      <p style="font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:20px">Pour exercer ces droits, contactez-nous à : <span class="ml-placeholder">[ton e-mail de contact]</span></p>
+
+      <button class="btn btn-full btn-accent" onclick="closeM('confidentialite-popup')">J'ai compris ✦</button>
     </div>
   </div>
 

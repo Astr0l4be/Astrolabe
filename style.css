@@ -200,10 +200,13 @@
     .pal-plus{font-size:11px;font-weight:700;color:var(--accent);line-height:1;margin-left:1px;}
 
     /* FOOTER PAGE PRINCIPALE */
-    .main-footer{display:flex;align-items:center;justify-content:center;gap:10px;padding:16px 16px 32px;}
-    .footer-link{background:none;border:none;color:var(--text3);font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.5px;cursor:pointer;text-decoration:underline;padding:0;}
-    .footer-link:hover{color:var(--text2);}
-    .footer-sep{color:var(--text3);font-size:10px;}
+    .main-footer{padding:0 16px 40px;}
+    .footer-divider{height:1px;background:rgba(180,190,255,.12);margin-bottom:20px;}
+    .footer-links{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+    .footer-link{background:none;border:none;color:var(--text2);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.5px;cursor:pointer;text-decoration:underline;padding:0;}
+    .footer-link:hover{color:var(--text);}
+    .footer-sep{color:var(--text3);font-size:12px;}
+    .footer-copy{text-align:center;font-size:11px;color:var(--text3);letter-spacing:.5px;}
 
     /* MENTIONS LÉGALES */
     .ml-section{margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid rgba(180,190,255,.07);}
