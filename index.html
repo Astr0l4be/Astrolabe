@@ -880,6 +880,44 @@
     </div>
   </div>
 
+  <!-- BANDEAU COOKIES -->
+  <div id="cookie-banner" class="cookie-banner">
+    <div class="cookie-content">
+      <p class="cookie-text">🍪 Ce site utilise des cookies strictement nécessaires à son fonctionnement (authentification, préférences de lecture). Aucun cookie publicitaire ou de tracking n'est utilisé.</p>
+      <div class="cookie-actions">
+        <button class="btn btn-accent cookie-btn-accept" onclick="accepterCookies()">Accepter ✦</button>
+        <button class="btn cookie-btn-info" onclick="openModal('cookie-detail-popup')">En savoir plus</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POP-UP DÉTAIL COOKIES -->
+  <div class="modal-overlay" id="cookie-detail-popup" style="position:fixed;z-index:500" onclick="closeModal(event,'cookie-detail-popup')">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeM('cookie-detail-popup')">✕</button>
+      <div class="modal-title" style="font-size:18px">Politique de cookies</div>
+
+      <div style="margin-bottom:14px">
+        <div style="font-size:11px;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin-bottom:6px">Cookies nécessaires</div>
+        <p style="font-size:12px;color:var(--text2);line-height:1.8">Ces cookies sont indispensables au fonctionnement du site. Ils permettent de gérer ta session de connexion et ton authentification via Supabase. Sans eux, le site ne peut pas fonctionner correctement.</p>
+      </div>
+
+      <div style="margin-bottom:14px">
+        <div style="font-size:11px;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin-bottom:6px">Données de navigation locale</div>
+        <p style="font-size:12px;color:var(--text2);line-height:1.8">Certaines préférences (marque-pages, options de lecture, tranche d'âge) sont stockées localement sur ton appareil via localStorage. Ces données ne sont pas transmises à des tiers.</p>
+      </div>
+
+      <div style="margin-bottom:20px">
+        <div style="font-size:11px;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin-bottom:6px">Ressources externes</div>
+        <p style="font-size:12px;color:var(--text2);line-height:1.8">Ce site utilise Google Fonts pour l'affichage des polices. Cette connexion peut être enregistrée par Google selon leur propre politique de confidentialité.</p>
+      </div>
+
+      <p style="font-size:11px;color:var(--text3);line-height:1.7;margin-bottom:20px">Aucun cookie publicitaire, de tracking ou d'analyse n'est utilisé sur ce site.</p>
+
+      <button class="btn btn-full btn-accent" onclick="accepterCookies();closeM('cookie-detail-popup')">Accepter ✦</button>
+    </div>
+  </div>
+
 </div><!-- #app -->
 
 <div id="pwa-banner" class="hidden">

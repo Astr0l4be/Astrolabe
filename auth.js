@@ -532,6 +532,25 @@ async function checkSession() {
 }
 
 /* ══════════════════════════════════════════════════════
+   CONSENTEMENT COOKIES
+   ══════════════════════════════════════════════════════ */
+
+function _initCookieBanner() {
+  const banner = document.getElementById('cookie-banner');
+  if (!banner) return;
+  // Déjà accepté → on cache
+  if (localStorage.getItem('cookies_accepted') === '1') {
+    banner.classList.add('hidden');
+  }
+}
+
+function accepterCookies() {
+  localStorage.setItem('cookies_accepted', '1');
+  const banner = document.getElementById('cookie-banner');
+  if (banner) banner.classList.add('hidden');
+}
+
+/* ══════════════════════════════════════════════════════
    VÉRIFICATION D'ÂGE (visiteurs non connectés)
    ══════════════════════════════════════════════════════ */
 
@@ -598,6 +617,7 @@ function validerAge() {
    ══════════════════════════════════════════════════════ */
 function _lancerApp() {
   _initAgeSelect();
+  _initCookieBanner();
   // Filet de sécurité : si Supabase ne répond pas, on passe quand même
   const splashGuard = setTimeout(() => {
     if (document.querySelector('.page.active')?.id === 'p-splash') {
