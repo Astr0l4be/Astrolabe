@@ -531,7 +531,16 @@ async function checkSession() {
   }
 }
 
+// Timeout de sécurité : quoi qu'il arrive, on passe à p-main après 5s max
+const _splashSafetyTimer = setTimeout(() => {
+  if (document.querySelector('.page.active')?.id === 'p-splash') {
+    go('p-main');
+    loadHistoires().catch(() => {});
+  }
+}, 5000);
+
 checkSession().catch(() => {}).finally(() => {
+  clearTimeout(_splashSafetyTimer); // annule le timer de sécurité si tout va bien
   setTimeout(() => {
     const lastPage = sessionStorage.getItem('lastPage');
     if (lastPage && lastPage !== 'p-splash' && document.getElementById(lastPage)) {
@@ -540,5 +549,5 @@ checkSession().catch(() => {}).finally(() => {
       go('p-main');
     }
     loadHistoires().catch(() => {});
-  }, 3200);
+  }, 300); // réduit de 3200ms à 300ms
 });
