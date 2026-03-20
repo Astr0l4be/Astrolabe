@@ -212,6 +212,7 @@ function openHistoire(id){
   const _mp=JSON.parse(localStorage.getItem('marque_pages')||'{}');
   const _mpNum=_mp[id]||null;
   _renderChapitresList(b,vc,_mpNum);
+  _updateBtnLectureRapide(b);
   const backDest=(prevPage==='p-histoire'||prevPage==='p-lecture')?'p-main':prevPage;
   document.getElementById('histoire-back-btn').onclick=function(){go(backDest);};
   go('p-histoire');
