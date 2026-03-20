@@ -142,6 +142,7 @@ function go(id){
   if(stars)stars.style.opacity=(id==='p-lecture')?'0':'1';
   if(id==='p-main'||id==='p-moncompte')updateTopbar();
   if(id==='p-moncompte')renderBibliotheque().catch(()=>{});
+  if(id==='p-inscription4b' && typeof _initCGUScroll==='function') setTimeout(_initCGUScroll, 100);
   if(id!=='p-splash')sessionStorage.setItem('lastPage',id);
 }
 function openModal(id){document.getElementById(id)?.classList.add('open');}

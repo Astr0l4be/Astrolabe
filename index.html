@@ -579,7 +579,57 @@
       <div class="gift-desc">Pour fêter ça, Astrolabe t'offre</div>
       <div class="tickets-badge">20 tickets ✦</div>
       <div class="gift-desc">Bienvenue dans l'univers Astrolabe ✦</div>
-      <button class="btn btn-full btn-accent" style="max-width:320px" onclick="addTickets(20);go('p-inscription5')">Continuer →</button>
+      <button class="btn btn-full btn-accent" style="max-width:320px" onclick="addTickets(20);go('p-inscription4b')">Continuer →</button>
+    </div>
+  </div>
+
+  <!-- INSCRIPTION 4B — Validation CGU -->
+  <div class="page" id="p-inscription4b">
+    <div class="page-header"><button class="btn" onclick="go('p-inscription4')">← Retour</button></div>
+    <div class="page-scroll" id="cgu-scroll-insc">
+      <div class="page-body">
+        <div class="step-stars"><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar on">✦</span></div>
+        <div class="page-title">Avant de commencer…</div>
+        <div class="page-subtitle">Merci de lire et accepter nos Conditions Générales d'Utilisation.</div>
+
+        <!-- CGU intégrées à défiler -->
+        <div class="cgu-scroll-box" id="cgu-scroll-box">
+          <div class="cgu-scroll-content" id="cgu-scroll-content">
+            <div class="ml-titre" style="font-size:16px;margin-bottom:14px">Conditions Générales d'Utilisation</div>
+
+            <div class="ml-section"><div class="ml-titre" style="font-size:14px">1. Objet</div><p class="ml-texte">Les présentes CGU ont pour objet de définir les modalités d'accès et d'utilisation de la plateforme de lecture proposée par le site.</p></div>
+            <div class="ml-section"><div class="ml-titre" style="font-size:14px">2. Accès au site</div><p class="ml-texte">Le site est accessible gratuitement à tout utilisateur disposant d'un accès à Internet. Le contenu non explicite est accessible aux utilisateurs âgés de 13 ans et plus. Le contenu adulte est strictement réservé aux utilisateurs majeurs (18 ans ou plus) et nécessite la création d'un compte.</p></div>
+            <div class="ml-section"><div class="ml-titre" style="font-size:14px">3. Création de compte</div><p class="ml-texte">L'accès à certaines fonctionnalités nécessite la création d'un compte. L'utilisateur s'engage à fournir des informations exactes, notamment concernant son âge.</p></div>
+            <div class="ml-section"><div class="ml-titre" style="font-size:14px">4. Déclaration d'âge</div><p class="ml-texte">L'utilisateur reconnaît être responsable de l'exactitude des informations fournies concernant son âge. Le site ne saurait être tenu responsable en cas de fausse déclaration.</p></div>
+            <div class="ml-section"><div class="ml-titre" style="font-size:14px">5. Contenu proposé</div><p class="ml-texte">Le site propose du contenu non explicite accessible aux 13 ans et plus, et du contenu adulte réservé aux majeurs. Le contenu adulte est strictement inaccessible sans authentification et validation de la majorité.</p></div>
+            <div class="ml-section"><div class="ml-titre" style="font-size:14px">6. Responsabilité</div><p class="ml-texte">L'utilisateur est seul responsable de l'utilisation qu'il fait du site. Le site ne pourra être tenu responsable en cas d'accès frauduleux, de non-respect des CGU ou de fausse déclaration d'âge.</p></div>
+            <div class="ml-section"><div class="ml-titre" style="font-size:14px">7. Propriété intellectuelle</div><p class="ml-texte">Les contenus présents sur la plateforme sont protégés par le droit de la propriété intellectuelle. Toute reproduction sans autorisation est interdite.</p></div>
+            <div class="ml-section"><div class="ml-titre" style="font-size:14px">8. Comportement des utilisateurs</div><p class="ml-texte">L'utilisateur s'engage à ne pas publier de contenu illégal, porter atteinte aux droits d'autrui, ou utiliser le site à des fins frauduleuses. Le site se réserve le droit de suspendre ou supprimer tout compte ne respectant pas ces règles.</p></div>
+            <div class="ml-section"><div class="ml-titre" style="font-size:14px">9. Modification des CGU</div><p class="ml-texte">Le site se réserve le droit de modifier les présentes CGU à tout moment. Les utilisateurs seront informés en cas de modification.</p></div>
+            <div class="ml-section"><div class="ml-titre" style="font-size:14px">10. Droit applicable</div><p class="ml-texte">Les présentes CGU sont soumises au droit français.</p></div>
+            <div class="ml-section"><div class="ml-titre" style="font-size:14px">11. Paiement et contenu payant</div><p class="ml-texte">Certaines parties du contenu sont accessibles uniquement après paiement. Les contenus numériques achetés sont non remboursables, conformément à la réglementation applicable. L'utilisateur est responsable des moyens de paiement utilisés.</p></div>
+
+            <div class="cgu-scroll-fin" id="cgu-scroll-fin">✦ Fin des Conditions Générales d'Utilisation ✦</div>
+          </div>
+        </div>
+
+        <!-- Indicateur de défilement -->
+        <div class="cgu-scroll-hint" id="cgu-scroll-hint">↓ Fais défiler pour lire les CGU en entier</div>
+
+        <!-- Cases à cocher — désactivées jusqu'à la fin du défilement -->
+        <div id="cgu-checks" class="cgu-checks cgu-checks-disabled">
+          <label class="cgu-check-row">
+            <input type="checkbox" id="check-cgu" disabled>
+            <span>J'ai lu et j'accepte les <button onclick="go('p-cgu')" style="background:none;border:none;color:var(--accent);font-family:'Jost',sans-serif;font-size:12px;cursor:pointer;padding:0;text-decoration:underline;">Conditions Générales d'Utilisation</button></span>
+          </label>
+          <label class="cgu-check-row" style="margin-top:10px">
+            <input type="checkbox" id="check-age">
+            <span>Je certifie que la date de naissance que j'ai renseignée est exacte et que j'ai l'âge requis pour accéder aux contenus choisis</span>
+          </label>
+        </div>
+        <span id="cgu-check-error" style="font-size:11px;color:var(--danger);display:none;margin-top:6px;">Merci de lire les CGU et de cocher les deux cases pour continuer.</span>
+        <button class="btn btn-full btn-accent" style="margin-top:16px" onclick="validerCGUInscription()">Valider et continuer →</button>
+      </div>
     </div>
   </div>
 
