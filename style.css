@@ -294,10 +294,12 @@
     .divider{height:1px;background:rgba(180,190,255,.07);margin:14px 0;}
 
     /* BIBLIOTHÈQUE */
-    .biblio-section-title{font-size:10px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:10px;margin-top:4px;}
-    .biblio-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;}
+    .biblio-titre{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;letter-spacing:1px;margin-bottom:14px;color:var(--text);}
+    .biblio-section-title{font-size:10px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-bottom:10px;margin-top:16px;}
+    .biblio-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:4px;}
     .biblio-row::-webkit-scrollbar{display:none;}
-    .biblio-card{flex-shrink:0;width:60px;aspect-ratio:2/3;border-radius:6px;border:1px solid rgba(180,190,255,.1);overflow:hidden;cursor:pointer;position:relative;}
+    .biblio-card{flex-shrink:0;width:60px;aspect-ratio:2/3;border-radius:6px;border:1px solid rgba(180,190,255,.1);overflow:hidden;cursor:pointer;position:relative;transition:transform .2s,border-color .2s;}
+    .biblio-card:hover{transform:scale(1.06);border-color:rgba(180,190,255,.25);}
     .biblio-card img{width:100%;height:100%;object-fit:cover;}
     .biblio-card-bg{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:18px;}
     .biblio-empty{font-size:11px;color:var(--text3);font-style:italic;padding:4px 0 12px;}

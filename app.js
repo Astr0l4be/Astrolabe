@@ -141,6 +141,7 @@ function go(id){
   const stars=document.getElementById('stars');
   if(stars)stars.style.opacity=(id==='p-lecture')?'0':'1';
   if(id==='p-main'||id==='p-moncompte')updateTopbar();
+  if(id==='p-moncompte')renderBibliotheque().catch(()=>{});
   if(id!=='p-splash')sessionStorage.setItem('lastPage',id);
 }
 function openModal(id){document.getElementById(id)?.classList.add('open');}
@@ -479,6 +480,73 @@ function desactiverPopupRetirerPAL() {
   localStorage.setItem('pal_popup_retire_off', '1');
   closeM('pal-retire-popup');
   retirerPAL();
+}
+
+/* ══════════════════════════════════════════════════════
+   BIBLIOTHÈQUE PERSONNELLE
+   ══════════════════════════════════════════════════════ */
+
+async function renderBibliotheque() {
+  if (!compte.loggedIn || !compte.userId) return;
+
+  // ── Récupérer PAL et abonnements depuis Supabase ──
+  const [{ data: palData }, { data: aboData }] = await Promise.all([
+    db.from('pile_a_lire').select('histoire_id').eq('user_id', compte.userId),
+    db.from('abonnements_histoires').select('histoire_id').eq('user_id', compte.userId)
+  ]);
+
+  const palIds    = (palData  || []).map(r => r.histoire_id);
+  const aboIds    = (aboData  || []).map(r => r.histoire_id);
+
+  // ── Continuer + Terminés depuis localStorage ──
+  const enCours   = [];
+  const termines  = [];
+
+  BOOKS.forEach(b => {
+    const lus = JSON.parse(localStorage.getItem('chapitres_lus_' + b.id) || '[]');
+    if (!lus.length) return;
+    // Terminé = dernier chapitre marqué fini
+    const dernierChap = b.chapitres[b.chapitres.length - 1];
+    const dernierFini = dernierChap &&
+      localStorage.getItem('chapitre_fini_' + b.id + '_' + dernierChap.num) === '1';
+    if (dernierFini) {
+      termines.push(b);
+    } else {
+      enCours.push(b);
+    }
+  });
+
+  // ── Rendu d'une étagère ──
+  function renderEtagere(containerId, books_or_ids, sourceIds) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    // books_or_ids peut être un tableau de BOOKS ou d'IDs
+    const livres = sourceIds
+      ? sourceIds.map(id => BOOKS.find(b => b.id === id)).filter(Boolean)
+      : books_or_ids;
+
+    if (!livres.length) {
+      el.innerHTML = '<span class="biblio-empty">' + el.dataset.empty + '</span>';
+      return;
+    }
+    el.innerHTML = livres.map(b => {
+      const img = b.cover
+        ? `<img src="${b.cover}" alt="${b.title}">`
+        : `<div class="biblio-card-bg ${b.color}">✦</div>`;
+      return `<div class="biblio-card" onclick="openHistoire('${b.id}')" title="${b.title}">${img}</div>`;
+    }).join('');
+  }
+
+  // Stocker les messages "vide" en data-empty
+  document.getElementById('biblio-pal').dataset.empty      = 'Ta pile à lire est vide';
+  document.getElementById('biblio-abos').dataset.empty     = 'Aucun abonnement';
+  document.getElementById('biblio-continuer').dataset.empty = 'Aucune lecture en cours';
+  document.getElementById('biblio-termines').dataset.empty  = 'Aucun livre terminé';
+
+  renderEtagere('biblio-pal',      null, palIds);
+  renderEtagere('biblio-abos',     null, aboIds);
+  renderEtagere('biblio-continuer', enCours);
+  renderEtagere('biblio-termines',  termines);
 }
 
 function openHistoire(id){
