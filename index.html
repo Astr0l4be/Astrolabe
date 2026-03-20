@@ -732,6 +732,11 @@
         </div>
         <div class="note-moyenne">Chargement…</div>
       </div>
+      <!-- COUPS DE CŒUR -->
+      <div id="top-coms-bloc" style="display:none;padding:0 16px 4px">
+        <div class="chapitres-label" style="padding-left:0">✦ Coups de cœur</div>
+        <div id="top-coms-liste"></div>
+      </div>
       <div class="chapitres-label">Chapitres</div>
       <button id="btn-lecture-rapide" style="display:none;margin:0 16px 14px;width:calc(100% - 32px);padding:14px;background:rgba(126,159,212,.15);border:1px solid rgba(126,159,212,.4);border-radius:12px;color:#eef0fa;font-family:'Jost',sans-serif;font-size:14px;letter-spacing:.5px;cursor:pointer;" onclick="lancerLectureRapide()">Commencer l'histoire</button>
       <div id="chapitres-list"></div>
@@ -750,6 +755,27 @@
     <div class="page-scroll" id="lecture-scroller">
       <div class="lecture-body" id="lecture-body"></div>
       <div class="lecture-nav" id="lecture-nav"></div>
+      <!-- SECTION COMMENTAIRES -->
+      <div class="com-section" id="com-section">
+        <div class="com-section-title">✦ Commentaires</div>
+        <!-- Formulaire nouveau commentaire -->
+        <div id="com-form-wrap">
+          <textarea id="com-input" class="com-input" placeholder="Laisse un commentaire…" maxlength="1000" rows="3"></textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+            <span id="com-char-count" class="com-char-count">0 / 1000</span>
+            <button class="btn btn-accent com-submit-btn" onclick="soumettreCommentaire()">Publier ✦</button>
+          </div>
+          <div id="com-error" class="com-error" style="display:none"></div>
+        </div>
+        <div id="com-login-msg" class="com-login-msg" style="display:none">
+          <span>Connecte-toi pour laisser un commentaire</span>
+          <button class="btn btn-accent" style="font-size:12px;padding:6px 14px" onclick="go('p-connexion-modal')">Se connecter</button>
+        </div>
+        <!-- Liste des commentaires -->
+        <div id="com-liste"></div>
+        <div id="com-loading" class="com-loading">Chargement…</div>
+        <button id="com-load-more" class="com-load-more" style="display:none" onclick="chargerPlusCommentaires()">Voir plus de commentaires</button>
+      </div>
     </div>
     <!-- Bouton mode immersif -->
     <button id="btn-immersif" onclick="toggleImmersif()" title="Mode immersif">✦</button>
@@ -1299,10 +1325,46 @@
   <button class="pwa-close-btn" onclick="closePWABanner()">✕</button>
 </div>
 
+<!-- MODAL SIGNALEMENT COMMENTAIRE -->
+<div class="modal-overlay" id="com-signalement-popup" style="position:fixed;z-index:200" onclick="closeModal(event,'com-signalement-popup')">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeM('com-signalement-popup')">✕</button>
+    <div class="modal-title">Signaler un commentaire</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.7">Pourquoi signales-tu ce commentaire ?</p>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">
+      <label class="com-signal-option"><input type="radio" name="signal-raison" value="inapproprie"> Contenu inapproprié</label>
+      <label class="com-signal-option"><input type="radio" name="signal-raison" value="spoiler"> Spoiler non signalé</label>
+      <label class="com-signal-option"><input type="radio" name="signal-raison" value="harcelement"> Harcèlement / attaque</label>
+      <label class="com-signal-option"><input type="radio" name="signal-raison" value="spam"> Spam</label>
+      <label class="com-signal-option"><input type="radio" name="signal-raison" value="autre"> Autre</label>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-full btn-accent" onclick="confirmerSignalement()">Signaler</button>
+      <button class="btn btn-full" onclick="closeM('com-signalement-popup')">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RÉPONDRE COMMENTAIRE -->
+<div class="modal-overlay" id="com-reponse-popup" style="position:fixed;z-index:200" onclick="closeModal(event,'com-reponse-popup')">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeM('com-reponse-popup')">✕</button>
+    <div class="modal-title">Répondre</div>
+    <div id="com-reponse-parent-apercu" class="com-reponse-apercu"></div>
+    <textarea id="com-reponse-input" class="com-input" placeholder="Ta réponse…" maxlength="1000" rows="3"></textarea>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+      <span id="com-reponse-char-count" class="com-char-count">0 / 1000</span>
+      <button class="btn btn-accent com-submit-btn" onclick="soumettreReponse()">Répondre ✦</button>
+    </div>
+    <div id="com-reponse-error" class="com-error" style="display:none"></div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase.js"></script>
 <script src="app.js"></script>
 <script src="lecture.js"></script>
 <script src="auth.js"></script>
+<script src="commentaires.js"></script>
 </body>
 </html>

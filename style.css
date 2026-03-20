@@ -387,3 +387,47 @@
     .ch-version-btn:hover{background:rgba(180,190,255,.15);opacity:0.8;}
     .ch-version-btn.ch-version-active{border-color:var(--accent);background:rgba(126,159,212,.18);opacity:1;}
     .ch-version-nav-big{width:64px;height:64px;font-size:32px;border-radius:14px;}
+
+    /* ── COMMENTAIRES ── */
+    .com-section{padding:0 16px 48px;margin-top:8px;border-top:1px solid rgba(180,190,255,.1);}
+    .com-section-title{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--text);letter-spacing:2px;margin:20px 0 16px;text-align:center;}
+    .com-input{width:100%;background:rgba(180,190,255,.07);border:1px solid rgba(180,190,255,.18);border-radius:12px;padding:12px 14px;color:var(--text);font-family:'Jost',sans-serif;font-size:14px;line-height:1.6;resize:none;box-sizing:border-box;transition:border-color .2s;}
+    .com-input:focus{outline:none;border-color:rgba(126,159,212,.5);}
+    .com-char-count{font-size:11px;color:var(--text3);}
+    .com-submit-btn{font-size:13px;padding:8px 18px;}
+    .com-error{font-size:12px;color:#e07070;margin-top:8px;}
+    .com-login-msg{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;background:rgba(126,159,212,.07);border:1px solid rgba(180,190,255,.15);border-radius:12px;font-size:13px;color:var(--text2);margin-bottom:16px;}
+    .com-loading{text-align:center;font-size:12px;color:var(--text3);padding:16px 0;}
+    .com-load-more{width:100%;background:none;border:1px solid rgba(180,190,255,.2);border-radius:10px;padding:10px;color:var(--text2);font-family:'Jost',sans-serif;font-size:13px;cursor:pointer;margin-top:8px;transition:background .2s;}
+    .com-load-more:hover{background:rgba(180,190,255,.07);}
+    /* Carte commentaire */
+    .com-card{padding:14px 0;border-bottom:1px solid rgba(180,190,255,.08);}
+    .com-card:last-child{border-bottom:none;}
+    .com-card-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+    .com-avatar{width:28px;height:28px;border-radius:50%;background:rgba(126,159,212,.15);border:1px solid rgba(180,190,255,.2);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+    .com-pseudo{font-size:13px;font-weight:600;color:var(--text);letter-spacing:.3px;}
+    .com-date{font-size:11px;color:var(--text3);margin-left:auto;}
+    .com-epingle-badge{font-size:10px;color:var(--accent);background:rgba(126,159,212,.12);border:1px solid rgba(126,159,212,.3);border-radius:20px;padding:2px 8px;letter-spacing:.5px;}
+    .com-texte{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:10px;word-break:break-word;}
+    .com-actions{display:flex;gap:14px;align-items:center;}
+    .com-action-btn{background:none;border:none;font-family:'Jost',sans-serif;font-size:12px;color:var(--text3);cursor:pointer;padding:0;display:flex;align-items:center;gap:4px;transition:color .2s;}
+    .com-action-btn:hover{color:var(--accent);}
+    .com-action-btn.liked{color:#e07070;}
+    /* Réponses imbriquées */
+    .com-replies{margin-left:20px;padding-left:12px;border-left:1px solid rgba(180,190,255,.15);margin-top:10px;}
+    .com-replies .com-card{padding:10px 0;}
+    /* Aperçu parent dans modal réponse */
+    .com-reponse-apercu{font-size:12px;color:var(--text3);background:rgba(180,190,255,.06);border-left:2px solid var(--accent);border-radius:4px;padding:8px 12px;margin-bottom:12px;line-height:1.6;font-style:italic;}
+    /* Option signalement */
+    .com-signal-option{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2);cursor:pointer;padding:6px 0;}
+    .com-signal-option input{accent-color:var(--accent);}
+    /* Coups de cœur sur page histoire */
+    .top-com-card{background:rgba(126,159,212,.07);border:1px solid rgba(180,190,255,.15);border-radius:12px;padding:14px 16px;margin-bottom:10px;}
+    .top-com-card .com-texte{font-size:13px;font-style:italic;}
+    .top-com-source{font-size:11px;color:var(--text3);margin-top:6px;text-align:right;}
+    /* Mode jour */
+    #p-lecture.mode-jour-lecture .com-section{border-top-color:rgba(26,21,16,.1);}
+    #p-lecture.mode-jour-lecture .com-input{background:rgba(26,21,16,.04);border-color:rgba(26,21,16,.2);color:#1a1510;}
+    #p-lecture.mode-jour-lecture .com-card{border-bottom-color:rgba(26,21,16,.08);}
+    #p-lecture.mode-jour-lecture .com-pseudo{color:#1a1510;}
+    #p-lecture.mode-jour-lecture .com-texte{color:#3a3020;}

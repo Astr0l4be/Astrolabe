@@ -682,6 +682,7 @@ function openHistoire(id){
   loadNoteHistoire(id).catch(()=>{});
   loadAbonnement(id).catch(()=>{});
   loadPAL(id).catch(()=>{});
+  if(typeof loadTopCommentaires==='function') loadTopCommentaires(id).catch(()=>{});
   const backDest=(prevPage==='p-histoire'||prevPage==='p-lecture')?'p-main':prevPage;
   document.getElementById('histoire-back-btn').onclick=function(){go(backDest);};
   go('p-histoire');
