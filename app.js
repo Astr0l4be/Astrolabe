@@ -277,8 +277,15 @@ function _hoverNote(n) {
 function _activerEditionNote() {
   _noteModeEdition = true;
   _noteSelectionnee = _noteUtilisateur;
-  // Recharger juste le rendu sans re-fetcher Supabase
-  loadNoteHistoire(currentHistoireId);
+  // On re-fetche juste les stats pour la moyenne, sans écraser _noteModeEdition
+  db.from('notes').select('note').eq('histoire_id', currentHistoireId).then(({ data: stats }) => {
+    let moyenne = 0, nbNotes = 0;
+    if (stats && stats.length) {
+      nbNotes = stats.length;
+      moyenne = stats.reduce((s, r) => s + r.note, 0) / nbNotes;
+    }
+    _renderNoteBloc(moyenne, nbNotes);
+  });
 }
 
 function _annulerEditionNote() {
