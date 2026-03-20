@@ -339,10 +339,10 @@ function _renderAbonnementBtn() {
   const btn = document.getElementById('abo-btn');
   if (!btn) return;
   if (_estAbonne) {
-    btn.textContent = '🔔 Abonné · Se désabonner';
+    btn.textContent = '🔔 Se désabonner';
     btn.classList.add('btn-abo-actif');
   } else {
-    btn.textContent = '🔔 S\'abonner aux nouveautés';
+    btn.textContent = '🔔 S\'abonner';
     btn.classList.remove('btn-abo-actif');
   }
 }
@@ -366,6 +366,23 @@ async function toggleAbonnement() {
 
   if (btn) btn.disabled = false;
   _renderAbonnementBtn();
+}
+
+async function accepterAboSuggestion() {
+  closeM('abo-suggestion-popup');
+  if (!compte.loggedIn || !compte.userId || _estAbonne) return;
+  await db.from('abonnements_histoires')
+    .insert({ user_id: compte.userId, histoire_id: currentHistoireId });
+  _estAbonne = true;
+  _renderAbonnementBtn();
+}
+
+function refuserAboSuggestion() {
+  closeM('abo-suggestion-popup');
+  // Mémoriser le refus pour cette histoire — ne plus jamais proposer
+  const refus = JSON.parse(localStorage.getItem('abo_refus') || '{}');
+  refus[currentHistoireId] = true;
+  localStorage.setItem('abo_refus', JSON.stringify(refus));
 }
 
 function openHistoire(id){

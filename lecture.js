@@ -105,6 +105,14 @@ async function openLecture(bookId,chapNum){
   const _lus=JSON.parse(localStorage.getItem(_clKey)||'[]');
   if(_lus.indexOf(chapNum)===-1){ _lus.push(chapNum); localStorage.setItem(_clKey,JSON.stringify(_lus)); }
 
+  // Suggestion d'abonnement au 3ème chapitre lu (connecté, pas déjà abonné, pas déjà refusé)
+  if(compte.loggedIn && _lus.length === 3 && !_estAbonne) {
+    const refus = JSON.parse(localStorage.getItem('abo_refus') || '{}');
+    if (!refus[bookId]) {
+      setTimeout(() => openModal('abo-suggestion-popup'), 800);
+    }
+  }
+
   // Numéro du chapitre — arabe ou romain
   const numAffiche=(b.numerotation==='romain')?toRoman(chapNum):chapNum;
   let html=`<div class="lecture-ch-num"><span class="lecture-star-side">✦</span>Chapitre ${numAffiche}<span class="lecture-star-side">✦</span></div>`;

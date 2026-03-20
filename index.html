@@ -763,6 +763,19 @@
     </div>
   </div>
 
+  <!-- POP-UP SUGGESTION ABONNEMENT -->
+  <div class="modal-overlay" id="abo-suggestion-popup" style="position:fixed;z-index:200" onclick="closeModal(event,'abo-suggestion-popup')">
+    <div class="modal-box" style="text-align:center">
+      <div style="font-size:36px;margin-bottom:12px">🔔</div>
+      <div class="modal-title">Tu sembles déjà apprécier cette histoire !</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.7">Souhaites-tu t'abonner pour être notifiée à chaque nouveau chapitre ?</p>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-full btn-accent" onclick="accepterAboSuggestion()">Oui ✦</button>
+        <button class="btn btn-full" onclick="refuserAboSuggestion()">Non</button>
+      </div>
+    </div>
+  </div>
+
 </div><!-- #app -->
 
 <div id="pwa-banner" class="hidden">
