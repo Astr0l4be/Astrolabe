@@ -535,27 +535,54 @@ async function checkSession() {
    VÉRIFICATION D'ÂGE (visiteurs non connectés)
    ══════════════════════════════════════════════════════ */
 
-function validerAge() {
-  const annee = parseInt(document.getElementById('age-annee-input').value);
-  const errEl = document.getElementById('age-error');
-  const now = new Date().getFullYear();
+function _initAgeSelect() {
+  const selAnnee = document.getElementById('age-annee-input');
+  const selMois  = document.getElementById('age-mois-input');
+  if (!selAnnee || !selMois) return;
 
-  if (!annee || annee < 1920 || annee > now) {
-    errEl.style.display = 'block'; return;
+  const moisNoms = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const defM = document.createElement('option');
+  defM.value = ''; defM.textContent = '— Mois —'; defM.disabled = true; defM.selected = true;
+  selMois.appendChild(defM);
+  moisNoms.forEach((m, i) => {
+    const o = document.createElement('option');
+    o.value = i + 1; o.textContent = m;
+    selMois.appendChild(o);
+  });
+
+  const now = new Date().getFullYear();
+  const defA = document.createElement('option');
+  defA.value = ''; defA.textContent = '— Année —'; defA.disabled = true; defA.selected = true;
+  selAnnee.appendChild(defA);
+  for (let y = now; y >= 1920; y--) {
+    const o = document.createElement('option');
+    o.value = y; o.textContent = y;
+    selAnnee.appendChild(o);
   }
+}
+
+function validerAge() {
+  const mois   = parseInt(document.getElementById('age-mois-input').value);
+  const annee  = parseInt(document.getElementById('age-annee-input').value);
+  const check  = document.getElementById('age-confirm-check').checked;
+  const errEl  = document.getElementById('age-error');
+
+  if (!mois || !annee || !check) { errEl.style.display = 'block'; return; }
   errEl.style.display = 'none';
 
-  const age = now - annee;
+  // Calcul de l'âge précis avec mois
+  const now = new Date();
+  let age = now.getFullYear() - annee;
+  if (now.getMonth() + 1 < mois) age--; // pas encore eu l'anniversaire ce mois-ci
+
   const tranche = trancheFromAge(age);
 
   if (tranche === 'refuse') {
-    // Bloquer l'accès — remplacer le popup âge par le popup refus
     closeM('age-popup');
     document.getElementById('age-refuse-popup').classList.add('open');
     return;
   }
 
-  // Appliquer la tranche pour les visiteurs non connectés
   compte.trancheAge = tranche;
   sessionStorage.setItem('visiteur_tranche', tranche);
   renderGrid('book-grid', BOOKS);
@@ -563,7 +590,6 @@ function validerAge() {
   renderGrid('hashtag-grid', BOOKS);
 
   closeM('age-popup');
-  // Afficher le conseil de création de compte
   setTimeout(() => openModal('compte-conseil-popup'), 300);
 }
 
@@ -571,6 +597,7 @@ function validerAge() {
    DÉMARRAGE — passage du splash à p-main
    ══════════════════════════════════════════════════════ */
 function _lancerApp() {
+  _initAgeSelect();
   // Filet de sécurité : si Supabase ne répond pas, on passe quand même
   const splashGuard = setTimeout(() => {
     if (document.querySelector('.page.active')?.id === 'p-splash') {

@@ -781,15 +781,35 @@
     <div class="modal-box" style="text-align:center">
       <div style="font-size:36px;margin-bottom:12px">✦</div>
       <div class="modal-title">Bienvenue sur Astrolabe</div>
-      <p style="font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.7">Pour accéder au contenu adapté à ton âge, merci d'indiquer ton année de naissance.</p>
-      <div class="form-group" style="margin-bottom:20px">
-        <label class="form-label">Ton année de naissance</label>
-        <input type="number" class="form-input" id="age-annee-input"
-          placeholder="ex : 2001" min="1920" max="2025"
-          style="text-align:center;font-size:18px;letter-spacing:2px">
-        <span id="age-error" style="font-size:11px;color:var(--danger);display:none;margin-top:6px;display:none">Merci d'entrer une année valide.</span>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.7;font-style:italic;">Ce site propose du contenu réservé aux majeurs (18+) ; en accédant, vous confirmez avoir 18 ans ou plus.</p>
+      <div style="display:flex;gap:10px;margin-bottom:16px">
+        <div style="flex:1">
+          <label class="form-label">Mois</label>
+          <select class="form-select" id="age-mois-input" style="text-align:center"></select>
+        </div>
+        <div style="flex:1">
+          <label class="form-label">Année</label>
+          <select class="form-select" id="age-annee-input" style="text-align:center"></select>
+        </div>
       </div>
+      <label style="display:flex;align-items:flex-start;gap:10px;text-align:left;margin-bottom:16px;cursor:pointer">
+        <input type="checkbox" id="age-confirm-check" style="margin-top:3px;flex-shrink:0;accent-color:var(--accent)">
+        <span style="font-size:11px;color:var(--text2);line-height:1.6;">Je confirme avoir saisi ma date de naissance correctement et avoir pris connaissance des <button onclick="openModal('cgu-popup')" style="background:none;border:none;color:var(--accent);font-family:'Jost',sans-serif;font-size:11px;cursor:pointer;padding:0;text-decoration:underline;">Conditions d'Utilisation</button> indiquant que le contenu accessible est réservé aux majeurs et adapté à l'âge déclaré.</span>
+      </label>
+      <span id="age-error" style="font-size:11px;color:var(--danger);display:none;margin-bottom:10px;display:none">Merci de remplir tous les champs et de cocher la case.</span>
       <button class="btn btn-full btn-accent" onclick="validerAge()">Entrer ✦</button>
+    </div>
+  </div>
+
+  <!-- POP-UP CGU -->
+  <div class="modal-overlay" id="cgu-popup" style="position:fixed;z-index:400" onclick="closeModal(event,'cgu-popup')">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeM('cgu-popup')">✕</button>
+      <div class="modal-title" style="font-size:18px">Conditions d'Utilisation (CGU) – Accès Visiteur</div>
+      <p style="font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:12px">En accédant à ce site, vous déclarez avoir saisi votre date de naissance correctement. Le contenu proposé est destiné à un public correspondant à l'âge indiqué : 13 ans et plus pour le contenu soft, 18 ans et plus pour le contenu adulte.</p>
+      <p style="font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:12px">Le site décline toute responsabilité en cas de consultation par des mineurs ayant menti sur leur âge.</p>
+      <p style="font-size:12px;color:var(--text2);line-height:1.8;">En utilisant le site, vous acceptez ces conditions et vous engagez à respecter les limitations d'accès selon votre âge.</p>
+      <button class="btn btn-full btn-accent" style="margin-top:20px" onclick="closeM('cgu-popup')">J'ai compris ✦</button>
     </div>
   </div>
 
@@ -799,7 +819,8 @@
       <div style="font-size:52px;margin-bottom:16px">🌙</div>
       <div class="modal-title">Bonjour mon petit chat !</div>
       <p style="font-size:13px;color:var(--text2);line-height:1.9;margin-bottom:24px">Tu me sembles encore un peu jeune pour entrer sur Astrolabe. Reviens nous voir quand tu seras plus grand·e !</p>
-      <p style="font-size:13px;color:var(--text2);">À bientôt ✦ Astrolabe</p>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:24px;">À bientôt ✦ Astrolabe</p>
+      <button class="btn btn-full" onclick="window.location.href='about:blank'" style="color:var(--danger);border-color:rgba(212,126,126,.3)">Quitter</button>
     </div>
   </div>
 
