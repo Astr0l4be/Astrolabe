@@ -308,6 +308,66 @@ async function soumettreNote() {
 }
 
 
+/* ══════════════════════════════════════════════════════
+   ABONNEMENTS HISTOIRES
+   ══════════════════════════════════════════════════════ */
+
+let _estAbonne = false;
+
+async function loadAbonnement(histoireId) {
+  const bloc = document.getElementById('abo-bloc');
+  if (!bloc) return;
+
+  // Uniquement visible si connecté
+  if (!compte.loggedIn || !compte.userId) {
+    bloc.style.display = 'none';
+    return;
+  }
+
+  bloc.style.display = 'block';
+  const { data } = await db.from('abonnements_histoires')
+    .select('id')
+    .eq('histoire_id', histoireId)
+    .eq('user_id', compte.userId)
+    .single();
+
+  _estAbonne = !!data;
+  _renderAbonnementBtn();
+}
+
+function _renderAbonnementBtn() {
+  const btn = document.getElementById('abo-btn');
+  if (!btn) return;
+  if (_estAbonne) {
+    btn.textContent = '🔔 Abonné · Se désabonner';
+    btn.classList.add('btn-abo-actif');
+  } else {
+    btn.textContent = '🔔 S\'abonner aux nouveautés';
+    btn.classList.remove('btn-abo-actif');
+  }
+}
+
+async function toggleAbonnement() {
+  if (!compte.loggedIn || !compte.userId) return;
+  const btn = document.getElementById('abo-btn');
+  if (btn) btn.disabled = true;
+
+  if (_estAbonne) {
+    await db.from('abonnements_histoires')
+      .delete()
+      .eq('histoire_id', currentHistoireId)
+      .eq('user_id', compte.userId);
+    _estAbonne = false;
+  } else {
+    await db.from('abonnements_histoires')
+      .insert({ user_id: compte.userId, histoire_id: currentHistoireId });
+    _estAbonne = true;
+  }
+
+  if (btn) btn.disabled = false;
+  _renderAbonnementBtn();
+}
+
 function openHistoire(id){
   currentHistoireId=id;
   const cur=document.querySelector('.page.active');if(cur)prevPage=cur.id;
@@ -349,6 +409,7 @@ function openHistoire(id){
   _renderChapitresList(b,vc,_mpNum);
   _updateBtnLectureRapide(b);
   loadNoteHistoire(id).catch(()=>{});
+  loadAbonnement(id).catch(()=>{});
   const backDest=(prevPage==='p-histoire'||prevPage==='p-lecture')?'p-main':prevPage;
   document.getElementById('histoire-back-btn').onclick=function(){go(backDest);};
   go('p-histoire');
