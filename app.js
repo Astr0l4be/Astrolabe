@@ -588,16 +588,15 @@ async function _renderTWFiltreListe() {
   const tousLesTW = [...new Set(data.map(r => r.contenu).filter(Boolean))].sort();
   const filtresActifs = compte.twFiltres || [];
 
+  liste.style.flexDirection = 'row';
+  liste.style.flexWrap = 'wrap';
+  liste.style.gap = '8px';
+
   liste.innerHTML = tousLesTW.map(tw => `
-    <div class="toggle-row">
-      <span class="toggle-label">${tw}</span>
-      <label class="tgl">
-        <input type="checkbox" ${filtresActifs.includes(tw) ? 'checked' : ''}
-          onchange="toggleTWFiltre('${tw.replace(/'/g, "\\'")}', this.checked)">
-        <div class="tgl-track"></div>
-        <div class="tgl-thumb"></div>
-      </label>
-    </div>
+    <button class="tw-filtre-pill${filtresActifs.includes(tw) ? ' tw-filtre-pill-actif' : ''}"
+      onclick="toggleTWFiltre('${tw.replace(/'/g, "\\'")}', ${!filtresActifs.includes(tw)})">
+      ${tw}
+    </button>
   `).join('');
 }
 
@@ -608,6 +607,12 @@ async function toggleTWFiltre(tw, actif) {
   } else {
     compte.twFiltres = compte.twFiltres.filter(t => t !== tw);
   }
+  // Mettre à jour visuellement les pills
+  document.querySelectorAll('.tw-filtre-pill').forEach(btn => {
+    const label = btn.textContent.trim();
+    btn.classList.toggle('tw-filtre-pill-actif', compte.twFiltres.includes(label));
+    btn.onclick = () => toggleTWFiltre(label, !compte.twFiltres.includes(label));
+  });
   // Sauvegarder en Supabase
   await db.from('profils').update({ tw_filtres: compte.twFiltres }).eq('id', compte.userId);
   // Mettre à jour le catalogue
