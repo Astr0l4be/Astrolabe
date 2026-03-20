@@ -193,8 +193,9 @@
     .histoire-title-wrap .histoire-title{padding:0;flex:1;text-align:center;}
     .btn-pal{position:absolute;right:16px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;background:rgba(140,150,195,.1);border:1px solid rgba(180,190,255,.2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s,border-color .2s;flex-shrink:0;padding:0;gap:0;}
     .btn-pal:hover{background:rgba(126,159,212,.2);border-color:rgba(126,159,212,.4);}
-    .btn-pal.btn-pal-actif{background:rgba(126,159,212,.35);border-color:rgba(126,159,212,.8);}
-    .btn-pal.btn-pal-actif .pal-plus{color:#eef0fa;}
+    .btn-pal.btn-pal-actif{background:#eef0fa;border-color:#eef0fa;}
+    .btn-pal.btn-pal-actif .pal-icon{filter:invert(1);}
+    .btn-pal.btn-pal-actif .pal-plus{color:var(--accent);}
     .pal-icon{font-size:14px;line-height:1;}
     .pal-plus{font-size:11px;font-weight:700;color:var(--accent);line-height:1;margin-left:1px;}
 
