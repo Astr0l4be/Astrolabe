@@ -740,15 +740,19 @@
 
   <!-- LECTURE -->
   <div class="page" id="p-lecture">
-    <div class="lecture-header">
+    <!-- Barre de progression lecture -->
+    <div id="lecture-progress-bar"></div>
+    <div class="lecture-header" id="lecture-header">
       <button class="btn" id="lecture-back-btn" onclick="go('p-histoire')">← Retour</button>
       <div class="lecture-titre" id="lecture-titre" style="color:inherit"></div>
       <button class="btn btn-icon" onclick="openOptionsPopup(currentHistoireId)" style="font-size:16px;background:none;border:1px solid rgba(180,190,255,.2);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;flex-shrink:0">⚙</button>
     </div>
-    <div class="page-scroll">
+    <div class="page-scroll" id="lecture-scroller">
       <div class="lecture-body" id="lecture-body"></div>
       <div class="lecture-nav" id="lecture-nav"></div>
     </div>
+    <!-- Bouton mode immersif -->
+    <button id="btn-immersif" onclick="toggleImmersif()" title="Mode immersif">✦</button>
   </div>
 
   <!-- MON COMPTE -->

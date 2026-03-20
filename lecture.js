@@ -201,6 +201,7 @@ async function openLecture(bookId,chapNum){
 
   document.getElementById('lecture-back-btn').onclick=()=>{
     _sauvegarderScrollPosition(bookId,chapNum);
+    quitterImmersif();
     // Sauvegarder le marque-page et rafraîchir la liste immédiatement
     const _mp=JSON.parse(localStorage.getItem('marque_pages')||'{}');
     _mp[bookId]=chapNum;
@@ -213,6 +214,11 @@ async function openLecture(bookId,chapNum){
   };
   const _scrollKey='scroll_'+bookId+'_'+chapNum;
   const _savedScroll=localStorage.getItem(_scrollKey);
+  // Remettre la barre de progression à 0
+  const progressBar=document.getElementById('lecture-progress-bar');
+  if(progressBar) progressBar.style.width='0%';
+  // Quitter le mode immersif si changement de chapitre
+  quitterImmersif();
   // Ne remettre à zéro que s'il n'y a pas de position sauvegardée
   if(!_savedScroll) document.querySelector('#p-lecture .page-scroll').scrollTop=0;
   go('p-lecture');
@@ -222,6 +228,13 @@ async function openLecture(bookId,chapNum){
   const _scroller=document.querySelector('#p-lecture .page-scroll');
   if(_scroller){
     const _onScroll=()=>{
+      // Barre de progression
+      const progressBar=document.getElementById('lecture-progress-bar');
+      if(progressBar){
+        const scrolled=_scroller.scrollTop;
+        const total=_scroller.scrollHeight-_scroller.clientHeight;
+        progressBar.style.width=(total>0?Math.min(100,(scrolled/total)*100):0)+'%';
+      }
       const distanceFin=_scroller.scrollHeight-_scroller.scrollTop-_scroller.clientHeight;
       if(distanceFin<200){
         localStorage.setItem('chapitre_fini_'+bookId+'_'+chapNum,'1');
@@ -370,6 +383,24 @@ function applyLectureMode(){
     el.style.color=modeJour?'':'couleur';
     el.style.color=couleur;
   });
+}
+
+/* ══════════════════════════════════════════════════════
+   MODE IMMERSIF
+   ══════════════════════════════════════════════════════ */
+
+let _modeImmersif = false;
+
+function toggleImmersif() {
+  _modeImmersif = !_modeImmersif;
+  document.getElementById('p-lecture').classList.toggle('mode-immersif', _modeImmersif);
+  const btn = document.getElementById('btn-immersif');
+  if (btn) btn.title = _modeImmersif ? 'Quitter le mode immersif' : 'Mode immersif';
+}
+
+function quitterImmersif() {
+  _modeImmersif = false;
+  document.getElementById('p-lecture').classList.remove('mode-immersif');
 }
 
 function syncCompteToggles(){
