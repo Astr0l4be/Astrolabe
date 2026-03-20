@@ -173,6 +173,93 @@ function goHashtag(name){
 
 let prevPage='p-main';
 
+/* ══════════════════════════════════════════════════════
+   SYSTÈME DE NOTES ÉTOILES
+   ══════════════════════════════════════════════════════ */
+
+let _noteUtilisateur = 0; // note de l'utilisateur connecté pour l'histoire ouverte
+
+async function loadNoteHistoire(histoireId) {
+  // Récupère la moyenne globale + le nombre de notes
+  const { data: stats } = await db.from('notes')
+    .select('note')
+    .eq('histoire_id', histoireId);
+
+  let moyenne = 0;
+  let nbNotes = 0;
+  if (stats && stats.length) {
+    nbNotes = stats.length;
+    moyenne = stats.reduce((s, r) => s + r.note, 0) / nbNotes;
+  }
+
+  // Récupère la note personnelle si connecté
+  _noteUtilisateur = 0;
+  if (compte.loggedIn && compte.userId) {
+    const { data: perso } = await db.from('notes')
+      .select('note')
+      .eq('histoire_id', histoireId)
+      .eq('user_id', compte.userId)
+      .single();
+    if (perso) _noteUtilisateur = perso.note;
+  }
+
+  _renderNoteBloc(moyenne, nbNotes, _noteUtilisateur);
+}
+
+function _renderNoteBloc(moyenne, nbNotes, notePerso) {
+  const bloc = document.getElementById('note-bloc');
+  if (!bloc) return;
+
+  // Étoiles interactives (note perso) ou grisées si non connecté
+  const starsHTML = [1,2,3,4,5].map(i =>
+    `<button class="note-star${i <= notePerso ? ' active' : ''}"
+      onclick="soumettreNote(${i})"
+      onmouseenter="_hoverNote(${i})"
+      onmouseleave="_hoverNote(0)"
+      ${!compte.loggedIn ? 'disabled title="Connecte-toi pour noter"' : ''}
+    >★</button>`
+  ).join('');
+
+  const moyenneTexte = nbNotes > 0
+    ? `${moyenne.toFixed(1)} ✦ ${nbNotes} avis`
+    : 'Aucun avis pour l\'instant';
+
+  const infoTexte = !compte.loggedIn
+    ? 'Connecte-toi pour laisser une note'
+    : (notePerso ? `Ta note : ${notePerso}/5` : 'Note cette histoire !');
+
+  bloc.innerHTML = `
+    <div class="note-stars" id="note-stars">${starsHTML}</div>
+    <div class="note-moyenne">${moyenneTexte}</div>
+    <div class="note-info">${infoTexte}</div>
+  `;
+}
+
+function _hoverNote(n) {
+  const stars = document.querySelectorAll('.note-star');
+  stars.forEach((s, i) => {
+    if (n === 0) {
+      // Revenir à l'état sauvegardé
+      s.classList.toggle('active', i < _noteUtilisateur);
+    } else {
+      s.classList.toggle('active', i < n);
+    }
+  });
+}
+
+async function soumettreNote(n) {
+  if (!compte.loggedIn || !compte.userId) return;
+  _noteUtilisateur = n;
+  // Upsert : insert ou update si déjà une note
+  await db.from('notes').upsert(
+    { user_id: compte.userId, histoire_id: currentHistoireId, note: n },
+    { onConflict: 'user_id,histoire_id' }
+  );
+  // Recharger les stats pour mettre à jour la moyenne
+  await loadNoteHistoire(currentHistoireId);
+}
+
+
 function openHistoire(id){
   currentHistoireId=id;
   const cur=document.querySelector('.page.active');if(cur)prevPage=cur.id;
@@ -213,6 +300,7 @@ function openHistoire(id){
   const _mpNum=_mp[id]||null;
   _renderChapitresList(b,vc,_mpNum);
   _updateBtnLectureRapide(b);
+  loadNoteHistoire(id).catch(()=>{});
   const backDest=(prevPage==='p-histoire'||prevPage==='p-lecture')?'p-main':prevPage;
   document.getElementById('histoire-back-btn').onclick=function(){go(backDest);};
   go('p-histoire');

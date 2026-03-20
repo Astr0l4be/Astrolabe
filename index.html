@@ -395,6 +395,17 @@
         <div class="tw-text" id="tw-text-reveal"></div>
       </div>
       <div class="histoire-desc" id="histoire-desc"></div>
+      <!-- NOTE ÉTOILES -->
+      <div class="note-bloc" id="note-bloc">
+        <div class="note-stars">
+          <button class="note-star">★</button>
+          <button class="note-star">★</button>
+          <button class="note-star">★</button>
+          <button class="note-star">★</button>
+          <button class="note-star">★</button>
+        </div>
+        <div class="note-moyenne">Chargement…</div>
+      </div>
       <div class="chapitres-label">Chapitres</div>
       <button id="btn-lecture-rapide" style="display:none;margin:0 16px 14px;width:calc(100% - 32px);padding:14px;background:rgba(126,159,212,.15);border:1px solid rgba(126,159,212,.4);border-radius:12px;color:#eef0fa;font-family:'Jost',sans-serif;font-size:14px;letter-spacing:.5px;cursor:pointer;" onclick="lancerLectureRapide()">Commencer l'histoire</button>
       <div id="chapitres-list"></div>
@@ -760,18 +771,10 @@
   <button class="pwa-close-btn" onclick="closePWABanner()">✕</button>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onload="window._supabaseReady=true"></script>
-<script>
-// Attendre que le CDN Supabase soit chargé avant de lancer les scripts
-function _waitAndLoad(srcs, i) {
-  if (!window._supabaseReady) { setTimeout(() => _waitAndLoad(srcs, i), 50); return; }
-  if (i >= srcs.length) return;
-  const s = document.createElement('script');
-  s.src = srcs[i];
-  s.onload = () => _waitAndLoad(srcs, i + 1);
-  document.body.appendChild(s);
-}
-_waitAndLoad(['supabase.js','app.js','lecture.js','auth.js'], 0);
-</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="app.js"></script>
+<script src="lecture.js"></script>
+<script src="auth.js"></script>
 </body>
 </html>
