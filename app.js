@@ -589,11 +589,15 @@ async function _renderTWFiltreListe() {
   const filtresActifs = compte.twFiltres || [];
 
   liste.innerHTML = tousLesTW.map(tw => `
-    <label class="tw-filtre-row">
-      <input type="checkbox" ${filtresActifs.includes(tw) ? 'checked' : ''}
-        onchange="toggleTWFiltre('${tw.replace(/'/g, "\\'")}', this.checked)">
-      <span>${tw}</span>
-    </label>
+    <div class="toggle-row">
+      <span class="toggle-label">${tw}</span>
+      <label class="tgl">
+        <input type="checkbox" ${filtresActifs.includes(tw) ? 'checked' : ''}
+          onchange="toggleTWFiltre('${tw.replace(/'/g, "\\'")}', this.checked)">
+        <div class="tgl-track"></div>
+        <div class="tgl-thumb"></div>
+      </label>
+    </div>
   `).join('');
 }
 
