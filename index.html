@@ -787,9 +787,12 @@
         <div class="toggle-row"><span class="toggle-label">Trigger warnings (chapitres)</span><label class="tgl"><input type="checkbox" id="toggle-tw-chapitre" onchange="compte.twrChapitre=this.checked;savePrefs()"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
         <div class="divider"></div>
         <!-- FILTRE TRIGGER WARNINGS -->
-        <div class="toggle-row" style="cursor:pointer" onclick="toggleTWFiltrePanel()">
-          <span class="toggle-label">Filtrer les Trigger Warnings</span>
-          <span id="tw-filtre-chevron" style="color:var(--accent);font-size:14px;transition:transform .2s">›</span>
+        <div class="toggle-row">
+          <span class="toggle-label" style="cursor:pointer" onclick="toggleTWFiltrePanel()">Filtrer les Trigger Warnings</span>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span id="tw-filtre-chevron" style="color:var(--accent);font-size:14px;transition:transform .2s;cursor:pointer" onclick="toggleTWFiltrePanel()">›</span>
+            <label class="tgl"><input type="checkbox" id="toggle-tw-filtre-actif" onchange="setTWFiltreActif(this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
+          </div>
         </div>
         <div id="tw-filtre-panel" style="display:none;padding:10px 0 6px">
           <p style="font-size:11px;color:var(--text3);line-height:1.6;margin-bottom:10px">Les histoires contenant les triggers cochés seront masquées du catalogue.</p>

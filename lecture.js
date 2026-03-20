@@ -376,9 +376,11 @@ function syncCompteToggles(){
   const togAdulte=document.getElementById('toggle-adulte');
   const togTWH=document.getElementById('toggle-tw-histoire');
   const togTWC=document.getElementById('toggle-tw-chapitre');
+  const togTWF=document.getElementById('toggle-tw-filtre-actif');
   if(togAdulte)togAdulte.checked=compte.adulte;
   if(togTWH)togTWH.checked=compte.twrHistoire;
   if(togTWC)togTWC.checked=compte.twrChapitre;
+  if(togTWF)togTWF.checked=compte.twFiltreActif||false;
   const rowAdulte=document.getElementById('row-adulte');
   if(rowAdulte)rowAdulte.style.display=compte.estAdulteAge?'flex':'none';
   // Restaurer le mode lecture sauvegardé

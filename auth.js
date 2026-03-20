@@ -384,6 +384,7 @@ function _chargerProfil(userId, profil) {
   compte.afficherChoixVersion = profil.afficher_choix_version === true;
   compte.versionDefaut        = profil.version_defaut || 'spicy';
   compte.twFiltres            = profil.tw_filtres || [];
+  compte.twFiltreActif        = profil.tw_filtre_actif || false;
   compte.estAdulteAge  = calcAge(profil.date_naissance) >= 18;
   compte.est16Ans      = calcAge(profil.date_naissance) >= 16;
   document.getElementById('compte-name').textContent = compte.pseudo;

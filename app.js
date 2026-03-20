@@ -29,8 +29,8 @@ function bookCardHTML(b){
 function livreVisible(b){
   const tranche=compte.trancheAge||'adulte';
 
-  // Filtre TW — masquer les histoires dont un TW est dans la liste filtrée
-  if(compte.twFiltres && compte.twFiltres.length && b.tw){
+  // Filtre TW — uniquement si le filtre est activé
+  if(compte.twFiltreActif && compte.twFiltres && compte.twFiltres.length && b.tw){
     const twsHistoire = b.tw.split(',').map(t => t.trim());
     if(compte.twFiltres.some(f => twsHistoire.includes(f))) return false;
   }
@@ -560,8 +560,26 @@ async function renderBibliotheque() {
    FILTRE TRIGGER WARNINGS
    ══════════════════════════════════════════════════════ */
 
-// Liste des TW filtrés par l'utilisateur (chargée depuis Supabase)
+// compte.twFiltreActif = true si le filtre est activé
 compte.twFiltres = [];
+compte.twFiltreActif = false;
+
+function setTWFiltreActif(actif) {
+  compte.twFiltreActif = actif;
+  if (!actif) {
+    // Fermer le panel si on désactive
+    const panel = document.getElementById('tw-filtre-panel');
+    const chevron = document.getElementById('tw-filtre-chevron');
+    if (panel) panel.style.display = 'none';
+    if (chevron) chevron.style.transform = '';
+  }
+  if (compte.userId) {
+    db.from('profils').update({ tw_filtre_actif: actif }).eq('id', compte.userId).catch(() => {});
+  }
+  renderGrid('book-grid', BOOKS);
+  renderGrid('search-grid', BOOKS);
+  renderGrid('hashtag-grid', BOOKS);
+}
 
 function toggleTWFiltrePanel() {
   const panel = document.getElementById('tw-filtre-panel');
