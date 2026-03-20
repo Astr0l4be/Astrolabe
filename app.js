@@ -345,7 +345,7 @@ function _updateBtnLectureRapide(b){
 
   // Aucun chapitre lu → Commencer
   if(!lus.length||!dernierChapLu){
-    btn.textContent='✦ Commencer l'histoire';
+    btn.textContent="✦ Commencer l'histoire";
     btn.style.display='block';
     window._lectureRapideChap=b.chapitres.length?b.chapitres[0].num:1;
     return;
