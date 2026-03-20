@@ -382,14 +382,11 @@ function syncCompteToggles(){
   if(togTWC)togTWC.checked=compte.twrChapitre;
   if(togTWF){
     togTWF.checked=compte.twFiltreActif||false;
-    const chevron=document.getElementById('tw-filtre-chevron');
     const panel=document.getElementById('tw-filtre-panel');
     if(compte.twFiltreActif){
-      if(chevron)chevron.style.display='none';
       if(panel)panel.style.display='block';
       _renderTWFiltreListe();
     } else {
-      if(chevron)chevron.style.display='';
       if(panel)panel.style.display='none';
     }
   }
