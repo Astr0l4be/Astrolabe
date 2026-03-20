@@ -83,7 +83,7 @@
       <div class="main-footer">
         <div class="footer-divider"></div>
         <div class="footer-links">
-          <button onclick="go('p-mentions-legales')" class="footer-link">Mentions légales</button>
+          <button onclick="go('p-mentions-legales')" class="footer-link">Politique de confidentialité</button>
           <span class="footer-sep">·</span>
           <button onclick="go('p-cgu')" class="footer-link">CGU</button>
           <span class="footer-sep">·</span>
@@ -127,57 +127,78 @@
     </div>
   </div>
 
-  <!-- MENTIONS LÉGALES -->
+  <!-- MENTIONS LÉGALES = POLITIQUE DE CONFIDENTIALITÉ -->
   <div class="page" id="p-mentions-legales">
-    <div class="page-header"><button class="btn" onclick="history.back?go('p-main'):go('p-main')">← Retour</button></div>
+    <div class="page-header"><button class="btn" onclick="go('p-main')">← Retour</button></div>
     <div class="page-scroll"><div class="page-body">
-      <div class="page-title">Mentions légales & CGU</div>
+      <div class="page-title">Politique de confidentialité</div>
 
       <div class="ml-section">
-        <div class="ml-titre">1. Éditeur du site</div>
-        <p class="ml-texte">Le site Astrolabe est édité par :</p>
-        <p class="ml-texte"><strong>Nom / Raison sociale :</strong> <span class="ml-placeholder">[À compléter]</span></p>
-        <p class="ml-texte"><strong>Adresse :</strong> <span class="ml-placeholder">[À compléter]</span></p>
-        <p class="ml-texte"><strong>E-mail de contact :</strong> <span class="ml-placeholder">[À compléter]</span></p>
-        <p class="ml-texte"><strong>Directeur de la publication :</strong> <span class="ml-placeholder">[À compléter]</span></p>
+        <div class="ml-titre">1. Données collectées</div>
+        <p class="ml-texte">Nous collectons et traitons certaines données personnelles pour permettre l'accès et l'utilisation du site :</p>
+        <ul class="ml-liste">
+          <li>Adresse e-mail et mot de passe pour créer et gérer un compte</li>
+          <li>Date de naissance pour vérifier l'âge et adapter le contenu</li>
+          <li>Données de paiement uniquement lorsque vous souscrivez à un abonnement ou achetez du contenu payant</li>
+        </ul>
       </div>
 
       <div class="ml-section">
-        <div class="ml-titre">2. Hébergement</div>
-        <p class="ml-texte">Le site est hébergé par :</p>
-        <p class="ml-texte"><strong>Hébergeur :</strong> <span class="ml-placeholder">[À compléter — ex : GitHub Pages, Netlify, OVH…]</span></p>
-        <p class="ml-texte"><strong>Base de données :</strong> Supabase — 970 Hope St, San Francisco, CA 94103, États-Unis</p>
+        <div class="ml-titre">2. Finalité de la collecte</div>
+        <p class="ml-texte">Ces données sont utilisées uniquement pour :</p>
+        <ul class="ml-liste">
+          <li>Créer et gérer votre compte utilisateur</li>
+          <li>Vérifier que vous êtes majeur pour accéder au contenu adulte</li>
+          <li>Gérer les achats et abonnements</li>
+          <li>Assurer la sécurité et le bon fonctionnement du site</li>
+        </ul>
       </div>
 
       <div class="ml-section">
-        <div class="ml-titre">3. Contenu et accès</div>
-        <p class="ml-texte">Astrolabe est une plateforme de lecture de romans en ligne. Certains contenus sont réservés aux personnes majeures (18 ans et plus) ou adaptés selon les tranches d'âge déclarées.</p>
-        <p class="ml-texte">L'accès au site implique la déclaration préalable de l'âge de l'utilisateur. Le site décline toute responsabilité en cas de fausse déclaration.</p>
+        <div class="ml-titre">3. Hébergement et prestataires</div>
+        <p class="ml-texte">Vos données sont hébergées et traitées par des prestataires tiers sécurisés :</p>
+        <ul class="ml-liste">
+          <li>Base de données : Supabase</li>
+          <li>Paiement : service tiers sécurisé</li>
+        </ul>
+        <p class="ml-texte">Ces prestataires ne vendent pas vos données et les traitent uniquement pour le compte du site.</p>
       </div>
 
       <div class="ml-section">
-        <div class="ml-titre">4. Propriété intellectuelle</div>
-        <p class="ml-texte">L'ensemble des contenus publiés sur Astrolabe (textes, illustrations, interface) sont la propriété de leurs auteurs respectifs et sont protégés par le droit d'auteur. Toute reproduction sans autorisation est interdite.</p>
+        <div class="ml-titre">4. Confidentialité et partage</div>
+        <ul class="ml-liste">
+          <li>Nous ne vendons ni ne partageons vos données à des tiers à d'autres fins</li>
+          <li>Les données sont utilisées uniquement pour les finalités indiquées</li>
+        </ul>
       </div>
 
       <div class="ml-section">
-        <div class="ml-titre">5. Données personnelles (RGPD)</div>
-        <p class="ml-texte">Les données collectées (adresse e-mail, date de naissance, préférences de lecture) sont utilisées uniquement pour le fonctionnement du service et ne sont pas transmises à des tiers.</p>
-        <p class="ml-texte">Conformément au RGPD, vous disposez d'un droit d'accès, de rectification et de suppression de vos données. Pour exercer ces droits, contactez-nous à : <span class="ml-placeholder">[e-mail de contact]</span></p>
+        <div class="ml-titre">5. Sécurité</div>
+        <p class="ml-texte">Nous mettons en place des mesures techniques et organisationnelles pour protéger vos données contre :</p>
+        <ul class="ml-liste">
+          <li>L'accès non autorisé</li>
+          <li>La perte ou modification accidentelle</li>
+          <li>Tout usage abusif</li>
+        </ul>
       </div>
 
       <div class="ml-section">
-        <div class="ml-titre">6. Cookies</div>
-        <p class="ml-texte">Ce site utilise des cookies strictement nécessaires à son fonctionnement (authentification, session). Aucun cookie publicitaire ou de tracking n'est utilisé. <button onclick="openModal('cookie-detail-popup')" style="background:none;border:none;color:var(--accent);font-family:'Jost',sans-serif;font-size:12px;cursor:pointer;padding:0;text-decoration:underline;">En savoir plus.</button></p>
+        <div class="ml-titre">6. Droits des utilisateurs (RGPD)</div>
+        <p class="ml-texte">Conformément au RGPD, vous disposez de :</p>
+        <ul class="ml-liste">
+          <li>Droit d'accès à vos données</li>
+          <li>Droit de rectification ou suppression</li>
+          <li>Droit de retirer votre consentement</li>
+        </ul>
+        <p class="ml-texte">Pour exercer vos droits, vous pouvez nous contacter à : <span class="ml-placeholder">[ton e-mail]</span></p>
       </div>
 
       <div class="ml-section">
-        <div class="ml-titre">7. Conditions Générales d'Utilisation</div>
-        <p class="ml-texte">En utilisant Astrolabe, vous acceptez les présentes CGU. Le site se réserve le droit de modifier ces conditions à tout moment. L'utilisation du site après modification vaut acceptation des nouvelles conditions.</p>
-        <p class="ml-texte">Tout compte peut être suspendu ou supprimé en cas de non-respect des règles de la plateforme.</p>
+        <div class="ml-titre">7. Acceptation</div>
+        <p class="ml-texte">En créant un compte ou en utilisant le site, vous acceptez que vos données soient collectées et utilisées conformément à cette politique.</p>
       </div>
 
-      <p class="ml-texte" style="margin-top:24px;color:var(--text3);font-size:11px;">Dernière mise à jour : <span class="ml-placeholder">[Date]</span></p>
+      <p class="ml-texte" style="margin-top:24px;color:var(--text3);">Dernière mise à jour : <span class="ml-placeholder">[Date]</span></p>
     </div></div>
   </div>
 
@@ -683,7 +704,7 @@
         <div class="divider"></div>
         <!-- SUPPRESSION -->
         <div style="text-align:center;padding:8px 0 4px">
-          <button onclick="go('p-mentions-legales')" style="background:none;border:none;color:var(--text3);font-family:'Jost',sans-serif;font-size:11px;cursor:pointer;letter-spacing:.5px;text-decoration:underline;">Mentions légales & CGU</button>
+          <button onclick="go('p-mentions-legales')" style="background:none;border:none;color:var(--text3);font-family:'Jost',sans-serif;font-size:11px;cursor:pointer;letter-spacing:.5px;text-decoration:underline;">Politique de confidentialité & CGU</button>
         </div>
         <div style="text-align:center;padding:4px 0 16px">
           <button style="background:none;border:none;color:var(--danger);font-family:'Jost',sans-serif;font-size:11px;cursor:pointer;letter-spacing:.5px;opacity:.7" onclick="openModal('delete-popup1')">Supprimer mon compte</button>
