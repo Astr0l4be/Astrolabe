@@ -177,85 +177,126 @@ let prevPage='p-main';
    SYSTÈME DE NOTES ÉTOILES
    ══════════════════════════════════════════════════════ */
 
-let _noteUtilisateur = 0; // note de l'utilisateur connecté pour l'histoire ouverte
+let _noteUtilisateur = 0;   // note validée en base
+let _noteSelectionnee = 0;  // note en cours de sélection (pas encore validée)
+let _noteModeEdition = false; // true quand on modifie une note déjà soumise
 
 async function loadNoteHistoire(histoireId) {
-  // Récupère la moyenne globale + le nombre de notes
-  const { data: stats } = await db.from('notes')
-    .select('note')
-    .eq('histoire_id', histoireId);
-
-  let moyenne = 0;
-  let nbNotes = 0;
+  const { data: stats } = await db.from('notes').select('note').eq('histoire_id', histoireId);
+  let moyenne = 0, nbNotes = 0;
   if (stats && stats.length) {
     nbNotes = stats.length;
     moyenne = stats.reduce((s, r) => s + r.note, 0) / nbNotes;
   }
-
-  // Récupère la note personnelle si connecté
   _noteUtilisateur = 0;
   if (compte.loggedIn && compte.userId) {
-    const { data: perso } = await db.from('notes')
-      .select('note')
-      .eq('histoire_id', histoireId)
-      .eq('user_id', compte.userId)
-      .single();
+    const { data: perso } = await db.from('notes').select('note')
+      .eq('histoire_id', histoireId).eq('user_id', compte.userId).single();
     if (perso) _noteUtilisateur = perso.note;
   }
-
-  _renderNoteBloc(moyenne, nbNotes, _noteUtilisateur);
+  _noteSelectionnee = _noteUtilisateur;
+  _noteModeEdition = false;
+  _renderNoteBloc(moyenne, nbNotes);
 }
 
-function _renderNoteBloc(moyenne, nbNotes, notePerso) {
+function _renderNoteBloc(moyenne, nbNotes) {
   const bloc = document.getElementById('note-bloc');
   if (!bloc) return;
 
-  // Étoiles interactives (note perso) ou grisées si non connecté
-  const starsHTML = [1,2,3,4,5].map(i =>
-    `<button class="note-star${i <= notePerso ? ' active' : ''}"
-      onclick="soumettreNote(${i})"
-      onmouseenter="_hoverNote(${i})"
-      onmouseleave="_hoverNote(0)"
-      ${!compte.loggedIn ? 'disabled title="Connecte-toi pour noter"' : ''}
-    >★</button>`
-  ).join('');
-
   const moyenneTexte = nbNotes > 0
-    ? `${moyenne.toFixed(1)} ✦ ${nbNotes} avis`
+    ? `${moyenne.toFixed(1)} ★ · ${nbNotes} avis`
     : 'Aucun avis pour l\'instant';
 
-  const infoTexte = !compte.loggedIn
-    ? 'Connecte-toi pour laisser une note'
-    : (notePerso ? `Ta note : ${notePerso}/5` : 'Note cette histoire !');
+  // CAS 1 : non connecté → étoiles grisées, message
+  if (!compte.loggedIn) {
+    bloc.innerHTML = `
+      <div class="note-stars">
+        ${[1,2,3,4,5].map(i => `<button class="note-star" disabled>★</button>`).join('')}
+      </div>
+      <div class="note-moyenne">${moyenneTexte}</div>
+      <div class="note-info">Connecte-toi pour laisser une note</div>`;
+    return;
+  }
 
+  // CAS 2 : déjà noté et pas en mode édition → note figée + bouton modifier
+  if (_noteUtilisateur > 0 && !_noteModeEdition) {
+    bloc.innerHTML = `
+      <div class="note-stars">
+        ${[1,2,3,4,5].map(i =>
+          `<button class="note-star${i <= _noteUtilisateur ? ' active' : ''}" disabled>★</button>`
+        ).join('')}
+      </div>
+      <div class="note-moyenne">${moyenneTexte}</div>
+      <div class="note-info">Ta note : ${_noteUtilisateur}/5</div>
+      <button class="note-btn-modifier" onclick="_activerEditionNote()">Modifier ma note</button>`;
+    return;
+  }
+
+  // CAS 3 : pas encore noté, ou en mode édition → étoiles cliquables + bouton valider
+  const noteRef = _noteModeEdition ? _noteUtilisateur : 0;
   bloc.innerHTML = `
-    <div class="note-stars" id="note-stars">${starsHTML}</div>
+    <div class="note-stars" id="note-stars">
+      ${[1,2,3,4,5].map(i =>
+        `<button class="note-star${i <= (_noteSelectionnee || noteRef) ? ' active' : ''}"
+          onclick="_selectionnerNote(${i})"
+          onmouseenter="_hoverNote(${i})"
+          onmouseleave="_hoverNote(0)"
+        >★</button>`
+      ).join('')}
+    </div>
     <div class="note-moyenne">${moyenneTexte}</div>
-    <div class="note-info">${infoTexte}</div>
-  `;
+    <div class="note-info" id="note-info-txt">${_noteSelectionnee ? `${_noteSelectionnee}/5 sélectionné` : 'Sélectionne une note'}</div>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+      <button class="note-btn-valider" id="note-btn-valider"
+        onclick="soumettreNote()"
+        ${!_noteSelectionnee ? 'disabled' : ''}>
+        Valider ✦
+      </button>
+      ${_noteModeEdition ? `<button class="note-btn-annuler" onclick="_annulerEditionNote()">Annuler</button>` : ''}
+    </div>`;
+}
+
+function _selectionnerNote(n) {
+  _noteSelectionnee = n;
+  // Mettre à jour les étoiles visuellement
+  document.querySelectorAll('.note-star').forEach((s, i) => s.classList.toggle('active', i < n));
+  // Mettre à jour le texte et débloquer le bouton valider
+  const info = document.getElementById('note-info-txt');
+  if (info) info.textContent = `${n}/5 sélectionné`;
+  const btn = document.getElementById('note-btn-valider');
+  if (btn) btn.disabled = false;
 }
 
 function _hoverNote(n) {
-  const stars = document.querySelectorAll('.note-star');
-  stars.forEach((s, i) => {
-    if (n === 0) {
-      // Revenir à l'état sauvegardé
-      s.classList.toggle('active', i < _noteUtilisateur);
-    } else {
-      s.classList.toggle('active', i < n);
-    }
+  const ref = _noteSelectionnee;
+  document.querySelectorAll('.note-star').forEach((s, i) => {
+    s.classList.toggle('active', i < (n || ref));
   });
 }
 
-async function soumettreNote(n) {
-  if (!compte.loggedIn || !compte.userId) return;
-  _noteUtilisateur = n;
-  // Upsert : insert ou update si déjà une note
+function _activerEditionNote() {
+  _noteModeEdition = true;
+  _noteSelectionnee = _noteUtilisateur;
+  // Recharger juste le rendu sans re-fetcher Supabase
+  loadNoteHistoire(currentHistoireId);
+}
+
+function _annulerEditionNote() {
+  _noteModeEdition = false;
+  _noteSelectionnee = _noteUtilisateur;
+  loadNoteHistoire(currentHistoireId);
+}
+
+async function soumettreNote() {
+  if (!compte.loggedIn || !compte.userId || !_noteSelectionnee) return;
+  const btn = document.getElementById('note-btn-valider');
+  if (btn) { btn.disabled = true; btn.textContent = '…'; }
   await db.from('notes').upsert(
-    { user_id: compte.userId, histoire_id: currentHistoireId, note: n },
+    { user_id: compte.userId, histoire_id: currentHistoireId, note: _noteSelectionnee },
     { onConflict: 'user_id,histoire_id' }
   );
-  // Recharger les stats pour mettre à jour la moyenne
+  _noteUtilisateur = _noteSelectionnee;
+  _noteModeEdition = false;
   await loadNoteHistoire(currentHistoireId);
 }
 
