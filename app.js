@@ -417,8 +417,8 @@ function _renderPALBtn() {
   if (!btn) return;
   if (_estEnPAL) {
     btn.classList.add('btn-pal-actif');
-    if (plus) plus.textContent = '✓';
-    btn.title = 'Dans ma Pile à Lire';
+    if (plus) plus.textContent = '−';
+    btn.title = 'Retirer de ma Pile à Lire';
   } else {
     btn.classList.remove('btn-pal-actif');
     if (plus) plus.textContent = '+';
@@ -428,13 +428,18 @@ function _renderPALBtn() {
 
 function clickPAL() {
   if (!compte.loggedIn || !compte.userId) return;
-  // Si déjà en PAL → retirer directement sans popup
-  if (_estEnPAL) { retirerPAL(); return; }
-  // Si popup désactivé → ajouter directement
   const popupDesactive = localStorage.getItem('pal_popup_off') === '1';
-  if (popupDesactive) { ajouterPAL(); return; }
-  // Sinon afficher le popup de confirmation
-  openModal('pal-popup');
+  const popupRetireDesactive = localStorage.getItem('pal_popup_retire_off') === '1';
+
+  if (_estEnPAL) {
+    // Retirer — popup sauf si désactivé
+    if (popupRetireDesactive) { retirerPAL(); return; }
+    openModal('pal-retire-popup');
+  } else {
+    // Ajouter — popup sauf si désactivé
+    if (popupDesactive) { ajouterPAL(); return; }
+    openModal('pal-popup');
+  }
 }
 
 async function ajouterPAL() {
@@ -462,7 +467,18 @@ async function confirmerPAL() {
 function desactiverPopupPAL() {
   localStorage.setItem('pal_popup_off', '1');
   closeM('pal-popup');
-  ajouterPAL(); // on ajoute quand même au PAL
+  ajouterPAL();
+}
+
+async function confirmerRetirerPAL() {
+  closeM('pal-retire-popup');
+  await retirerPAL();
+}
+
+function desactiverPopupRetirerPAL() {
+  localStorage.setItem('pal_popup_retire_off', '1');
+  closeM('pal-retire-popup');
+  retirerPAL();
 }
 
 function openHistoire(id){

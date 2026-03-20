@@ -768,6 +768,21 @@
     </div>
   </div>
 
+  <!-- POP-UP RETIRER DE LA PILE À LIRE -->
+  <div class="modal-overlay" id="pal-retire-popup" style="position:fixed;z-index:200" onclick="closeModal(event,'pal-retire-popup')">
+    <div class="modal-box" style="text-align:center">
+      <button class="modal-close" onclick="closeM('pal-retire-popup')">✕</button>
+      <div style="font-size:36px;margin-bottom:12px">📚</div>
+      <div class="modal-title">Pile à Lire</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.7">Retirer ce livre de ta Pile à Lire ?</p>
+      <div style="display:flex;gap:10px;margin-bottom:20px">
+        <button class="btn btn-full btn-accent" onclick="confirmerRetirerPAL()">Oui ✦</button>
+        <button class="btn btn-full" onclick="closeM('pal-retire-popup')">Non</button>
+      </div>
+      <button onclick="desactiverPopupRetirerPAL()" style="background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer;font-family:'Jost',sans-serif;text-decoration:underline;">Ne plus afficher ce message</button>
+    </div>
+  </div>
+
   <!-- POP-UP PILE À LIRE -->
   <div class="modal-overlay" id="pal-popup" style="position:fixed;z-index:200" onclick="closeModal(event,'pal-popup')">
     <div class="modal-box" style="text-align:center">
