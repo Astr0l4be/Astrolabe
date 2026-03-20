@@ -380,7 +380,19 @@ function syncCompteToggles(){
   if(togAdulte)togAdulte.checked=compte.adulte;
   if(togTWH)togTWH.checked=compte.twrHistoire;
   if(togTWC)togTWC.checked=compte.twrChapitre;
-  if(togTWF)togTWF.checked=compte.twFiltreActif||false;
+  if(togTWF){
+    togTWF.checked=compte.twFiltreActif||false;
+    const chevron=document.getElementById('tw-filtre-chevron');
+    const panel=document.getElementById('tw-filtre-panel');
+    if(compte.twFiltreActif){
+      if(chevron)chevron.style.display='none';
+      if(panel)panel.style.display='block';
+      _renderTWFiltreListe();
+    } else {
+      if(chevron)chevron.style.display='';
+      if(panel)panel.style.display='none';
+    }
+  }
   const rowAdulte=document.getElementById('row-adulte');
   if(rowAdulte)rowAdulte.style.display=compte.estAdulteAge?'flex':'none';
   // Restaurer le mode lecture sauvegardé

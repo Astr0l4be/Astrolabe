@@ -566,12 +566,17 @@ compte.twFiltreActif = false;
 
 function setTWFiltreActif(actif) {
   compte.twFiltreActif = actif;
-  if (!actif) {
-    // Fermer le panel si on désactive
-    const panel = document.getElementById('tw-filtre-panel');
-    const chevron = document.getElementById('tw-filtre-chevron');
+  const panel = document.getElementById('tw-filtre-panel');
+  const chevron = document.getElementById('tw-filtre-chevron');
+  if (actif) {
+    // Ouvrir le panel, cacher la flèche
+    if (panel) panel.style.display = 'block';
+    if (chevron) chevron.style.display = 'none';
+    _renderTWFiltreListe();
+  } else {
+    // Fermer le panel, remettre la flèche
     if (panel) panel.style.display = 'none';
-    if (chevron) chevron.style.transform = '';
+    if (chevron) { chevron.style.display = ''; chevron.style.transform = ''; }
   }
   if (compte.userId) {
     db.from('profils').update({ tw_filtre_actif: actif }).eq('id', compte.userId).catch(() => {});
