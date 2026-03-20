@@ -532,6 +532,42 @@ async function checkSession() {
 }
 
 /* ══════════════════════════════════════════════════════
+   VÉRIFICATION D'ÂGE (visiteurs non connectés)
+   ══════════════════════════════════════════════════════ */
+
+function validerAge() {
+  const annee = parseInt(document.getElementById('age-annee-input').value);
+  const errEl = document.getElementById('age-error');
+  const now = new Date().getFullYear();
+
+  if (!annee || annee < 1920 || annee > now) {
+    errEl.style.display = 'block'; return;
+  }
+  errEl.style.display = 'none';
+
+  const age = now - annee;
+  const tranche = trancheFromAge(age);
+
+  if (tranche === 'refuse') {
+    // Bloquer l'accès — remplacer le popup âge par le popup refus
+    closeM('age-popup');
+    document.getElementById('age-refuse-popup').classList.add('open');
+    return;
+  }
+
+  // Appliquer la tranche pour les visiteurs non connectés
+  compte.trancheAge = tranche;
+  sessionStorage.setItem('visiteur_tranche', tranche);
+  renderGrid('book-grid', BOOKS);
+  renderGrid('search-grid', BOOKS);
+  renderGrid('hashtag-grid', BOOKS);
+
+  closeM('age-popup');
+  // Afficher le conseil de création de compte
+  setTimeout(() => openModal('compte-conseil-popup'), 300);
+}
+
+/* ══════════════════════════════════════════════════════
    DÉMARRAGE — passage du splash à p-main
    ══════════════════════════════════════════════════════ */
 function _lancerApp() {
@@ -552,6 +588,14 @@ function _lancerApp() {
       go('p-main');
     }
     loadHistoires().catch(() => {});
+
+    // Si non connecté et tranche pas encore définie cette session → popup âge
+    if (!compte.loggedIn && !sessionStorage.getItem('visiteur_tranche')) {
+      setTimeout(() => openModal('age-popup'), 400);
+    } else if (!compte.loggedIn) {
+      // Tranche déjà définie (ne devrait pas arriver avec sessionStorage mais sécurité)
+      compte.trancheAge = sessionStorage.getItem('visiteur_tranche') || 'adulte';
+    }
   });
 }
 

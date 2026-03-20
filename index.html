@@ -776,6 +776,46 @@
     </div>
   </div>
 
+  <!-- POP-UP VÉRIFICATION D'ÂGE -->
+  <div class="modal-overlay" id="age-popup" style="position:fixed;z-index:300">
+    <div class="modal-box" style="text-align:center">
+      <div style="font-size:36px;margin-bottom:12px">✦</div>
+      <div class="modal-title">Bienvenue sur Astrolabe</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.7">Pour accéder au contenu adapté à ton âge, merci d'indiquer ton année de naissance.</p>
+      <div class="form-group" style="margin-bottom:20px">
+        <label class="form-label">Ton année de naissance</label>
+        <input type="number" class="form-input" id="age-annee-input"
+          placeholder="ex : 2001" min="1920" max="2025"
+          style="text-align:center;font-size:18px;letter-spacing:2px">
+        <span id="age-error" style="font-size:11px;color:var(--danger);display:none;margin-top:6px;display:none">Merci d'entrer une année valide.</span>
+      </div>
+      <button class="btn btn-full btn-accent" onclick="validerAge()">Entrer ✦</button>
+    </div>
+  </div>
+
+  <!-- POP-UP REFUS < 13 ANS -->
+  <div class="modal-overlay" id="age-refuse-popup" style="position:fixed;z-index:300">
+    <div class="modal-box" style="text-align:center">
+      <div style="font-size:52px;margin-bottom:16px">🌙</div>
+      <div class="modal-title">Bonjour mon petit chat !</div>
+      <p style="font-size:13px;color:var(--text2);line-height:1.9;margin-bottom:24px">Tu me sembles encore un peu jeune pour entrer sur Astrolabe. Reviens nous voir quand tu seras plus grand·e !</p>
+      <p style="font-size:13px;color:var(--text2);">À bientôt ✦ Astrolabe</p>
+    </div>
+  </div>
+
+  <!-- POP-UP CONSEIL CRÉATION DE COMPTE -->
+  <div class="modal-overlay" id="compte-conseil-popup" style="position:fixed;z-index:300">
+    <div class="modal-box" style="text-align:center">
+      <div style="font-size:36px;margin-bottom:12px">☽</div>
+      <div class="modal-title">Une dernière chose…</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.7">Pour une meilleure expérience utilisateur, nous vous conseillons de créer un compte afin de pouvoir régler vos préférences de lecture.</p>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <button class="btn btn-full btn-accent" onclick="closeM('compte-conseil-popup');go('p-inscription1')">Créer un compte ✦</button>
+        <button class="btn btn-full" onclick="closeM('compte-conseil-popup')">Continuer sans compte</button>
+      </div>
+    </div>
+  </div>
+
   <!-- POP-UP RETIRER DE LA PILE À LIRE -->
   <div class="modal-overlay" id="pal-retire-popup" style="position:fixed;z-index:200" onclick="closeModal(event,'pal-retire-popup')">
     <div class="modal-box" style="text-align:center">
