@@ -793,7 +793,7 @@ function _renderChapitresList(b, vc, marquePageNum){
     return '<div class="ch-lire-row">'
       +'<button class="btn-lire'+(libre?'':' btn-lire-locked')+(estLu?' btn-lire-lu':'')+'" '+onclick+'>'
       +'<span style="display:flex;align-items:center;gap:6px;flex:1;min-width:0">'+marquePage+'<span class="ch-lire-titre">Ch.'+ch.num+' · '+ch.titre+'</span></span>'
-      +'<div style="display:flex;gap:6px;align-items:center;flex-shrink:0"><span class="ch-like-count" id="ch-likes-'+ch.num+'"></span>'+versionBtns+badge+'</div>'
+      +'<div style="display:flex;gap:6px;align-items:center;flex-shrink:0">'+versionBtns+'<span class="ch-like-count" id="ch-likes-'+ch.num+'"></span>'+badge+'</div>'
       +'</button>'
       +'</div>';
   }).join('');
