@@ -908,10 +908,11 @@
                 <span class="ban-dropdown-arrow">▾</span>
               </button>
               <div class="ban-dropdown-menu" id="ban-dropdown-type-menu">
-                <div class="ban-dropdown-item" onclick="setBanType('', 'Aucun lien')">Aucun lien</div>
-                <div class="ban-dropdown-item" onclick="setBanType('histoire', '→ Page d'une histoire')">→ Page d'une histoire</div>
-                <div class="ban-dropdown-item" onclick="setBanType('chapitre', '→ Chapitre spécifique')">→ Chapitre spécifique</div>
-                <div class="ban-dropdown-item" onclick="setBanType('externe', '→ URL externe')">→ URL externe</div>
+                <div class="ban-dropdown-item" data-value="" onclick="banPickType(this)">Aucun lien</div>
+                <div class="ban-dropdown-item" data-value="histoire" onclick="banPickType(this)">→ Page d'une histoire</div>
+                <div class="ban-dropdown-item" data-value="chapitre" onclick="banPickType(this)">→ Chapitre spécifique</div>
+                <div class="ban-dropdown-item" data-value="interne" onclick="banPickType(this)">→ Page du site</div>
+                <div class="ban-dropdown-item" data-value="externe" onclick="banPickType(this)">→ URL externe</div>
               </div>
             </div>
             <input type="hidden" id="ban-type-lien" value="">
@@ -931,8 +932,26 @@
             <label class="form-label">Numéro de chapitre</label>
             <input type="number" id="ban-chapitre-num" class="form-input" placeholder="ex: 3" min="1">
           </div>
+          <div id="ban-lien-interne" style="display:none">
+            <label class="form-label">Page du site</label>
+            <div class="ban-dropdown" id="ban-dropdown-interne">
+              <button type="button" class="ban-dropdown-btn" onclick="toggleBanDropdown('interne')">
+                <span id="ban-interne-label">— Choisir une page —</span>
+                <span class="ban-dropdown-arrow">▾</span>
+              </button>
+              <div class="ban-dropdown-menu" id="ban-dropdown-interne-menu">
+                <div class="ban-dropdown-item" data-value="p-main" onclick="banPickInterne(this)">🏠 Accueil</div>
+                <div class="ban-dropdown-item" data-value="p-search" onclick="banPickInterne(this)">🔍 Recherche</div>
+                <div class="ban-dropdown-item" data-value="p-hashtag" onclick="banPickInterne(this)">🏷 Hashtags</div>
+                <div class="ban-dropdown-item" data-value="p-inscription1" onclick="banPickInterne(this)">✦ Inscription</div>
+                <div class="ban-dropdown-item" data-value="p-connexion-modal" onclick="banPickInterne(this)">🔑 Connexion</div>
+                <div class="ban-dropdown-item" data-value="p-moncompte" onclick="banPickInterne(this)">☽ Mon compte</div>
+              </div>
+            </div>
+            <input type="hidden" id="ban-interne-select" value="">
+          </div>
           <div id="ban-lien-externe" style="display:none">
-            <label class="form-label">URL</label>
+            <label class="form-label">URL externe</label>
             <input type="url" id="ban-url-input" class="form-input" placeholder="https://…">
           </div>
           <div>
@@ -2620,47 +2639,60 @@ function toggleBanDropdown(which) {
   const el = document.getElementById('ban-dropdown-' + which);
   if (!el) return;
   const isOpen = el.classList.contains('open');
-  // Fermer tous les dropdowns ouverts
   document.querySelectorAll('.ban-dropdown.open').forEach(d => d.classList.remove('open'));
   if (!isOpen) el.classList.add('open');
 }
 
-// Fermer si clic en dehors
 document.addEventListener('click', e => {
   if (!e.target.closest('.ban-dropdown')) {
     document.querySelectorAll('.ban-dropdown.open').forEach(d => d.classList.remove('open'));
   }
 });
 
-function setBanType(value, label) {
+function banPickType(el) {
+  const value = el.dataset.value;
+  const label = el.textContent.trim();
   document.getElementById('ban-type-lien').value = value;
   document.getElementById('ban-type-label').textContent = label;
   document.querySelectorAll('#ban-dropdown-type-menu .ban-dropdown-item')
-    .forEach(i => i.classList.toggle('selected', i.textContent.trim() === label));
+    .forEach(i => i.classList.toggle('selected', i === el));
   document.getElementById('ban-dropdown-type').classList.remove('open');
-  // Afficher/masquer les champs selon le type
-  document.getElementById('ban-lien-histoire').style.display = (value === 'histoire' || value === 'chapitre') ? 'block' : 'none';
-  document.getElementById('ban-lien-chapitre').style.display = value === 'chapitre' ? 'block' : 'none';
-  document.getElementById('ban-lien-externe').style.display = value === 'externe' ? 'block' : 'none';
+  // Afficher/masquer les blocs
+  document.getElementById('ban-lien-histoire').style.display  = (value === 'histoire' || value === 'chapitre') ? 'block' : 'none';
+  document.getElementById('ban-lien-chapitre').style.display  = value === 'chapitre' ? 'block' : 'none';
+  document.getElementById('ban-lien-interne').style.display   = value === 'interne'  ? 'block' : 'none';
+  document.getElementById('ban-lien-externe').style.display   = value === 'externe'  ? 'block' : 'none';
 }
 
-function setBanHistoire(value, label) {
-  document.getElementById('ban-histoire-select').value = value;
-  document.getElementById('ban-histoire-label').textContent = label;
+function banPickHistoire(el) {
+  document.getElementById('ban-histoire-select').value = el.dataset.id;
+  document.getElementById('ban-histoire-label').textContent = el.textContent.trim();
   document.querySelectorAll('#ban-dropdown-histoire-menu .ban-dropdown-item')
-    .forEach(i => i.classList.toggle('selected', i.dataset.id === value));
+    .forEach(i => i.classList.toggle('selected', i === el));
   document.getElementById('ban-dropdown-histoire').classList.remove('open');
 }
 
-function toggleBanLien() {} // gardé pour compatibilité, remplacé par setBanType
+function banPickInterne(el) {
+  document.getElementById('ban-interne-select').value = el.dataset.value;
+  document.getElementById('ban-interne-label').textContent = el.textContent.trim();
+  document.querySelectorAll('#ban-dropdown-interne-menu .ban-dropdown-item')
+    .forEach(i => i.classList.toggle('selected', i === el));
+  document.getElementById('ban-dropdown-interne').classList.remove('open');
+}
+
+// Alias gardés pour compatibilité
+function setBanType(value, label) {}
+function setBanHistoire(value, label) {}
+function toggleBanLien() {}
 
 async function loadHistoiresSelectBan() {
   const menu = document.getElementById('ban-dropdown-histoire-menu');
   if (!menu || menu.children.length > 0) return;
   const { data } = await db.from('histoires').select('id, titre').order('titre');
   if (!data) return;
-  menu.innerHTML = '<div class="ban-dropdown-item" onclick="setBanHistoire(\'\', \'— Choisir une histoire —\')" data-id="">— Choisir une histoire —</div>' +
-    data.map(h => `<div class="ban-dropdown-item" onclick="setBanHistoire('${h.id}', '${h.titre.replace(/'/g, "\\'")}')" data-id="${h.id}">${h.titre}</div>`).join('');
+  menu.innerHTML = data.map(h =>
+    `<div class="ban-dropdown-item" data-id="${h.id}" onclick="banPickHistoire(this)">${h.titre}</div>`
+  ).join('');
 }
 
 // Prévisualisation image avant upload
@@ -2734,6 +2766,8 @@ async function ajouterBanniere() {
     histoireId = document.getElementById('ban-histoire-select').value || null;
     chapitreNum = parseInt(document.getElementById('ban-chapitre-num').value) || null;
     lien = histoireId;
+  } else if (typeLien === 'interne') {
+    lien = document.getElementById('ban-interne-select').value || null;
   } else if (typeLien === 'externe') {
     lien = document.getElementById('ban-url-input').value.trim() || null;
   }
@@ -2766,8 +2800,12 @@ async function ajouterBanniere() {
   document.getElementById('ban-type-label').textContent = 'Aucun lien';
   document.getElementById('ban-histoire-select').value = '';
   document.getElementById('ban-histoire-label').textContent = '— Choisir une histoire —';
+  document.getElementById('ban-interne-select').value = '';
+  document.getElementById('ban-interne-label').textContent = '— Choisir une page —';
   document.getElementById('ban-ordre').value = '0';
-  setBanType('', 'Aucun lien');
+  // Masquer tous les blocs de lien
+  ['ban-lien-histoire','ban-lien-chapitre','ban-lien-interne','ban-lien-externe']
+    .forEach(id => document.getElementById(id).style.display = 'none');
 
   loadBannieresAdmin();
 }

@@ -735,14 +735,55 @@ function handleSearch(val){
 }
 
 /* BANNER */
-let bIdx=0;const BCOUNT=5;
+/* BANNER DYNAMIQUE */
+let bIdx=0,bCount=0,bTimer=null;
 const track=document.getElementById('banner-track');
-function setBanner(idx){bIdx=(idx+BCOUNT)%BCOUNT;track.style.transform='translateX(-'+(bIdx*20)+'%)';document.querySelectorAll('.bdot').forEach((d,i)=>d.classList.toggle('active',i===bIdx));}
-let bTimer=setInterval(()=>setBanner(bIdx+1),3500);
+
+function setBanner(idx){
+  if(!bCount)return;
+  bIdx=(idx+bCount)%bCount;
+  track.style.transform='translateX(-'+(bIdx*(100/bCount))+'%)';
+  document.querySelectorAll('.bdot').forEach((d,i)=>d.classList.toggle('active',i===bIdx));
+}
+
+function _startBannerTimer(){
+  if(bTimer)clearInterval(bTimer);
+  if(bCount>1)bTimer=setInterval(()=>setBanner(bIdx+1),3500);
+}
+
+async function loadBannieres(){
+  const{data,error}=await db.from('bannieres').select('*').eq('actif',true).order('ordre');
+  if(error||!data||!data.length){
+    // Fallback slide vide
+    track.innerHTML='<div class="banner-slide b1" style="display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text3);letter-spacing:2px;">✦ Astrolabe ✦</div>';
+    bCount=1;return;
+  }
+  bCount=data.length;
+  track.style.width=(bCount*100)+'%';
+  track.innerHTML=data.map((b,i)=>{
+    const onclick=b.lien
+      ? b.type_lien==='histoire' ? `onclick="openHistoire('${b.histoire_id}')"`
+      : b.type_lien==='chapitre' ? `onclick="openHistoire('${b.histoire_id}');setTimeout(()=>openLecture('${b.histoire_id}',${b.chapitre_num}),300)"`
+      : b.type_lien==='interne' ? `onclick="go('${b.lien}')"`
+      : `onclick="window.open('${b.lien}','_blank')"`
+      :'';
+    return`<div class="banner-slide" style="width:${100/bCount}%;cursor:${b.lien?'pointer':'default'}" ${onclick}>
+      <img src="${b.image_url}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">
+    </div>`;
+  }).join('');
+  // Dots
+  const dotsEl=document.getElementById('banner-dots');
+  if(dotsEl){
+    dotsEl.innerHTML=data.map((_,i)=>`<div class="bdot${i===0?' active':''}" id="bd${i}"></div>`).join('');
+  }
+  setBanner(0);
+  _startBannerTimer();
+}
+
 const bWrap=document.getElementById('banner-wrap');
 let tx=0,ty=0;
 bWrap.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
-bWrap.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>40){clearInterval(bTimer);setBanner(dx<0?bIdx+1:bIdx-1);bTimer=setInterval(()=>setBanner(bIdx+1),3500);}},{passive:true});
+bWrap.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>40){clearInterval(bTimer);setBanner(dx<0?bIdx+1:bIdx-1);_startBannerTimer();}},{passive:true});
 
 /* PWA */
 let deferredPrompt=null;
