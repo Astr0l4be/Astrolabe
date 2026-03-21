@@ -464,4 +464,4 @@
     #p-lecture.mode-jour-lecture .chapitre-like-btn.liked{border-color:#c05050;color:#c05050;background:rgba(192,80,80,.08);}
 
     /* Likes dans liste chapitres */
-    .ch-like-count{font-size:11px;color:rgba(224,112,112,.7);letter-spacing:.3px;flex-shrink:0;}
+    .ch-like-count{font-size:11px;color:rgba(224,112,112,.7);letter-spacing:.3px;flex-shrink:0;min-width:36px;text-align:right;}
