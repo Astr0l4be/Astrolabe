@@ -223,8 +223,9 @@ async function openLecture(bookId,chapNum){
   if(!_savedScroll) document.querySelector('#p-lecture .page-scroll').scrollTop=0;
   go('p-lecture');
   setTimeout(()=>applyLectureModeForHistoire(bookId),50);
-  // Charger les commentaires
+  // Charger les commentaires et les likes
   if(typeof initCommentaires==='function') initCommentaires(bookId,chapNum).catch(()=>{});
+  if(typeof initLikeChapitre==='function') initLikeChapitre(bookId,chapNum).catch(()=>{});
 
   // Détecter la fin du chapitre (scroll à moins de 200px de la fin)
   const _scroller=document.querySelector('#p-lecture .page-scroll');

@@ -506,3 +506,90 @@ async function checkAlertesSignalement() {
   // Afficher le badge rouge sur le bouton Mon Compte
   if (badge) badge.style.display = 'block';
 }
+
+/* ══════════════════════════════════════════════════════
+   J'AIME CHAPITRE
+   ══════════════════════════════════════════════════════ */
+
+let _chapLiked = false;
+let _chapLikeHistoireId = null;
+let _chapLikeNum = null;
+
+async function initLikeChapitre(histoireId, chapNum) {
+  _chapLikeHistoireId = histoireId;
+  _chapLikeNum = chapNum;
+  _chapLiked = false;
+
+  // Compter les likes de ce chapitre
+  const { count } = await db
+    .from('chapitres_likes')
+    .select('*', { count: 'exact', head: true })
+    .eq('histoire_id', histoireId)
+    .eq('chapitre_num', chapNum);
+
+  // Vérifier si l'utilisateur a déjà liké
+  if (compte.loggedIn && compte.userId) {
+    const { data } = await db
+      .from('chapitres_likes')
+      .select('user_id')
+      .eq('histoire_id', histoireId)
+      .eq('chapitre_num', chapNum)
+      .eq('user_id', compte.userId)
+      .single();
+    _chapLiked = !!data;
+  }
+
+  _renderLikeChapitre(count || 0);
+}
+
+function _renderLikeChapitre(nb) {
+  const btn = document.getElementById('chapitre-like-btn');
+  const icone = document.getElementById('chapitre-like-icone');
+  const count = document.getElementById('chapitre-like-count');
+  const msg = document.getElementById('chapitre-like-msg');
+
+  if (!btn) return;
+
+  btn.classList.toggle('liked', _chapLiked);
+  if (icone) icone.textContent = _chapLiked ? '♥' : '♡';
+  if (count) count.textContent = nb;
+  if (msg) msg.textContent = _chapLiked ? 'Tu as aimé ce chapitre ✦' : '';
+}
+
+async function toggleLikeChapitre() {
+  if (!compte.loggedIn || !compte.userId) {
+    go('p-connexion-modal');
+    return;
+  }
+
+  const btn = document.getElementById('chapitre-like-btn');
+  const icone = document.getElementById('chapitre-like-icone');
+  const count = document.getElementById('chapitre-like-count');
+  const msg = document.getElementById('chapitre-like-msg');
+
+  if (!btn) return;
+  btn.disabled = true;
+
+  // Déclencher l'animation pulse
+  btn.classList.remove('pulse');
+  void btn.offsetWidth; // force reflow pour relancer l'animation
+  btn.classList.add('pulse');
+  setTimeout(() => btn.classList.remove('pulse'), 500);
+
+  const { data: liked, error } = await db.rpc('toggle_like_chapitre', {
+    p_histoire_id: _chapLikeHistoireId,
+    p_chapitre_num: _chapLikeNum
+  });
+
+  btn.disabled = false;
+  if (error) return;
+
+  _chapLiked = liked;
+  const current = parseInt(count?.textContent) || 0;
+  const newCount = liked ? current + 1 : Math.max(0, current - 1);
+
+  btn.classList.toggle('liked', liked);
+  if (icone) icone.textContent = liked ? '♥' : '♡';
+  if (count) count.textContent = newCount;
+  if (msg) msg.textContent = liked ? 'Tu as aimé ce chapitre ✦' : '';
+}
