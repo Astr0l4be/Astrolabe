@@ -38,7 +38,7 @@
         </div>
       </div>
       <button class="btn" id="btn-connexion" onclick="go('p-connexion-modal')">Connexion</button>
-      <button class="btn btn-accent" id="btn-moncompte-top" style="display:none;align-items:center;gap:6px;padding:8px 18px;position:relative" onclick="go('p-moncompte')"><span id="topbar-avatar" style="font-size:14px">☽</span> Mon compte <span id="topbar-avatar2" style="font-size:14px;transform:scaleX(-1);display:inline-block">☽</span><span id="notif-badge" style="display:none;position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:#e07070;"></span></button>
+      <button class="btn btn-accent" id="btn-moncompte-top" style="display:none;align-items:center;gap:6px;padding:8px 18px;position:relative" onclick="go('p-moncompte')"><span id="topbar-avatar" style="font-size:14px">☽</span> Mon compte <span id="topbar-avatar2" style="font-size:14px;transform:scaleX(-1);display:inline-block">☽</span><span id="notif-badge" style="display:none;position:absolute;top:-4px;right:-6px;min-width:18px;height:18px;border-radius:10px;background:#e07070;color:#fff;font-size:10px;font-weight:700;font-family:'Jost',sans-serif;align-items:center;justify-content:center;padding:0 4px;line-height:1" id="notif-badge">0</span></button>
     </div>
     <!-- Pop-up déconnexion topbar -->
     <div class="modal-overlay" id="deco-popup-main" onclick="closeModal(event,'deco-popup-main')" style="position:fixed;z-index:200">
@@ -813,6 +813,14 @@
           <div id="alerte-signalement-texte" style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:10px;"></div>
           <div style="font-size:11px;color:var(--text3);line-height:1.6;">Un ou plusieurs de tes commentaires ont été signalés par la communauté et sont en attente de vérification. Si le contenu est conforme aux règles d'Astrolabe, il sera rétabli.</div>
         </div>
+        <!-- NOTIFICATIONS -->
+        <div id="notifs-bloc" style="display:none;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <div style="font-size:13px;font-weight:600;color:var(--text);letter-spacing:.3px;">🔔 Notifications</div>
+            <button onclick="marquerToutesLues()" style="background:none;border:none;color:var(--accent);font-family:'Jost',sans-serif;font-size:11px;cursor:pointer;letter-spacing:.3px;">Tout marquer comme lu</button>
+          </div>
+          <div id="notifs-liste"></div>
+        </div>
         <div class="tickets-row" onclick="openModal('tickets-popup')">
           <span class="tickets-row-label">Mes tickets</span>
           <span class="tickets-row-val" id="compte-tickets">0 ✦</span>
@@ -1412,5 +1420,6 @@
 <script src="lecture.js"></script>
 <script src="auth.js"></script>
 <script src="commentaires.js"></script>
+<script src="notifications.js"></script>
 </body>
 </html>

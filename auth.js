@@ -346,6 +346,8 @@ async function handleConnexion() {
   const { data: profil } = await db.from('profils').select('*').eq('id', data.user.id).single();
   if (profil) {
     _chargerProfil(data.user.id, profil);
+    if(typeof chargerNotifications==='function') chargerNotifications().catch(()=>{});
+    if(typeof checkAlertesSignalement==='function') checkAlertesSignalement().catch(()=>{});
   }
   closeM('p-connexion-modal'); updateTopbar(); go('p-main');
 }
@@ -515,6 +517,8 @@ async function checkSession() {
 
   // Vérifier les alertes signalement dès la connexion
   if(typeof checkAlertesSignalement==='function') checkAlertesSignalement().catch(()=>{});
+  // Charger les notifications
+  if(typeof chargerNotifications==='function') chargerNotifications().catch(()=>{});
 
   const age = calcAge(profil.date_naissance);
 

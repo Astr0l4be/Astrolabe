@@ -147,7 +147,11 @@ function go(id){
   const stars=document.getElementById('stars');
   if(stars)stars.style.opacity=(id==='p-lecture')?'0':'1';
   if(id==='p-main'||id==='p-moncompte')updateTopbar();
-  if(id==='p-moncompte'){renderBibliotheque().catch(()=>{});if(typeof checkAlertesSignalement==='function')checkAlertesSignalement().catch(()=>{});}
+  if(id==='p-moncompte'){
+    renderBibliotheque().catch(()=>{});
+    if(typeof checkAlertesSignalement==='function') checkAlertesSignalement().catch(()=>{});
+    if(typeof renderNotifications==='function') renderNotifications();
+  }
   if(id==='p-inscription4b' && typeof _initCGUScroll==='function') setTimeout(_initCGUScroll, 100);
   if(id!=='p-splash')sessionStorage.setItem('lastPage',id);
 }
