@@ -413,6 +413,8 @@
     .com-action-btn{background:none;border:none;font-family:'Jost',sans-serif;font-size:12px;color:var(--text3);cursor:pointer;padding:0;display:flex;align-items:center;gap:4px;transition:color .2s;}
     .com-action-btn:hover{color:var(--accent);}
     .com-action-btn.liked{color:#e07070;}
+    .com-action-btn .com-heart::before{content:'\2661';}
+    .com-action-btn.liked .com-heart::before{content:'\2665';}
     /* Réponses imbriquées */
     .com-replies{margin-left:20px;padding-left:12px;border-left:1px solid rgba(180,190,255,.15);margin-top:10px;}
     .com-replies .com-card{padding:10px 0;}

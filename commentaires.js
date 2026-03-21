@@ -113,7 +113,7 @@ function _renderComCard(com, aLike, isReply) {
   const texteEchappe = _escapeHtml(com.contenu);
 
   // Actions
-  const likeBtn = `<button class="com-action-btn${aLike ? ' liked' : ''}" id="com-like-${com.id}" onclick="toggleLikeCommentaire('${com.id}')">♥ <span id="com-likes-${com.id}">${com.nb_likes || 0}</span></button>`;
+  const likeBtn = `<button class="com-action-btn${aLike ? ' liked' : ''}" id="com-like-${com.id}" onclick="toggleLikeCommentaire('${com.id}')"><span class="com-heart"></span> <span id="com-likes-${com.id}">${com.nb_likes || 0}</span></button>`;
   const repondreBtn = !isReply && compte.loggedIn
     ? `<button class="com-action-btn" onclick="ouvrirReponse('${com.id}', ${JSON.stringify(com.contenu)})">↩ Répondre</button>` : '';
   const signalerBtn = compte.loggedIn && com.user_id !== compte.userId
