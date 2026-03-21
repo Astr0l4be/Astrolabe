@@ -171,6 +171,7 @@
       <button class="tab" onclick="switchTab('auteurs')">✍ Auteur·ices</button>
       <button class="tab" onclick="switchTab('nouvel-auteur')">✦ Nouvel·le auteur·ice</button>
       <button class="tab" onclick="switchTab('tags')">🏷 Tags & TW</button>
+      <button class="tab" onclick="switchTab('bannieres')">🖼 Bannières</button>
     </div>
 
     <!-- PANEL HISTOIRES -->
@@ -874,6 +875,57 @@
       </div>
     </div>
 
+  <!-- PANEL BANNIÈRES -->
+    <div class="panel" id="panel-bannieres">
+      <div id="alert-bannieres" class="alert"></div>
+
+      <!-- Ajouter une bannière -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-title">Ajouter une bannière</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div>
+            <label class="form-label">Image <span style="color:var(--text3);font-size:10px">(jpg, png, webp — max 2Mo)</span></label>
+            <input type="file" id="ban-image-input" accept="image/*" class="form-input" style="padding:6px">
+            <div id="ban-image-preview" style="margin-top:8px;display:none"><img id="ban-preview-img" style="max-width:100%;max-height:160px;border-radius:8px;object-fit:cover"></div>
+          </div>
+          <div>
+            <label class="form-label">Type de lien</label>
+            <select id="ban-type-lien" class="form-input" onchange="toggleBanLien()">
+              <option value="">Aucun lien</option>
+              <option value="histoire">→ Page d'une histoire</option>
+              <option value="chapitre">→ Chapitre spécifique</option>
+              <option value="externe">→ URL externe</option>
+            </select>
+          </div>
+          <div id="ban-lien-histoire" style="display:none">
+            <label class="form-label">Histoire</label>
+            <select id="ban-histoire-select" class="form-input"></select>
+          </div>
+          <div id="ban-lien-chapitre" style="display:none">
+            <label class="form-label">Numéro de chapitre</label>
+            <input type="number" id="ban-chapitre-num" class="form-input" placeholder="ex: 3" min="1">
+          </div>
+          <div id="ban-lien-externe" style="display:none">
+            <label class="form-label">URL</label>
+            <input type="url" id="ban-url-input" class="form-input" placeholder="https://…">
+          </div>
+          <div>
+            <label class="form-label">Ordre d'affichage</label>
+            <input type="number" id="ban-ordre" class="form-input" placeholder="ex: 1" min="0" value="0">
+          </div>
+          <button class="btn btn-accent btn-full" onclick="ajouterBanniere()">✦ Ajouter la bannière</button>
+        </div>
+      </div>
+
+      <!-- Liste des bannières -->
+      <div class="card">
+        <div class="card-title">Bannières actives</div>
+        <div id="ban-liste">
+          <div style="color:var(--text3);font-size:13px;text-align:center;padding:16px">Chargement…</div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -951,6 +1003,7 @@ function switchTab(tab){
     loadAuteurs();
   }
   if(tab==='tags'){loadTagsGestion();loadTWsGestion();}
+  if(tab==='bannieres'){loadBannieresAdmin();loadHistoiresSelectBan();}
   if(tab==='chapitre'){
     chTws=[];renderChTws();loadHistoiresSelect();initBlocs('','ch-blocs');
     document.getElementById('edit-chapitre-form').style.display='none';
@@ -2531,6 +2584,193 @@ function toRoman(num){
     while(num>=vals[i]){result+=syms[i];num-=vals[i];}
   }
   return result;
+}
+
+/* ══════════════════════════════════════════════════════
+   BANNIÈRES
+   ══════════════════════════════════════════════════════ */
+
+function toggleBanLien() {
+  const type = document.getElementById('ban-type-lien').value;
+  document.getElementById('ban-lien-histoire').style.display = (type === 'histoire' || type === 'chapitre') ? 'block' : 'none';
+  document.getElementById('ban-lien-chapitre').style.display = type === 'chapitre' ? 'block' : 'none';
+  document.getElementById('ban-lien-externe').style.display = type === 'externe' ? 'block' : 'none';
+}
+
+async function loadHistoiresSelectBan() {
+  const sel = document.getElementById('ban-histoire-select');
+  if (!sel || sel.options.length > 1) return;
+  const { data } = await db.from('histoires').select('id, titre').order('titre');
+  if (!data) return;
+  sel.innerHTML = '<option value="">— Choisir une histoire —</option>' +
+    data.map(h => `<option value="${h.id}">${h.titre}</option>`).join('');
+}
+
+// Prévisualisation image avant upload
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('ban-image-input');
+  if (input) {
+    input.addEventListener('change', () => {
+      const file = input.files[0];
+      if (!file) return;
+      const preview = document.getElementById('ban-image-preview');
+      const img = document.getElementById('ban-preview-img');
+      const reader = new FileReader();
+      reader.onload = e => { img.src = e.target.result; preview.style.display = 'block'; };
+      reader.readAsDataURL(file);
+    });
+  }
+});
+
+async function ajouterBanniere() {
+  const alertEl = document.getElementById('alert-bannieres');
+  alertEl.textContent = '';
+  alertEl.className = 'alert';
+
+  const fileInput = document.getElementById('ban-image-input');
+  const typeLien = document.getElementById('ban-type-lien').value;
+  const ordre = parseInt(document.getElementById('ban-ordre').value) || 0;
+
+  if (!fileInput.files[0]) {
+    alertEl.textContent = 'Choisis une image.';
+    alertEl.className = 'alert alert-error';
+    return;
+  }
+
+  const file = fileInput.files[0];
+  if (file.size > 2 * 1024 * 1024) {
+    alertEl.textContent = 'Image trop lourde (max 2 Mo).';
+    alertEl.className = 'alert alert-error';
+    return;
+  }
+
+  const btn = document.querySelector('#panel-bannieres .btn-accent');
+  btn.disabled = true; btn.textContent = 'Upload en cours…';
+
+  // Upload dans Supabase Storage
+  const ext = file.name.split('.').pop();
+  const fileName = `ban_${Date.now()}.${ext}`;
+  const { data: uploadData, error: uploadError } = await db.storage
+    .from('bannieres')
+    .upload(fileName, file, { contentType: file.type, upsert: false });
+
+  if (uploadError) {
+    alertEl.textContent = 'Erreur upload : ' + uploadError.message;
+    alertEl.className = 'alert alert-error';
+    btn.disabled = false; btn.textContent = '✦ Ajouter la bannière';
+    return;
+  }
+
+  // Récupérer l'URL publique
+  const { data: urlData } = db.storage.from('bannieres').getPublicUrl(fileName);
+  const imageUrl = urlData.publicUrl;
+
+  // Construire le lien selon le type
+  let lien = null;
+  let histoireId = null;
+  let chapitreNum = null;
+
+  if (typeLien === 'histoire') {
+    histoireId = document.getElementById('ban-histoire-select').value || null;
+    lien = histoireId;
+  } else if (typeLien === 'chapitre') {
+    histoireId = document.getElementById('ban-histoire-select').value || null;
+    chapitreNum = parseInt(document.getElementById('ban-chapitre-num').value) || null;
+    lien = histoireId;
+  } else if (typeLien === 'externe') {
+    lien = document.getElementById('ban-url-input').value.trim() || null;
+  }
+
+  const { error } = await db.from('bannieres').insert({
+    image_url: imageUrl,
+    lien,
+    type_lien: typeLien || null,
+    histoire_id: histoireId,
+    chapitre_num: chapitreNum,
+    ordre,
+    actif: true
+  });
+
+  btn.disabled = false; btn.textContent = '✦ Ajouter la bannière';
+
+  if (error) {
+    alertEl.textContent = 'Erreur : ' + error.message;
+    alertEl.className = 'alert alert-error';
+    return;
+  }
+
+  alertEl.textContent = '✦ Bannière ajoutée !';
+  alertEl.className = 'alert alert-success';
+
+  // Reset formulaire
+  fileInput.value = '';
+  document.getElementById('ban-image-preview').style.display = 'none';
+  document.getElementById('ban-type-lien').value = '';
+  document.getElementById('ban-ordre').value = '0';
+  toggleBanLien();
+
+  loadBannieresAdmin();
+}
+
+async function loadBannieresAdmin() {
+  const liste = document.getElementById('ban-liste');
+  if (!liste) return;
+  liste.innerHTML = '<div style="color:var(--text3);font-size:13px;text-align:center;padding:16px">Chargement…</div>';
+
+  const { data, error } = await db.from('bannieres').select('*').order('ordre');
+
+  if (error || !data || !data.length) {
+    liste.innerHTML = '<div style="color:var(--text3);font-size:13px;text-align:center;padding:16px">Aucune bannière pour l\'instant.</div>';
+    return;
+  }
+
+  liste.innerHTML = data.map(b => `
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--glass-border)">
+      <img src="${b.image_url}" style="width:80px;height:44px;object-fit:cover;border-radius:6px;flex-shrink:0">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:4px">
+          ${b.type_lien === 'histoire' ? '→ Histoire' : b.type_lien === 'chapitre' ? '→ Chapitre ' + b.chapitre_num : b.type_lien === 'externe' ? '→ ' + (b.lien||'') : 'Aucun lien'}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <label style="font-size:11px;color:var(--text3)">Ordre</label>
+          <input type="number" value="${b.ordre}" min="0"
+            style="width:52px;background:var(--glass);border:1px solid var(--glass-border);border-radius:6px;padding:3px 6px;color:var(--text);font-size:12px;font-family:'Jost',sans-serif"
+            onchange="majOrdreBanniere('${b.id}', this.value)">
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+        <button onclick="toggleActifBanniere('${b.id}', ${b.actif})"
+          style="font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid ${b.actif ? 'rgba(126,159,212,.4)' : 'rgba(180,190,255,.2)'};background:${b.actif ? 'rgba(126,159,212,.15)' : 'transparent'};color:${b.actif ? 'var(--accent)' : 'var(--text3)'};cursor:pointer;font-family:'Jost',sans-serif">
+          ${b.actif ? '✦ Active' : 'Inactive'}
+        </button>
+        <button onclick="supprimerBanniere('${b.id}', '${b.image_url}')"
+          style="font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid rgba(212,126,126,.3);background:transparent;color:var(--danger);cursor:pointer;font-family:'Jost',sans-serif">
+          Supprimer
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function majOrdreBanniere(id, ordre) {
+  await db.from('bannieres').update({ ordre: parseInt(ordre) || 0 }).eq('id', id);
+}
+
+async function toggleActifBanniere(id, actuel) {
+  await db.from('bannieres').update({ actif: !actuel }).eq('id', id);
+  loadBannieresAdmin();
+}
+
+async function supprimerBanniere(id, imageUrl) {
+  if (!confirm('Supprimer cette bannière définitivement ?')) return;
+
+  // Supprimer le fichier du Storage
+  const fileName = imageUrl.split('/').pop();
+  await db.storage.from('bannieres').remove([fileName]).catch(() => {});
+
+  // Supprimer la ligne en base
+  await db.from('bannieres').delete().eq('id', id);
+  loadBannieresAdmin();
 }
 
 checkSession();
