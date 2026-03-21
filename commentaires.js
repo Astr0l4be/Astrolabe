@@ -311,19 +311,13 @@ async function confirmerSignalement() {
 
   const raison = document.querySelector('input[name="signal-raison"]:checked')?.value || 'autre';
 
-  await db.from('commentaires_signalements').insert({
-    user_id: compte.userId,
-    commentaire_id: _comSignalementId,
-    raison
+  // Passe par la fonction sécurisée — le trigger gère le masquage auto après 3 signalements
+  await db.rpc('signaler_commentaire', {
+    p_commentaire_id: _comSignalementId,
+    p_raison: raison
   }).catch(() => {});
 
-  // Marquer comme signalé côté serveur (soft hide)
-  await db.from('commentaires')
-    .update({ signale: true })
-    .eq('id', _comSignalementId)
-    .catch(() => {});
-
-  // Masquer côté client immédiatement
+  // Masquer côté client immédiatement pour le signalant
   const card = document.getElementById('com-card-' + _comSignalementId);
   if (card) card.style.display = 'none';
 

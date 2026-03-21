@@ -807,6 +807,12 @@
         <div class="badges-row"><span class="badge">BADGE</span></div>
       </div>
       <div class="compte-body">
+        <!-- ALERTES SIGNALEMENT -->
+        <div id="alerte-signalement-bloc" style="display:none;margin-bottom:16px;padding:14px 16px;background:rgba(212,126,126,.08);border:1px solid rgba(212,126,126,.3);border-radius:12px;">
+          <div style="font-size:13px;font-weight:600;color:var(--danger);margin-bottom:6px;">⚠ Commentaire signalé</div>
+          <div id="alerte-signalement-texte" style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:10px;"></div>
+          <div style="font-size:11px;color:var(--text3);line-height:1.6;">Un ou plusieurs de tes commentaires ont été signalés par la communauté et sont en attente de vérification. Si le contenu est conforme aux règles d'Astrolabe, il sera rétabli.</div>
+        </div>
         <div class="tickets-row" onclick="openModal('tickets-popup')">
           <span class="tickets-row-label">Mes tickets</span>
           <span class="tickets-row-val" id="compte-tickets">0 ✦</span>
@@ -884,12 +890,6 @@
 
         <div class="divider"></div>
         <!-- SUPPRESSION -->
-        <!-- ALERTES SIGNALEMENT -->
-        <div id="alerte-signalement-bloc" style="display:none;margin-bottom:16px;padding:14px 16px;background:rgba(212,126,126,.08);border:1px solid rgba(212,126,126,.3);border-radius:12px;">
-          <div style="font-size:13px;font-weight:600;color:var(--danger);margin-bottom:6px;">⚠ Commentaire signalé</div>
-          <div id="alerte-signalement-texte" style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:10px;"></div>
-          <div style="font-size:11px;color:var(--text3);line-height:1.6;">Un ou plusieurs de tes commentaires ont été signalés par la communauté et sont en attente de vérification. Si le contenu est conforme aux règles d'Astrolabe, il sera rétabli.</div>
-        </div>
         <div class="divider"></div>
         <!-- SIGNALER UN BUG -->
         <div style="padding:4px 0 12px">
