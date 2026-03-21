@@ -687,6 +687,7 @@ function openHistoire(id){
   loadAbonnement(id).catch(()=>{});
   loadPAL(id).catch(()=>{});
   if(typeof loadTopCommentaires==='function') loadTopCommentaires(id).catch(()=>{});
+  _loadTotalLikesHistoire(id).catch(()=>{});
   const backDest=(prevPage==='p-histoire'||prevPage==='p-lecture')?'p-main':prevPage;
   document.getElementById('histoire-back-btn').onclick=function(){go(backDest);};
   go('p-histoire');
@@ -708,6 +709,17 @@ function refreshTWHistoire(){
     if(twrHistoire!==false){twBox.style.display='block';document.getElementById('tw-text').textContent=b.tw;}
     else{if(twRevealBtn)twRevealBtn.style.display='block';if(twBoxReveal)twBoxReveal.textContent=b.tw;}
   }
+}
+
+async function _loadTotalLikesHistoire(histoireId){
+  const el=document.getElementById('histoire-likes-total');
+  if(!el) return;
+  const {count}=await db.from('chapitres_likes')
+    .select('*',{count:'exact',head:true})
+    .eq('histoire_id',histoireId);
+  if(!count){el.style.display='none';return;}
+  el.style.display='block';
+  el.textContent='♥ '+count+' j\'aime sur toute la série';
 }
 
 // openLecture est définie dans lecture.js
@@ -751,13 +763,24 @@ if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch
    MARQUE-PAGE & RENDU LISTE CHAPITRES
    ══════════════════════════════════════════════════════ */
 
-function _renderChapitresList(b, vc, marquePageNum){
+async function _renderChapitresList(b, vc, marquePageNum){
   const chapList=document.getElementById('chapitres-list');
   if(!chapList) return;
   const prefsHist=(typeof optParHistoire!=='undefined')?optParHistoire[b.id]:null;
   const masquer=prefsHist?prefsHist.afficherChoixVersion:compte.afficherChoixVersion;
   // Mettre à jour le bouton lecture rapide
   _updateBtnLectureRapide(b);
+
+  // Charger les likes de tous les chapitres en une seule requête
+  let likesParChap={};
+  try{
+    const {data:likesData}=await db.from('chapitres_likes')
+      .select('chapitre_num')
+      .eq('histoire_id',b.id);
+    if(likesData) likesData.forEach(l=>{
+      likesParChap[l.chapitre_num]=(likesParChap[l.chapitre_num]||0)+1;
+    });
+  }catch(e){}
 
   chapList.innerHTML=b.chapitres.map(function(ch){
     const libre=ch.gratuit||ch.num<=(b.gratuit_jusqu_au||8);
@@ -778,9 +801,14 @@ function _renderChapitresList(b, vc, marquePageNum){
     const marquePage=(ch.num===marquePageNum)
       ?'<span style="font-size:13px;flex-shrink:0" title="Dernière lecture">🔖</span>'
       :'';
+    // Likes du chapitre
+    const nbLikes=likesParChap[ch.num]||0;
+    const likeBadge=nbLikes>0
+      ?'<span class="ch-like-count">♥ '+nbLikes+'</span>'
+      :'';
     return '<div class="ch-lire-row">'
       +'<button class="btn-lire'+(libre?'':' btn-lire-locked')+(estLu?' btn-lire-lu':'')+'" '+onclick+'>'
-      +'<span style="display:flex;align-items:center;gap:6px;flex:1;min-width:0">'+marquePage+'<span class="ch-lire-titre">Ch.'+ch.num+' · '+ch.titre+'</span></span>'
+      +'<span style="display:flex;align-items:center;gap:6px;flex:1;min-width:0">'+marquePage+'<span class="ch-lire-titre">Ch.'+ch.num+' · '+ch.titre+'</span>'+likeBadge+'</span>'
       +'<div style="display:flex;gap:6px;align-items:center;flex-shrink:0">'+versionBtns+badge+'</div>'
       +'</button>'
       +'</div>';
