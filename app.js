@@ -763,24 +763,13 @@ if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch
    MARQUE-PAGE & RENDU LISTE CHAPITRES
    ══════════════════════════════════════════════════════ */
 
-async function _renderChapitresList(b, vc, marquePageNum){
+function _renderChapitresList(b, vc, marquePageNum){
   const chapList=document.getElementById('chapitres-list');
   if(!chapList) return;
   const prefsHist=(typeof optParHistoire!=='undefined')?optParHistoire[b.id]:null;
   const masquer=prefsHist?prefsHist.afficherChoixVersion:compte.afficherChoixVersion;
   // Mettre à jour le bouton lecture rapide
   _updateBtnLectureRapide(b);
-
-  // Charger les likes de tous les chapitres en une seule requête
-  let likesParChap={};
-  try{
-    const {data:likesData}=await db.from('chapitres_likes')
-      .select('chapitre_num')
-      .eq('histoire_id',b.id);
-    if(likesData) likesData.forEach(l=>{
-      likesParChap[l.chapitre_num]=(likesParChap[l.chapitre_num]||0)+1;
-    });
-  }catch(e){}
 
   chapList.innerHTML=b.chapitres.map(function(ch){
     const libre=ch.gratuit||ch.num<=(b.gratuit_jusqu_au||8);
@@ -801,18 +790,29 @@ async function _renderChapitresList(b, vc, marquePageNum){
     const marquePage=(ch.num===marquePageNum)
       ?'<span style="font-size:13px;flex-shrink:0" title="Dernière lecture">🔖</span>'
       :'';
-    // Likes du chapitre
-    const nbLikes=likesParChap[ch.num]||0;
-    const likeBadge=nbLikes>0
-      ?'<span class="ch-like-count">♥ '+nbLikes+'</span>'
-      :'';
     return '<div class="ch-lire-row">'
       +'<button class="btn-lire'+(libre?'':' btn-lire-locked')+(estLu?' btn-lire-lu':'')+'" '+onclick+'>'
-      +'<span style="display:flex;align-items:center;gap:6px;flex:1;min-width:0">'+marquePage+'<span class="ch-lire-titre">Ch.'+ch.num+' · '+ch.titre+'</span>'+likeBadge+'</span>'
+      +'<span style="display:flex;align-items:center;gap:6px;flex:1;min-width:0">'+marquePage+'<span class="ch-lire-titre">Ch.'+ch.num+' · '+ch.titre+'</span><span class="ch-like-count" id="ch-likes-'+ch.num+'"></span></span>'
       +'<div style="display:flex;gap:6px;align-items:center;flex-shrink:0">'+versionBtns+badge+'</div>'
       +'</button>'
       +'</div>';
   }).join('');
+
+  // Charger les likes en arrière-plan sans bloquer l'affichage
+  _injecterLikesChapitres(b.id).catch(()=>{});
+}
+
+async function _injecterLikesChapitres(histoireId){
+  const {data}=await db.from('chapitres_likes')
+    .select('chapitre_num')
+    .eq('histoire_id',histoireId);
+  if(!data||!data.length) return;
+  const likesParChap={};
+  data.forEach(l=>{likesParChap[l.chapitre_num]=(likesParChap[l.chapitre_num]||0)+1;});
+  Object.entries(likesParChap).forEach(([num,nb])=>{
+    const el=document.getElementById('ch-likes-'+num);
+    if(el&&nb>0) el.textContent='♥ '+nb;
+  });
 }
 
 async function sauvegarderMarquePage(bookId,chapNum){
