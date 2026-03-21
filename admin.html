@@ -49,6 +49,18 @@
     .form-select option:hover,.form-select option:focus,.form-select option:checked{background:#1e2438;color:var(--accent);}
     .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
     .form-hint{font-size:10px;color:var(--text3);margin-top:4px;}
+    /* Dropdowns custom bannières */
+    .ban-dropdown{position:relative;width:100%;}
+    .ban-dropdown-btn{width:100%;background:linear-gradient(160deg,rgba(26,31,46,.9),rgba(30,36,56,.9));border:1px solid rgba(180,190,255,.18);border-radius:10px;color:var(--text);font-family:'Jost',sans-serif;font-size:13px;padding:10px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;transition:border-color .2s;}
+    .ban-dropdown-btn:hover{border-color:rgba(126,159,212,.45);}
+    .ban-dropdown-btn:focus{outline:none;border-color:rgba(126,159,212,.6);}
+    .ban-dropdown-arrow{color:var(--accent);font-size:12px;flex-shrink:0;transition:transform .2s;}
+    .ban-dropdown.open .ban-dropdown-arrow{transform:rotate(180deg);}
+    .ban-dropdown-menu{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:linear-gradient(160deg,#1a1f2e,#1e2438);border:1px solid rgba(180,190,255,.2);border-radius:10px;overflow:hidden;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,.4);}
+    .ban-dropdown.open .ban-dropdown-menu{display:block;}
+    .ban-dropdown-item{padding:10px 14px;font-size:13px;color:var(--text2);cursor:pointer;font-family:'Jost',sans-serif;transition:background .15s,color .15s;}
+    .ban-dropdown-item:hover{background:rgba(126,159,212,.12);color:var(--accent);}
+    .ban-dropdown-item.selected{color:var(--accent);background:rgba(126,159,212,.08);}
 
     /* BUTTONS */
     .btn{background:var(--glass);border:1px solid var(--glass-border);color:var(--text);font-family:'Jost',sans-serif;font-size:12px;padding:9px 18px;border-radius:24px;cursor:pointer;transition:all .2s;}
@@ -890,16 +902,30 @@
           </div>
           <div>
             <label class="form-label">Type de lien</label>
-            <select id="ban-type-lien" class="form-input form-select" onchange="toggleBanLien()">
-              <option value="">Aucun lien</option>
-              <option value="histoire">→ Page d'une histoire</option>
-              <option value="chapitre">→ Chapitre spécifique</option>
-              <option value="externe">→ URL externe</option>
-            </select>
+            <div class="ban-dropdown" id="ban-dropdown-type">
+              <button type="button" class="ban-dropdown-btn" onclick="toggleBanDropdown('type')">
+                <span id="ban-type-label">Aucun lien</span>
+                <span class="ban-dropdown-arrow">▾</span>
+              </button>
+              <div class="ban-dropdown-menu" id="ban-dropdown-type-menu">
+                <div class="ban-dropdown-item" onclick="setBanType('', 'Aucun lien')">Aucun lien</div>
+                <div class="ban-dropdown-item" onclick="setBanType('histoire', '→ Page d'une histoire')">→ Page d'une histoire</div>
+                <div class="ban-dropdown-item" onclick="setBanType('chapitre', '→ Chapitre spécifique')">→ Chapitre spécifique</div>
+                <div class="ban-dropdown-item" onclick="setBanType('externe', '→ URL externe')">→ URL externe</div>
+              </div>
+            </div>
+            <input type="hidden" id="ban-type-lien" value="">
           </div>
           <div id="ban-lien-histoire" style="display:none">
             <label class="form-label">Histoire</label>
-            <select id="ban-histoire-select" class="form-input form-select"></select>
+            <div class="ban-dropdown" id="ban-dropdown-histoire">
+              <button type="button" class="ban-dropdown-btn" onclick="toggleBanDropdown('histoire')">
+                <span id="ban-histoire-label">— Choisir une histoire —</span>
+                <span class="ban-dropdown-arrow">▾</span>
+              </button>
+              <div class="ban-dropdown-menu" id="ban-dropdown-histoire-menu"></div>
+            </div>
+            <input type="hidden" id="ban-histoire-select" value="">
           </div>
           <div id="ban-lien-chapitre" style="display:none">
             <label class="form-label">Numéro de chapitre</label>
@@ -2590,20 +2616,51 @@ function toRoman(num){
    BANNIÈRES
    ══════════════════════════════════════════════════════ */
 
-function toggleBanLien() {
-  const type = document.getElementById('ban-type-lien').value;
-  document.getElementById('ban-lien-histoire').style.display = (type === 'histoire' || type === 'chapitre') ? 'block' : 'none';
-  document.getElementById('ban-lien-chapitre').style.display = type === 'chapitre' ? 'block' : 'none';
-  document.getElementById('ban-lien-externe').style.display = type === 'externe' ? 'block' : 'none';
+function toggleBanDropdown(which) {
+  const el = document.getElementById('ban-dropdown-' + which);
+  if (!el) return;
+  const isOpen = el.classList.contains('open');
+  // Fermer tous les dropdowns ouverts
+  document.querySelectorAll('.ban-dropdown.open').forEach(d => d.classList.remove('open'));
+  if (!isOpen) el.classList.add('open');
 }
 
+// Fermer si clic en dehors
+document.addEventListener('click', e => {
+  if (!e.target.closest('.ban-dropdown')) {
+    document.querySelectorAll('.ban-dropdown.open').forEach(d => d.classList.remove('open'));
+  }
+});
+
+function setBanType(value, label) {
+  document.getElementById('ban-type-lien').value = value;
+  document.getElementById('ban-type-label').textContent = label;
+  document.querySelectorAll('#ban-dropdown-type-menu .ban-dropdown-item')
+    .forEach(i => i.classList.toggle('selected', i.textContent.trim() === label));
+  document.getElementById('ban-dropdown-type').classList.remove('open');
+  // Afficher/masquer les champs selon le type
+  document.getElementById('ban-lien-histoire').style.display = (value === 'histoire' || value === 'chapitre') ? 'block' : 'none';
+  document.getElementById('ban-lien-chapitre').style.display = value === 'chapitre' ? 'block' : 'none';
+  document.getElementById('ban-lien-externe').style.display = value === 'externe' ? 'block' : 'none';
+}
+
+function setBanHistoire(value, label) {
+  document.getElementById('ban-histoire-select').value = value;
+  document.getElementById('ban-histoire-label').textContent = label;
+  document.querySelectorAll('#ban-dropdown-histoire-menu .ban-dropdown-item')
+    .forEach(i => i.classList.toggle('selected', i.dataset.id === value));
+  document.getElementById('ban-dropdown-histoire').classList.remove('open');
+}
+
+function toggleBanLien() {} // gardé pour compatibilité, remplacé par setBanType
+
 async function loadHistoiresSelectBan() {
-  const sel = document.getElementById('ban-histoire-select');
-  if (!sel || sel.options.length > 1) return;
+  const menu = document.getElementById('ban-dropdown-histoire-menu');
+  if (!menu || menu.children.length > 0) return;
   const { data } = await db.from('histoires').select('id, titre').order('titre');
   if (!data) return;
-  sel.innerHTML = '<option value="">— Choisir une histoire —</option>' +
-    data.map(h => `<option value="${h.id}">${h.titre}</option>`).join('');
+  menu.innerHTML = '<div class="ban-dropdown-item" onclick="setBanHistoire(\'\', \'— Choisir une histoire —\')" data-id="">— Choisir une histoire —</div>' +
+    data.map(h => `<div class="ban-dropdown-item" onclick="setBanHistoire('${h.id}', '${h.titre.replace(/'/g, "\\'")}')" data-id="${h.id}">${h.titre}</div>`).join('');
 }
 
 // Prévisualisation image avant upload
@@ -2706,8 +2763,11 @@ async function ajouterBanniere() {
   fileInput.value = '';
   document.getElementById('ban-image-preview').style.display = 'none';
   document.getElementById('ban-type-lien').value = '';
+  document.getElementById('ban-type-label').textContent = 'Aucun lien';
+  document.getElementById('ban-histoire-select').value = '';
+  document.getElementById('ban-histoire-label').textContent = '— Choisir une histoire —';
   document.getElementById('ban-ordre').value = '0';
-  toggleBanLien();
+  setBanType('', 'Aucun lien');
 
   loadBannieresAdmin();
 }
