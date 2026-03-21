@@ -61,6 +61,11 @@
     .ban-dropdown-item{padding:10px 14px;font-size:13px;color:var(--text2);cursor:pointer;font-family:'Jost',sans-serif;transition:background .15s,color .15s;}
     .ban-dropdown-item:hover{background:rgba(126,159,212,.12);color:var(--accent);}
     .ban-dropdown-item.selected{color:var(--accent);background:rgba(126,159,212,.08);}
+    .ban-pages-suggestions{display:none;position:absolute;left:0;right:0;background:linear-gradient(160deg,#1a1f2e,#1e2438);border:1px solid rgba(180,190,255,.2);border-radius:10px;overflow:hidden;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,.4);margin-top:2px;}
+    .ban-pages-suggestions.open{display:block;}
+    .ban-pages-suggestion-item{padding:9px 14px;font-size:12px;color:var(--text2);cursor:pointer;font-family:'Jost',sans-serif;transition:background .15s;}
+    .ban-pages-suggestion-item:hover{background:rgba(126,159,212,.12);color:var(--accent);}
+    #ban-lien-interne{position:relative;}
 
     /* BUTTONS */
     .btn{background:var(--glass);border:1px solid var(--glass-border);color:var(--text);font-family:'Jost',sans-serif;font-size:12px;padding:9px 18px;border-radius:24px;cursor:pointer;transition:all .2s;}
@@ -933,22 +938,14 @@
             <input type="number" id="ban-chapitre-num" class="form-input" placeholder="ex: 3" min="1">
           </div>
           <div id="ban-lien-interne" style="display:none">
-            <label class="form-label">Page du site</label>
-            <div class="ban-dropdown" id="ban-dropdown-interne">
-              <button type="button" class="ban-dropdown-btn" onclick="toggleBanDropdown('interne')">
-                <span id="ban-interne-label">— Choisir une page —</span>
-                <span class="ban-dropdown-arrow">▾</span>
-              </button>
-              <div class="ban-dropdown-menu" id="ban-dropdown-interne-menu">
-                <div class="ban-dropdown-item" data-value="p-main" onclick="banPickInterne(this)">🏠 Accueil</div>
-                <div class="ban-dropdown-item" data-value="p-search" onclick="banPickInterne(this)">🔍 Recherche</div>
-                <div class="ban-dropdown-item" data-value="p-hashtag" onclick="banPickInterne(this)">🏷 Hashtags</div>
-                <div class="ban-dropdown-item" data-value="p-inscription1" onclick="banPickInterne(this)">✦ Inscription</div>
-                <div class="ban-dropdown-item" data-value="p-connexion-modal" onclick="banPickInterne(this)">🔑 Connexion</div>
-                <div class="ban-dropdown-item" data-value="p-moncompte" onclick="banPickInterne(this)">☽ Mon compte</div>
-              </div>
+            <label class="form-label">ID de la page</label>
+            <input type="text" id="ban-interne-select" class="form-input" placeholder="ex: p-main"
+              oninput="filterBanPages(this.value)" autocomplete="off">
+            <div id="ban-pages-suggestions" class="ban-pages-suggestions"></div>
+            <div style="margin-top:8px;font-size:11px;color:var(--text3);line-height:1.8">
+              Pages disponibles :<br>
+              <span id="ban-pages-liste" style="color:var(--accent);letter-spacing:.3px"></span>
             </div>
-            <input type="hidden" id="ban-interne-select" value="">
           </div>
           <div id="ban-lien-externe" style="display:none">
             <label class="form-label">URL externe</label>
@@ -1048,7 +1045,7 @@ function switchTab(tab){
     loadAuteurs();
   }
   if(tab==='tags'){loadTagsGestion();loadTWsGestion();}
-  if(tab==='bannieres'){loadBannieresAdmin();loadHistoiresSelectBan();}
+  if(tab==='bannieres'){loadBannieresAdmin();loadHistoiresSelectBan();initBanPages();}
   if(tab==='chapitre'){
     chTws=[];renderChTws();loadHistoiresSelect();initBlocs('','ch-blocs');
     document.getElementById('edit-chapitre-form').style.display='none';
@@ -2680,6 +2677,49 @@ function banPickInterne(el) {
   document.getElementById('ban-dropdown-interne').classList.remove('open');
 }
 
+// Pages connues — ajoute ici toute nouvelle page créée
+const BAN_PAGES_CONNUES = [
+  { id: 'p-main',            label: 'Accueil' },
+  { id: 'p-search',          label: 'Recherche' },
+  { id: 'p-hashtag',         label: 'Hashtags' },
+  { id: 'p-inscription1',    label: 'Inscription' },
+  { id: 'p-connexion-modal', label: 'Connexion' },
+  { id: 'p-moncompte',       label: 'Mon compte' },
+  { id: 'p-mentions-legales',label: 'Mentions légales' },
+  { id: 'p-acheter-tickets', label: 'Acheter des tickets' },
+];
+
+function initBanPages() {
+  const liste = document.getElementById('ban-pages-liste');
+  if (liste) {
+    liste.innerHTML = BAN_PAGES_CONNUES
+      .map(p => `<span style="cursor:pointer;margin-right:10px" onclick="document.getElementById('ban-interne-select').value='${p.id}';filterBanPages('${p.id}')">${p.id}</span>`)
+      .join('');
+  }
+}
+
+function filterBanPages(val) {
+  const suggestionsEl = document.getElementById('ban-pages-suggestions');
+  if (!suggestionsEl) return;
+  const q = val.trim().toLowerCase();
+  if (!q) { suggestionsEl.classList.remove('open'); return; }
+  const matches = BAN_PAGES_CONNUES.filter(p =>
+    p.id.includes(q) || p.label.toLowerCase().includes(q)
+  );
+  if (!matches.length) { suggestionsEl.classList.remove('open'); return; }
+  suggestionsEl.innerHTML = matches.map(p =>
+    `<div class="ban-pages-suggestion-item" onclick="document.getElementById('ban-interne-select').value='${p.id}';document.getElementById('ban-pages-suggestions').classList.remove('open')">${p.id} <span style="color:var(--text3);font-size:11px">— ${p.label}</span></div>`
+  ).join('');
+  suggestionsEl.classList.add('open');
+}
+
+// Fermer les suggestions si clic dehors
+document.addEventListener('click', e => {
+  if (!e.target.closest('#ban-lien-interne')) {
+    document.getElementById('ban-pages-suggestions')?.classList.remove('open');
+  }
+});
+
 // Alias gardés pour compatibilité
 function setBanType(value, label) {}
 function setBanHistoire(value, label) {}
@@ -2801,7 +2841,8 @@ async function ajouterBanniere() {
   document.getElementById('ban-histoire-select').value = '';
   document.getElementById('ban-histoire-label').textContent = '— Choisir une histoire —';
   document.getElementById('ban-interne-select').value = '';
-  document.getElementById('ban-interne-label').textContent = '— Choisir une page —';
+  const interneInput = document.getElementById('ban-interne-select');
+  if (interneInput) interneInput.value = '';
   document.getElementById('ban-ordre').value = '0';
   // Masquer tous les blocs de lien
   ['ban-lien-histoire','ban-lien-chapitre','ban-lien-interne','ban-lien-externe']
