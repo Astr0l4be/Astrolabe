@@ -2767,9 +2767,10 @@ async function ajouterBanniere() {
   }
 
   const file = fileInput.files[0];
-  if (file.size > 2 * 1024 * 1024) {
-    alertEl.textContent = 'Image trop lourde (max 2 Mo).';
+  if (file.size > 5 * 1024 * 1024) {
+    alertEl.textContent = 'Image trop lourde (max 5 Mo).';
     alertEl.className = 'alert alert-error';
+    alertEl.scrollIntoView({ behavior: 'smooth' });
     return;
   }
 
