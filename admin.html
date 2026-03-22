@@ -2776,23 +2776,16 @@ async function ajouterBanniere() {
   const btn = document.querySelector('#panel-bannieres .btn-accent');
   btn.disabled = true; btn.textContent = 'Upload en cours…';
 
-  // Upload dans Supabase Storage
-  const ext = file.name.split('.').pop();
-  const fileName = `ban_${Date.now()}.${ext}`;
-  const { data: uploadData, error: uploadError } = await db.storage
-    .from('bannieres')
-    .upload(fileName, file, { contentType: file.type, upsert: false });
-
-  if (uploadError) {
-    alertEl.textContent = 'Erreur upload : ' + uploadError.message;
+  // Utiliser la même fonction uploadImage que le reste de l'admin
+  let imageUrl;
+  try {
+    imageUrl = await uploadImage(file, 'bannieres');
+  } catch(e) {
+    alertEl.textContent = 'Erreur upload : ' + e.message;
     alertEl.className = 'alert alert-error';
     btn.disabled = false; btn.textContent = '✦ Ajouter la bannière';
     return;
   }
-
-  // Récupérer l'URL publique
-  const { data: urlData } = db.storage.from('bannieres').getPublicUrl(fileName);
-  const imageUrl = urlData.publicUrl;
 
   // Construire le lien selon le type
   let lien = null;
@@ -2903,9 +2896,9 @@ async function toggleActifBanniere(id, actuel) {
 async function supprimerBanniere(id, imageUrl) {
   if (!confirm('Supprimer cette bannière définitivement ?')) return;
 
-  // Supprimer le fichier du Storage
+  // Supprimer le fichier du Storage (bucket Images, dossier bannieres)
   const fileName = imageUrl.split('/').pop();
-  await db.storage.from('bannieres').remove([fileName]).catch(() => {});
+  await db.storage.from('Images').remove(['bannieres/' + fileName]).catch(() => {});
 
   // Supprimer la ligne en base
   await db.from('bannieres').delete().eq('id', id);
