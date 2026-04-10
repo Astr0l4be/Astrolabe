@@ -1,0 +1,2181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Astrolabe — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --bg:#1a1f2e;--bg2:#1e2438;--glass:rgba(140,150,195,.10);--glass-border:rgba(180,190,230,.18);
+      --text:#eef0fa;--text2:#9aa2c8;--text3:#5d6490;
+      --accent:#7e9fd4;--accent2:#a78fd4;--danger:#d47e7e;--success:#7ed4a0;
+    }
+    body{background:var(--bg);color:var(--text);font-family:'Jost',sans-serif;font-size:14px;min-height:100vh;}
+    #app{max-width:800px;margin:0 auto;padding:24px 20px;}
+
+    /* AUTH */
+    #auth-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:16px;}
+    .auth-logo{font-family:'Cormorant Garamond',serif;font-size:32px;letter-spacing:6px;margin-bottom:8px;}
+    .auth-sub{font-size:11px;letter-spacing:2px;color:var(--text3);margin-bottom:24px;}
+    .auth-box{width:320px;background:var(--bg2);border:1px solid var(--glass-border);border-radius:16px;padding:24px;}
+
+    /* HEADER */
+    .admin-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;padding-bottom:16px;border-bottom:1px solid var(--glass-border);}
+    .admin-title{font-family:'Cormorant Garamond',serif;font-size:24px;letter-spacing:2px;}
+    .admin-user{font-size:11px;color:var(--text3);}
+
+    /* TABS */
+    .tabs{display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap;}
+    .tab{background:var(--glass);border:1px solid var(--glass-border);color:var(--text2);font-family:'Jost',sans-serif;font-size:11px;padding:7px 12px;border-radius:20px;cursor:pointer;transition:all .2s;}
+    .tab.active{background:rgba(126,159,212,.2);border-color:rgba(126,159,212,.4);color:var(--accent);}
+
+    /* PANELS */
+    .panel{display:none;}
+    .panel.active{display:block;}
+
+    /* CARDS */
+    .card{background:var(--bg2);border:1px solid var(--glass-border);border-radius:14px;padding:20px;margin-bottom:16px;}
+    .card-title{font-family:'Cormorant Garamond',serif;font-size:18px;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid rgba(180,190,255,.07);}
+
+    /* FORM */
+    .form-group{margin-bottom:14px;}
+    .form-label{display:block;font-size:10px;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;margin-bottom:5px;}
+    .form-input,.form-select,.form-textarea{width:100%;background:rgba(140,150,195,.1);border:1px solid rgba(180,190,230,.16);border-radius:8px;color:var(--text);font-family:'Jost',sans-serif;font-size:13px;padding:10px 12px;outline:none;transition:border-color .2s;}
+    .form-input:focus,.form-select:focus,.form-textarea:focus{border-color:rgba(126,159,212,.5);}
+    .form-textarea{resize:vertical;min-height:120px;line-height:1.7;}
+    .form-select option{background:#1e2438;color:var(--text);}
+    .form-select option:hover,.form-select option:focus,.form-select option:checked{background:#1e2438;color:var(--accent);}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .form-hint{font-size:10px;color:var(--text3);margin-top:4px;}
+    .tgl{position:relative;width:44px;height:25px;flex-shrink:0;cursor:pointer;}
+    .tgl input{display:none;}
+    .tgl-track{position:absolute;inset:0;background:rgba(140,150,195,.18);border:1px solid rgba(180,190,230,.18);border-radius:13px;cursor:pointer;transition:background .2s;}
+    .tgl input:checked+.tgl-track{background:rgba(126,159,212,.38);border-color:rgba(126,159,212,.5);}
+    .tgl-thumb{position:absolute;top:3px;left:3px;width:17px;height:17px;border-radius:50%;background:var(--text3);pointer-events:none;transition:left .2s,background .2s;}
+    .tgl input:checked~.tgl-thumb{left:22px;background:var(--accent);}
+    /* Dropdowns custom bannières */
+    .ban-dropdown{position:relative;width:100%;}
+    .ban-dropdown-btn{width:100%;background:linear-gradient(160deg,rgba(26,31,46,.9),rgba(30,36,56,.9));border:1px solid rgba(180,190,255,.18);border-radius:10px;color:var(--text);font-family:'Jost',sans-serif;font-size:13px;padding:10px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;transition:border-color .2s;}
+    .ban-dropdown-btn:hover{border-color:rgba(126,159,212,.45);}
+    .ban-dropdown-btn:focus{outline:none;border-color:rgba(126,159,212,.6);}
+    .ban-dropdown-arrow{color:var(--accent);font-size:12px;flex-shrink:0;transition:transform .2s;}
+    .ban-dropdown.open .ban-dropdown-arrow{transform:rotate(180deg);}
+    .ban-dropdown-menu{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:linear-gradient(160deg,#1a1f2e,#1e2438);border:1px solid rgba(180,190,255,.2);border-radius:10px;overflow:hidden;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,.4);}
+    .ban-dropdown.open .ban-dropdown-menu{display:block;}
+    .ban-dropdown-item{padding:10px 14px;font-size:13px;color:var(--text2);cursor:pointer;font-family:'Jost',sans-serif;transition:background .15s,color .15s;}
+    .ban-dropdown-item:hover{background:rgba(126,159,212,.12);color:var(--accent);}
+    .ban-dropdown-item.selected{color:var(--accent);background:rgba(126,159,212,.08);}
+    .ban-pages-suggestions{display:none;position:absolute;left:0;right:0;background:linear-gradient(160deg,#1a1f2e,#1e2438);border:1px solid rgba(180,190,255,.2);border-radius:10px;overflow:hidden;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,.4);margin-top:2px;}
+    .ban-pages-suggestions.open{display:block;}
+    .ban-pages-suggestion-item{padding:9px 14px;font-size:12px;color:var(--text2);cursor:pointer;font-family:'Jost',sans-serif;transition:background .15s;}
+    .ban-pages-suggestion-item:hover{background:rgba(126,159,212,.12);color:var(--accent);}
+    #ban-lien-interne{position:relative;}
+
+    /* BUTTONS */
+    .btn{background:var(--glass);border:1px solid var(--glass-border);color:var(--text);font-family:'Jost',sans-serif;font-size:12px;padding:9px 18px;border-radius:24px;cursor:pointer;transition:all .2s;}
+    .btn:hover{background:rgba(140,150,195,.18);}
+    .btn-accent{background:rgba(126,159,212,.18);border-color:rgba(126,159,212,.4);color:var(--accent);}
+    .btn-accent:hover{background:rgba(126,159,212,.28);}
+    .btn-danger{background:rgba(212,126,126,.15);border-color:rgba(212,126,126,.4);color:var(--danger);}
+    .btn-success{background:rgba(126,212,160,.15);border-color:rgba(126,212,160,.4);color:var(--success);}
+    .btn-full{width:100%;padding:12px;border-radius:10px;font-size:13px;}
+    .btn-sm{padding:5px 12px;font-size:11px;}
+
+    /* IMAGE UPLOAD */
+    .img-upload{border:2px dashed rgba(180,190,230,.2);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:border-color .2s;position:relative;}
+    .img-upload:hover{border-color:rgba(126,159,212,.4);}
+    .img-upload input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+    .img-upload-text{font-size:12px;color:var(--text3);}
+    .img-preview{width:100%;border-radius:8px;margin-top:10px;display:none;}
+
+    /* LIST */
+    .histoire-item{background:rgba(140,150,195,.06);border:1px solid var(--glass-border);border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;}
+    .histoire-item-cover{width:40px;height:60px;border-radius:4px;object-fit:cover;background:rgba(126,159,212,.1);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;}
+    .histoire-item-info{flex:1;}
+    .histoire-item-title{font-size:14px;font-weight:500;margin-bottom:2px;}
+    .histoire-item-meta{font-size:11px;color:var(--text3);}
+    .histoire-item-status{font-size:10px;padding:2px 8px;border-radius:10px;flex-shrink:0;}
+    .status-publie{background:rgba(126,212,160,.15);color:var(--success);}
+    .status-encours{background:rgba(159,126,212,.15);color:#9f7ed4;}
+    .status-brouillon{background:rgba(180,190,230,.1);color:var(--text3);}
+    .status-termine{background:rgba(126,159,212,.15);color:var(--accent);}
+    .status-pause{background:rgba(212,180,126,.15);color:#d4b47e;}
+
+    /* ALERT */
+    .alert{padding:12px 18px;border-radius:10px;font-size:12px;display:none;}
+    .alert.show{display:block;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:500;min-width:220px;max-width:90vw;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.4);}
+    .alert-success{background:rgba(126,212,160,.15);border:1px solid rgba(126,212,160,.3);color:var(--success);}
+    .alert-error{background:rgba(212,126,126,.15);border:1px solid rgba(212,126,126,.3);color:var(--danger);}
+
+    /* TAGS INPUT */
+    .tags-wrap{display:flex;flex-wrap:wrap;gap:6px;background:rgba(140,150,195,.1);border:1px solid rgba(180,190,230,.16);border-radius:8px;padding:8px;min-height:42px;cursor:text;}
+    .tag-chip{background:rgba(126,159,212,.15);border:1px solid rgba(126,159,212,.3);color:var(--accent);font-size:11px;padding:3px 10px;border-radius:12px;display:flex;align-items:center;gap:5px;}
+    .tag-chip button{background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;line-height:1;padding:0;}
+    .tags-wrap input{background:none;border:none;outline:none;color:var(--text);font-family:'Jost',sans-serif;font-size:13px;min-width:80px;flex:1;}
+
+    /* CHAPITRE LIST */
+    .chapitre-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(140,150,195,.06);border:1px solid var(--glass-border);border-radius:8px;margin-bottom:8px;}
+    .ch-num{font-size:11px;color:var(--text3);width:24px;flex-shrink:0;}
+    .ch-info{flex:1;}
+    .ch-title{font-size:13px;}
+    .ch-meta{font-size:10px;color:var(--text3);}
+
+    /* LOADING */
+    .loading{text-align:center;padding:40px;color:var(--text3);font-size:13px;}
+    .spinner{display:inline-block;width:20px;height:20px;border:2px solid rgba(126,159,212,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin-right:8px;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* TOOLBAR */
+    .editor-wrap{border:1px solid rgba(180,190,230,.16);border-radius:8px;overflow:hidden;}
+    .editor-toolbar{display:flex;gap:4px;padding:6px 8px;background:rgba(140,150,195,.08);border-bottom:1px solid rgba(180,190,230,.1);flex-wrap:wrap;}
+    .tb-btn{background:none;border:1px solid transparent;color:var(--text2);font-family:'Jost',sans-serif;font-size:12px;padding:4px 8px;border-radius:5px;cursor:pointer;transition:all .15s;line-height:1;}
+    .tb-btn:hover{background:rgba(126,159,212,.12);border-color:rgba(126,159,212,.3);color:var(--accent);}
+    .tb-btn.active{background:rgba(126,159,212,.2);border-color:rgba(126,159,212,.4);color:var(--accent);}
+    .tb-sep{width:1px;background:rgba(180,190,230,.15);margin:2px 4px;}
+    .editor-wrap textarea{border:none;border-radius:0;}
+    .editor-wrap textarea:focus{border-color:transparent;}
+
+    /* BLOCS ÉDITEUR */
+    .bloc-wrap{background:rgba(140,150,195,.05);border:1px solid rgba(180,190,230,.12);border-radius:8px;margin-bottom:8px;overflow:hidden;}
+    .bloc-header{display:flex;align-items:center;gap:6px;padding:6px 8px;background:rgba(140,150,195,.08);border-bottom:1px solid rgba(180,190,230,.1);}
+    .bloc-type{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);flex:1;}
+    .bloc-type.pov{color:var(--accent2);}
+    .bloc-pov-input{width:100%;background:none;border:none;outline:none;color:var(--text);font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;text-align:center;padding:10px 14px;}
+    .bloc-pov-input::placeholder{color:var(--text3);font-weight:400;}
+    .bloc-textarea{width:100%;background:none;border:none;outline:none;color:var(--text);font-family:'Jost',sans-serif;font-size:13px;line-height:1.8;padding:10px 14px;resize:vertical;min-height:120px;}
+
+    /* CUSTOM SELECT */
+    .custom-select-wrap{position:relative;}
+    .custom-select-box{width:100%;background:rgba(140,150,195,.1);border:1px solid rgba(180,190,230,.16);border-radius:8px;color:var(--text);font-family:'Jost',sans-serif;font-size:13px;padding:10px 12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:border-color .2s;}
+    .custom-select-box:hover{border-color:rgba(126,159,212,.5);}
+    .custom-select-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#1e2438;border:1px solid rgba(180,190,230,.2);border-radius:8px;z-index:50;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.3);}
+    .custom-select-option{padding:10px 12px;font-size:13px;color:var(--text2);cursor:pointer;transition:color .15s,background .15s;}
+    .custom-select-option:hover{background:rgba(126,159,212,.08);color:var(--accent);}
+    .custom-select-option.selected{color:var(--accent);}
+  </style>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen">
+  <div class="auth-logo">✦ ASTROLABE</div>
+  <div class="auth-sub">ESPACE ADMINISTRATION</div>
+  <div class="auth-box">
+    <div class="form-group">
+      <label class="form-label">E-mail admin</label>
+      <input type="email" class="form-input" id="auth-email" placeholder="ton@mail.com" value="astrolabe.support@gmail.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Mot de passe</label>
+      <input type="password" class="form-input" id="auth-mdp" placeholder="••••••••">
+    </div>
+    <div id="auth-error" class="alert alert-error">E-mail ou mot de passe incorrect.</div>
+    <button class="btn btn-accent btn-full" onclick="login()" style="margin-top:8px">Connexion ✦</button>
+  </div>
+</div>
+
+<!-- ADMIN APP -->
+<div id="admin-app" style="display:none">
+  <div id="app">
+    <div class="admin-header">
+      <div>
+        <div class="admin-title">✦ Administration</div>
+        <div class="admin-user" id="admin-user-label"></div>
+      </div>
+      <button class="btn btn-sm" onclick="logout()">Déconnexion</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('histoires')">📚 Histoires</button>
+      <button class="tab" onclick="switchTab('nouvelle')">✦ Nouvelle histoire</button>
+      <button class="tab" onclick="switchTab('chapitre')">📝 Ajouter chapitre</button>
+      <button class="tab" onclick="switchTab('auteurs')">✍ Auteur·ices</button>
+      <button class="tab" onclick="switchTab('nouvel-auteur')">✦ Nouvel·le auteur·ice</button>
+      <button class="tab" onclick="switchTab('roles')">👑 Rôles</button>
+      <button class="tab" onclick="switchTab('tags')">🏷 Tags & TW</button>
+      <button class="tab" onclick="switchTab('bannieres')">🖼 Bannières</button>
+      <button class="tab" onclick="switchTab('bd-nouvelle')">🎨 Nouvelle BD</button>
+      <button class="tab" onclick="switchTab('nouveau-webtoon')">📱 Nouveau webtoon</button>
+      <button class="tab" onclick="switchTab('nouveau-audio')">🎧 Livre audio</button>
+    </div>
+
+    <!-- PANEL HISTOIRES -->
+    <div class="panel active" id="panel-histoires">
+      <div id="alert-histoires" class="alert"></div>
+
+      <!-- Sous-onglets format -->
+      <div style="display:flex;gap:6px;margin-bottom:16px">
+        <button class="tab active" id="subtab-roman" onclick="switchFormatTab('roman')">📖 Romans</button>
+        <button class="tab" id="subtab-bd" onclick="switchFormatTab('bd')">🎨 BD</button>
+        <button class="tab" id="subtab-webtoon" onclick="switchFormatTab('webtoon')">📱 Webtoon</button>
+        <button class="tab" id="subtab-audio" onclick="switchFormatTab('audio')">🎧 Audio</button>
+        <button class="tab" id="subtab-corbeille" onclick="switchFormatTab('corbeille')" style="color:var(--danger)">🗑 Corbeille</button>
+      </div>
+
+      <!-- Panel Roman -->
+      <div id="subpanel-roman">
+        <div class="card" id="histoires-card">
+          <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+            <span>Romans</span>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-sm filter-btn active" onclick="filterHistoires('all',this)">Toutes</button>
+              <button class="btn btn-sm filter-btn" onclick="filterHistoires('en-cours',this)" style="background:rgba(159,126,212,.1);border-color:rgba(159,126,212,.3);color:#9f7ed4">En cours</button>
+              <button class="btn btn-sm filter-btn" onclick="filterHistoires('pause',this)" style="background:rgba(212,180,126,.1);border-color:rgba(212,180,126,.3);color:#d4b47e">En pause</button>
+              <button class="btn btn-sm filter-btn" onclick="filterHistoires('termine',this)" style="background:rgba(126,159,212,.1);border-color:rgba(126,159,212,.3);color:var(--accent)">Terminées</button>
+              <button class="btn btn-sm filter-btn" onclick="filterHistoires('brouillon',this)">Brouillons</button>
+  
+            </div>
+          </div>
+          <div id="histoires-list"><div class="loading"><span class="spinner"></span>Chargement…</div></div>
+        </div>
+      </div>
+
+      <!-- Panel BD -->
+      <div id="subpanel-bd" style="display:none">
+        <div class="card" id="bd-publiees-card">
+          <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+            <span>BD publiées</span>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-sm filter-btn-bd active" onclick="filterBD('all',this)">Toutes</button>
+              <button class="btn btn-sm filter-btn-bd" onclick="filterBD('en-cours',this)" style="background:rgba(159,126,212,.1);border-color:rgba(159,126,212,.3);color:#9f7ed4">En cours</button>
+              <button class="btn btn-sm filter-btn-bd" onclick="filterBD('termine',this)" style="background:rgba(126,159,212,.1);border-color:rgba(126,159,212,.3);color:var(--accent)">Terminées</button>
+              <button class="btn btn-sm filter-btn-bd" onclick="filterBD('brouillon',this)">Brouillons</button>
+            </div>
+          </div>
+          <div id="bd-publiees-liste"><div class="loading"><span class="spinner"></span>Chargement…</div></div>
+        </div>
+        <div class="card" id="bd-episodes-card" style="display:none;margin-top:16px">
+          <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
+            <span id="bd-episodes-titre">Épisodes</span>
+            <button class="btn btn-sm" onclick="document.getElementById('bd-episodes-card').style.display='none'">← Retour</button>
+          </div>
+          <div id="bd-episodes-liste"></div>
+        </div>
+      </div>
+
+      <!-- Panel Webtoon -->
+      <div id="subpanel-audio" style="display:none">
+        <div id="alert-audio-liste" class="alert"></div>
+        <div class="card">
+          <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+            <span>Livres audio</span>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-sm filter-btn-audio active" onclick="filterAudio('all',this)">Tous</button>
+              <button class="btn btn-sm filter-btn-audio" onclick="filterAudio('en-cours',this)" style="background:rgba(159,126,212,.1);border-color:rgba(159,126,212,.3);color:#9f7ed4">En cours</button>
+              <button class="btn btn-sm filter-btn-audio" onclick="filterAudio('pause',this)" style="background:rgba(212,180,126,.1);border-color:rgba(212,180,126,.3);color:#d4b47e">En pause</button>
+              <button class="btn btn-sm filter-btn-audio" onclick="filterAudio('termine',this)" style="background:rgba(126,159,212,.1);border-color:rgba(126,159,212,.3);color:var(--accent)">Terminés</button>
+            </div>
+          </div>
+          <div id="audio-publiees-liste"><div class="loading"><span class="spinner"></span>Chargement…</div></div>
+        </div>
+        <div class="card" id="audio-chapitres-card" style="display:none;margin-top:16px">
+          <div class="card-title" id="audio-chapitres-titre">Chapitres</div>
+          <div id="audio-chapitres-liste"></div>
+        </div>
+      </div>
+
+      <div id="subpanel-webtoon" style="display:none">
+        <div id="alert-wt" class="alert"></div>
+        <div class="card">
+          <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+            <span>Webtoons</span>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-sm filter-btn-wt active" onclick="filterWT('all',this)">Tous</button>
+              <button class="btn btn-sm filter-btn-wt" onclick="filterWT('en-cours',this)" style="background:rgba(159,126,212,.1);border-color:rgba(159,126,212,.3);color:#9f7ed4">En cours</button>
+              <button class="btn btn-sm filter-btn-wt" onclick="filterWT('pause',this)" style="background:rgba(212,180,126,.1);border-color:rgba(212,180,126,.3);color:#d4b47e">En pause</button>
+              <button class="btn btn-sm filter-btn-wt" onclick="filterWT('termine',this)" style="background:rgba(126,159,212,.1);border-color:rgba(126,159,212,.3);color:var(--accent)">Terminés</button>
+            </div>
+          </div>
+          <div id="wt-publiees-liste"><div class="loading"><span class="spinner"></span>Chargement…</div></div>
+        </div>
+        <div class="card" id="wt-episodes-card" style="display:none;margin-top:16px">
+          <div class="card-title" id="wt-episodes-titre">Épisodes</div>
+          <div id="wt-episodes-liste"></div>
+        </div>
+      </div>
+
+      <!-- Panel Corbeille -->
+      <div id="subpanel-corbeille" style="display:none">
+        <div class="card">
+          <div class="card-title">🗑 Corbeille</div>
+          <div id="corbeille-list"><div class="loading"><span class="spinner"></span>Chargement…</div></div>
+        </div>
+      </div>
+      <!-- DETAIL HISTOIRE (caché par défaut) -->
+      <div id="histoire-detail" style="display:none">
+        <div style="margin-bottom:12px">
+          <button class="btn btn-sm" onclick="retourDepuisHistoire()">← Retour</button>
+        </div>
+        <div class="card" id="detail-card"></div>
+        <!-- FORMULAIRE ÉDITION -->
+        <div id="edit-histoire-form" style="display:none">
+          <div class="card">
+            <div class="card-title">Modifier l'histoire</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Titre *</label>
+                <div class="editor-wrap">
+                  <div class="editor-toolbar">
+                    <button type="button" class="tb-btn" onclick="fmt('edit-titre','bold')"><b>G</b></button>
+                    <button type="button" class="tb-btn" onclick="fmt('edit-titre','italic')"><i>I</i></button>
+                  </div>
+                  <input type="text" class="form-input" id="edit-titre" style="border:none;border-radius:0">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Auteur·ice</label>
+                <div>
+                  <div class="tags-wrap" id="edit-auteurs-chips" style="min-height:42px;margin-bottom:6px"></div>
+                  <div style="position:relative">
+                    <div class="custom-select-box" onclick="toggleAuteurEditDropdown()" style="cursor:pointer">
+                      <span id="auteur-edit-label" style="color:var(--text3)">+ Ajouter un·e auteur·ice</span>
+                      <span style="color:var(--text3);font-size:10px">▾</span>
+                    </div>
+                    <div class="custom-select-list" id="auteur-edit-list" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:50"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Résumé</label>
+              <div class="editor-wrap">
+                <div class="editor-toolbar">
+                  <button type="button" class="tb-btn" onclick="fmt('edit-resume','bold')"><b>G</b></button>
+                  <button type="button" class="tb-btn" onclick="fmt('edit-resume','italic')"><i>I</i></button>
+                  <div class="tb-sep"></div>
+                  <button type="button" class="tb-btn" onclick="align('edit-resume','left')">⬤◁</button>
+                  <button type="button" class="tb-btn" onclick="align('edit-resume','center')">◁⬤▷</button>
+                  <button type="button" class="tb-btn" onclick="align('edit-resume','right')">▷⬤</button>
+                  <button type="button" class="tb-btn" onclick="align('edit-resume','justify')">▤</button>
+                </div>
+                <textarea class="form-textarea" id="edit-resume" style="min-height:80px"></textarea>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Couverture (portrait 2:3)</label>
+                <div class="img-upload" id="edit-cover-zone">
+                  <input type="file" accept="image/*" id="edit-cover-input" onchange="previewImg(this,'edit-cover-preview','edit-cover-zone')">
+                  <div class="img-upload-text">📎 Cliquer ou glisser</div>
+                  <img id="edit-cover-preview" class="img-preview">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Bannière (paysage 2:1)</label>
+                <div class="img-upload" id="edit-banner-zone">
+                  <input type="file" accept="image/*" id="edit-banner-input" onchange="previewImg(this,'edit-banner-preview','edit-banner-zone')">
+                  <div class="img-upload-text">📎 Cliquer ou glisser</div>
+                  <img id="edit-banner-preview" class="img-preview">
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Tags</label>
+              <div class="tags-wrap" id="edit-tags-wrap" onclick="document.getElementById('edit-tags-input').focus()">
+                <input type="text" id="edit-tags-input" placeholder="Ajouter un tag…" onkeydown="handleEditTagInput(event)">
+              </div>
+              <div id="edit-tags-suggestions-label" style="font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:10px;margin-bottom:5px;display:none">Suggestions</div>
+              <div id="edit-tags-suggestions" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Trigger warnings</label>
+              <div class="tags-wrap" id="edit-tw-wrap" onclick="document.getElementById('edit-tw-input').focus()">
+                <input type="text" id="edit-tw-input" placeholder="Ajouter un TW…" onkeydown="handleEditTwInput(event)">
+              </div>
+              <div id="edit-tw-suggestions-label" style="font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:10px;margin-bottom:5px;display:none">Suggestions</div>
+              <div id="edit-tw-suggestions" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Chapitres gratuits</label>
+                <input type="number" class="form-input" id="edit-gratuit" min="0">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Prix par chapitre</label>
+                <input type="number" class="form-input" id="edit-prix" min="1">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Contenu adulte</label>
+                <div style="display:flex;gap:8px">
+                  <button type="button" class="btn" id="edit-adulte-non" onclick="setEditAdulte(false)" style="flex:1">Non</button>
+                  <button type="button" class="btn" id="edit-adulte-oui" onclick="setEditAdulte(true)" style="flex:1">Oui</button>
+                </div>
+                <input type="hidden" id="edit-adulte-val" value="false">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Statut</label>
+                <div style="display:flex;gap:8px">
+                  <button type="button" class="btn" id="edit-statut-brouillon" onclick="setEditStatut('brouillon')" style="flex:1">Brouillon</button>
+                  <button type="button" class="btn" id="edit-statut-en-cours" onclick="setEditStatut('en-cours')" style="flex:1">En cours</button>
+                  <button type="button" class="btn" id="edit-statut-pause" onclick="setEditStatut('pause')" style="flex:1">En pause</button>
+                  <button type="button" class="btn" id="edit-statut-termine" onclick="setEditStatut('termine')" style="flex:1">Terminé</button>
+                </div>
+                <input type="hidden" id="edit-statut-val" value="brouillon">
+              </div>
+            </div>
+            <!-- OPTIONS CONDITIONNELLES ADULTE (édition) -->
+            <div id="edit-options-adulte" style="display:none" class="form-group">
+              <label class="form-label">Version soft des scènes spicy ?</label>
+              <div style="display:flex;gap:8px">
+                <button type="button" class="btn" id="edit-soft-non" onclick="setEditOption('edit-soft','false')" style="flex:1">Non</button>
+                <button type="button" class="btn" id="edit-soft-oui" onclick="setEditOption('edit-soft','true')" style="flex:1">Oui</button>
+              </div>
+              <input type="hidden" id="edit-soft" value="false">
+              <div id="edit-moins18-wrap" style="display:none;margin-top:10px">
+                <label class="form-label">Adapté à un public -18 ans ?</label>
+                <div style="display:flex;gap:8px">
+                  <button type="button" class="btn" id="edit-moins18-non" onclick="setEditOption('edit-moins18','false')" style="flex:1">Non</button>
+                  <button type="button" class="btn" id="edit-moins18-oui" onclick="setEditOption('edit-moins18','true')" style="flex:1">Oui</button>
+                </div>
+                <input type="hidden" id="edit-moins18" value="false">
+              </div>
+            </div>
+            <div id="edit-options-non-adulte" style="display:none" class="form-group">
+              <label class="form-label">Adapté à un public -16 ans ?</label>
+              <div style="display:flex;gap:8px">
+                <button type="button" class="btn" id="edit-moins16-non" onclick="setEditOption('edit-moins16','false')" style="flex:1">Non</button>
+                <button type="button" class="btn" id="edit-moins16-oui" onclick="setEditOption('edit-moins16','true')" style="flex:1">Oui</button>
+              </div>
+              <input type="hidden" id="edit-moins16" value="false">
+              <div style="margin-top:10px">
+                <label class="form-label">Adapté à un public -18 ans ?</label>
+                <div style="display:flex;gap:8px">
+                  <button type="button" class="btn" id="edit-moins18b-non" onclick="setEditOption('edit-moins18b','false')" style="flex:1">Non</button>
+                  <button type="button" class="btn" id="edit-moins18b-oui" onclick="setEditOption('edit-moins18b','true')" style="flex:1">Oui</button>
+                </div>
+                <input type="hidden" id="edit-moins18b" value="false">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Numérotation des chapitres</label>
+              <div style="display:flex;gap:8px">
+                <button type="button" class="btn" id="edit-num-arabe" onclick="setEditNumerotation('arabe')" style="flex:1">1, 2, 3… (Arabe)</button>
+                <button type="button" class="btn" id="edit-num-romain" onclick="setEditNumerotation('romain')" style="flex:1">I, II, III… (Romain)</button>
+              </div>
+              <input type="hidden" id="edit-numerotation-val" value="arabe">
+            </div>
+            <div style="display:flex;gap:10px;margin-top:8px">
+              <button class="btn btn-full" onclick="fermerEditionHistoire()" style="flex:1">Annuler</button>
+              <button class="btn btn-full btn-accent" id="edit-save-btn" onclick="sauvegarderHistoire()" style="flex:2">✦ Sauvegarder</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- POP-UP CORBEILLE -->
+    <div id="popup-corbeille" style="display:none;position:fixed;inset:0;background:rgba(10,12,25,.7);z-index:100;align-items:center;justify-content:center">
+      <div style="background:#1e2438;border:1px solid rgba(180,190,230,.2);border-radius:18px;padding:28px 24px;width:300px;text-align:center">
+        <div style="font-size:32px;margin-bottom:12px">🗑</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:20px;margin-bottom:10px">Mettre à la corbeille ?</div>
+        <p style="font-size:12px;color:#9aa2c8;line-height:1.7;margin-bottom:22px">L'histoire sera déplacée dans la corbeille. Tu pourras la restaurer à tout moment.</p>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-full" onclick="fermerPopupCorbeille()">Annuler</button>
+          <button class="btn btn-full btn-danger" onclick="confirmerCorbeille()">Oui, mettre à la corbeille</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL NOUVELLE HISTOIRE -->
+    <div class="panel" id="panel-nouvelle">
+      <div id="alert-nouvelle" class="alert"></div>
+      <div class="card">
+        <div class="card-title">Nouvelle histoire</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Titre *</label>
+            <div class="editor-wrap">
+              <div class="editor-toolbar">
+                <button type="button" class="tb-btn" onclick="fmt('n-titre','bold')"><b>G</b></button>
+                <button type="button" class="tb-btn" onclick="fmt('n-titre','italic')"><i>I</i></button>
+              </div>
+              <input type="text" class="form-input" id="n-titre" placeholder="Titre de l'histoire" style="border:none;border-radius:0">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Auteur·ices</label>
+            <div class="tags-wrap" id="n-auteurs-chips" style="min-height:42px"></div>
+            <div style="position:relative;margin-top:6px">
+              <div class="custom-select-box" onclick="toggleAuteurDropdown()" style="cursor:pointer">
+                <span id="auteur-select-label" style="color:var(--text3)">+ Ajouter un·e auteur·ice</span>
+                <span style="color:var(--text3);font-size:10px">▾</span>
+              </div>
+              <div class="custom-select-list" id="auteur-select-list" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:50"></div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Résumé *</label>
+          <div class="editor-wrap">
+            <div class="editor-toolbar">
+              <button type="button" class="tb-btn" onclick="fmt('n-resume','bold')" title="Gras"><b>G</b></button>
+              <button type="button" class="tb-btn" onclick="fmt('n-resume','italic')" title="Italique"><i>I</i></button>
+              <div class="tb-sep"></div>
+              <button type="button" class="tb-btn" onclick="align('n-resume','left')" title="Gauche">⬤◁</button>
+              <button type="button" class="tb-btn" onclick="align('n-resume','center')" title="Centré">◁⬤▷</button>
+              <button type="button" class="tb-btn" onclick="align('n-resume','right')" title="Droite">▷⬤</button>
+              <button type="button" class="tb-btn" onclick="align('n-resume','justify')" title="Justifié">▤</button>
+            </div>
+            <textarea class="form-textarea" id="n-resume" placeholder="Résumé de l'histoire…" style="min-height:80px"></textarea>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Couverture (portrait 2:3)</label>
+            <div class="img-upload" id="cover-zone">
+              <input type="file" accept="image/*" id="cover-input" onchange="previewImg(this,'cover-preview','cover-zone')">
+              <div class="img-upload-text">📎 Cliquer ou glisser une image</div>
+              <img id="cover-preview" class="img-preview">
+            </div>
+            <button class="btn btn-sm btn-danger" style="margin-top:6px;display:none" id="cover-remove" onclick="removeImg('cover')">✕ Supprimer</button>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Bannière (paysage 2:1)</label>
+            <div class="img-upload" id="banner-zone">
+              <input type="file" accept="image/*" id="banner-input" onchange="previewImg(this,'banner-preview','banner-zone')">
+              <div class="img-upload-text">📎 Cliquer ou glisser une image</div>
+              <img id="banner-preview" class="img-preview">
+            </div>
+            <button class="btn btn-sm btn-danger" style="margin-top:6px;display:none" id="banner-remove" onclick="removeImg('banner')">✕ Supprimer</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tags <span style="color:var(--text3);font-size:9px">(Entrée pour ajouter)</span></label>
+          <div class="tags-wrap" id="tags-wrap" onclick="document.getElementById('tags-input').focus()">
+            <input type="text" id="tags-input" placeholder="Romance, Fantastique…" onkeydown="handleTagInput(event)">
+          </div>
+          <div id="tags-suggestions-label" style="font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:10px;margin-bottom:5px;display:none">Suggestions</div>
+          <div id="tags-suggestions" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Trigger warnings <span style="color:var(--text3);font-size:9px">(Entrée pour ajouter)</span></label>
+          <div class="tags-wrap" id="tw-wrap" onclick="document.getElementById('tw-input').focus()">
+            <input type="text" id="tw-input" placeholder="Scènes spicy, Violence…" onkeydown="handleTWInput(event)">
+          </div>
+          <div id="tw-suggestions-label" style="font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:10px;margin-bottom:5px;display:none">Suggestions</div>
+          <div id="tw-suggestions" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Chapitres gratuits</label>
+            <input type="number" class="form-input" id="n-gratuit" value="8" min="0">
+            <div class="form-hint">Les X premiers chapitres sont gratuits</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Prix par chapitre (tickets)</label>
+            <input type="number" class="form-input" id="n-prix" value="1" min="1">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Contenu adulte</label>
+            <div style="display:flex;gap:8px">
+              <button type="button" class="btn btn-accent" id="adulte-non" onclick="setAdulte(false)" style="flex:1;width:auto;padding:9px 18px">Non</button>
+              <button type="button" class="btn" id="adulte-oui" onclick="setAdulte(true)" style="flex:1;width:auto;padding:9px 18px">Oui</button>
+            </div>
+            <input type="hidden" id="n-adulte" value="false">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Statut</label>
+            <div style="display:flex;gap:8px">
+              <button type="button" class="btn" id="statut-brouillon" onclick="setStatut('brouillon')" style="flex:1">Brouillon</button>
+              <button type="button" class="btn btn-accent" id="statut-en-cours" onclick="setStatut('en-cours')" style="flex:1">En cours</button>
+              <button type="button" class="btn" id="statut-pause" onclick="setStatut('pause')" style="flex:1">En pause</button>
+              <button type="button" class="btn" id="statut-termine" onclick="setStatut('termine')" style="flex:1">Terminé</button>
+            </div>
+            <input type="hidden" id="n-statut" value="en-cours">
+          </div>
+        </div>
+        <!-- OPTIONS CONDITIONNELLES ADULTE -->
+        <div id="n-options-adulte" style="display:none" class="form-group">
+          <label class="form-label">Version soft des scènes spicy ?</label>
+          <div style="display:flex;gap:8px">
+            <button type="button" class="btn" id="n-soft-non" onclick="setOption('n-soft','false')" style="flex:1">Non</button>
+            <button type="button" class="btn" id="n-soft-oui" onclick="setOption('n-soft','true')" style="flex:1">Oui</button>
+          </div>
+          <input type="hidden" id="n-soft" value="false">
+          <div id="n-moins18-wrap" style="display:none;margin-top:10px">
+            <label class="form-label">Adapté à un public -18 ans ?</label>
+            <div style="display:flex;gap:8px">
+              <button type="button" class="btn" id="n-moins18-non" onclick="setOption('n-moins18','false')" style="flex:1">Non</button>
+              <button type="button" class="btn btn-accent" id="n-moins18-oui" onclick="setOption('n-moins18','true')" style="flex:1">Oui</button>
+            </div>
+            <input type="hidden" id="n-moins18" value="true">
+          </div>
+        </div>
+        <div id="n-options-non-adulte" style="display:none" class="form-group">
+          <label class="form-label">Adapté à un public -16 ans ?</label>
+          <div style="display:flex;gap:8px">
+            <button type="button" class="btn" id="n-moins16-non" onclick="setOption('n-moins16','false')" style="flex:1">Non</button>
+            <button type="button" class="btn btn-accent" id="n-moins16-oui" onclick="setOption('n-moins16','true')" style="flex:1">Oui</button>
+          </div>
+          <input type="hidden" id="n-moins16" value="true">
+          <div style="margin-top:10px">
+            <label class="form-label">Adapté à un public -18 ans ?</label>
+            <div style="display:flex;gap:8px">
+              <button type="button" class="btn" id="n-moins18b-non" onclick="setOption('n-moins18b','false')" style="flex:1">Non</button>
+              <button type="button" class="btn btn-accent" id="n-moins18b-oui" onclick="setOption('n-moins18b','true')" style="flex:1">Oui</button>
+            </div>
+            <input type="hidden" id="n-moins18b" value="true">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Numérotation des chapitres</label>
+          <div style="display:flex;gap:8px">
+            <button type="button" class="btn btn-accent" id="num-arabe" onclick="setNumerotation('arabe')" style="flex:1">1, 2, 3… (Arabe)</button>
+            <button type="button" class="btn" id="num-romain" onclick="setNumerotation('romain')" style="flex:1">I, II, III… (Romain)</button>
+          </div>
+          <input type="hidden" id="n-numerotation" value="arabe">
+        </div>
+        <button class="btn btn-accent btn-full" onclick="creerHistoire()" style="margin-top:8px">✦ Créer l'histoire</button>
+      </div>
+    </div>
+
+    <!-- PANEL AUTEURS -->
+    <div class="panel" id="panel-auteurs">
+      <div id="alert-auteurs" class="alert"></div>
+      <!-- LISTE -->
+      <div class="card" id="auteurs-card">
+        <div class="card-title">Auteur·ices</div>
+        <div id="auteurs-list"><div class="loading"><span class="spinner"></span>Chargement…</div></div>
+      </div>
+      <!-- DETAIL AUTEUR -->
+      <div id="auteur-detail" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <button class="btn btn-sm" onclick="retourDepuisAuteur()">← Retour</button>
+          <button class="btn btn-sm btn-danger" onclick="ouvrirPopupSupprimerAuteur()" style="width:34px;height:34px;padding:0;border-radius:50%;font-size:15px;display:flex;align-items:center;justify-content:center" title="Supprimer">🗑</button>
+        </div>
+        <div class="card" id="auteur-detail-card"></div>
+        <!-- FORMULAIRE ÉDITION AUTEUR -->
+        <div id="edit-auteur-form" style="display:none">
+          <div class="card">
+            <div class="card-title">Modifier l'auteur·ice</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Nom de plume *</label>
+                <input type="text" class="form-input" id="edit-a-pseudo">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Vrai nom (privé)</label>
+                <input type="text" class="form-input" id="edit-a-nom">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Pseudo Astrolabe <span style="font-size:10px;color:var(--text3)">(pseudo du compte lecteur — pour le macaron ✍)</span></label>
+              <input type="text" class="form-input" id="edit-a-pseudo-astrolabe" placeholder="Ex: Marie-Lou">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Bio courte</label>
+              <div class="editor-wrap">
+                <div class="editor-toolbar">
+                  <button type="button" class="tb-btn" onclick="fmt('edit-a-bio','bold')"><b>G</b></button>
+                  <button type="button" class="tb-btn" onclick="fmt('edit-a-bio','italic')"><i>I</i></button>
+                  <div class="tb-sep"></div>
+                  <button type="button" class="tb-btn" onclick="align('edit-a-bio','left')">⬤◁</button>
+                  <button type="button" class="tb-btn" onclick="align('edit-a-bio','center')">◁⬤▷</button>
+                  <button type="button" class="tb-btn" onclick="align('edit-a-bio','right')">▷⬤</button>
+                  <button type="button" class="tb-btn" onclick="align('edit-a-bio','justify')">▤</button>
+                </div>
+                <textarea class="form-textarea" id="edit-a-bio" style="min-height:70px"></textarea>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Photo (carré 1:1)</label>
+              <div class="img-upload" id="edit-a-photo-zone" style="max-width:160px">
+                <input type="file" accept="image/*" id="edit-a-photo-input" onchange="previewImg(this,'edit-a-photo-preview','edit-a-photo-zone')">
+                <div class="img-upload-text">📎 Cliquer ou glisser</div>
+                <img id="edit-a-photo-preview" class="img-preview" style="aspect-ratio:1/1;object-fit:cover;">
+              </div>
+            </div>
+            <div class="form-group" style="margin-top:8px">
+              <label class="form-label">Réseaux sociaux</label>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="font-size:14px;width:20px">📷</span>
+                  <input type="text" class="form-input" id="edit-a-instagram" placeholder="@pseudo Instagram" style="flex:1">
+                </div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="font-size:14px;width:20px">🐦</span>
+                  <input type="text" class="form-input" id="edit-a-twitter" placeholder="@pseudo Twitter / X" style="flex:1">
+                </div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="font-size:14px;width:20px">🎵</span>
+                  <input type="text" class="form-input" id="edit-a-tiktok" placeholder="@pseudo TikTok" style="flex:1">
+                </div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="font-size:14px;width:20px">🌐</span>
+                  <input type="text" class="form-input" id="edit-a-site-web" placeholder="https://..." style="flex:1">
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:8px">
+              <button class="btn btn-full" onclick="fermerEditionAuteur()" style="flex:1">Annuler</button>
+              <button class="btn btn-full btn-accent" id="edit-a-save-btn" onclick="sauvegarderAuteur()" style="flex:2">✦ Sauvegarder</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- POP-UP SUPPRIMER AUTEUR -->
+    <div id="popup-supprimer-auteur" style="display:none;position:fixed;inset:0;background:rgba(10,12,25,.7);z-index:100;align-items:center;justify-content:center">
+      <div style="background:#1e2438;border:1px solid rgba(180,190,230,.2);border-radius:18px;padding:28px 24px;width:300px;text-align:center">
+        <div style="font-size:32px;margin-bottom:12px">✍</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:20px;margin-bottom:10px">Supprimer cet·te auteur·ice ?</div>
+        <p style="font-size:12px;color:#9aa2c8;line-height:1.7;margin-bottom:22px">Cette action est irréversible. Les histoires associées ne seront pas supprimées.</p>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-full" onclick="fermerPopupSupprimerAuteur()">Annuler</button>
+          <button class="btn btn-full btn-danger" onclick="confirmerSupprimerAuteur()">Oui, supprimer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL NOUVEL AUTEUR -->
+    <div class="panel" id="panel-nouvel-auteur">
+      <div id="alert-nouvel-auteur" class="alert"></div>
+      <div class="card">
+        <div class="card-title">Nouvel·le auteur·ice</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Nom de plume *</label>
+            <input type="text" class="form-input" id="a-pseudo" placeholder="Nom affiché sur le site">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Vrai nom (privé)</label>
+            <input type="text" class="form-input" id="a-nom" placeholder="Non visible par les lecteurs">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Bio courte</label>
+          <div class="editor-wrap">
+            <div class="editor-toolbar">
+              <button type="button" class="tb-btn" onclick="fmt('a-bio','bold')"><b>G</b></button>
+              <button type="button" class="tb-btn" onclick="fmt('a-bio','italic')"><i>I</i></button>
+              <div class="tb-sep"></div>
+              <button type="button" class="tb-btn" onclick="align('a-bio','left')">⬤◁</button>
+              <button type="button" class="tb-btn" onclick="align('a-bio','center')">◁⬤▷</button>
+              <button type="button" class="tb-btn" onclick="align('a-bio','right')">▷⬤</button>
+              <button type="button" class="tb-btn" onclick="align('a-bio','justify')">▤</button>
+            </div>
+            <textarea class="form-textarea" id="a-bio" placeholder="Quelques mots sur l'auteur·ice…" style="min-height:70px"></textarea>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Photo (carré 1:1)</label>
+          <div class="img-upload" id="auteur-photo-zone" style="max-width:160px">
+            <input type="file" accept="image/*" id="auteur-photo-input" onchange="previewImg(this,'auteur-photo-preview','auteur-photo-zone')">
+            <div class="img-upload-text">📎 Cliquer ou glisser</div>
+            <img id="auteur-photo-preview" class="img-preview" style="aspect-ratio:1/1;object-fit:cover;">
+          </div>
+          <button class="btn btn-sm btn-danger" style="margin-top:6px;display:none" id="auteur-photo-remove" onclick="removeImg('auteur-photo')">✕ Supprimer</button>
+        </div>
+        <button class="btn btn-accent btn-full" onclick="creerAuteur()" style="margin-top:8px">✦ Ajouter l'auteur·ice</button>
+      </div>
+    </div>
+
+    <!-- PANEL AUTEURS -->
+        <!-- PANEL CHAPITRE -->
+    <div class="panel" id="panel-chapitre">
+      <div id="alert-chapitre" class="alert"></div>
+      <div class="card">
+        <div class="card-title">Ajouter un chapitre</div>
+        <div class="form-group">
+          <label class="form-label">Histoire *</label>
+          <div class="custom-select-wrap" id="histoire-select-wrap">
+            <div class="custom-select-box" id="histoire-select-box" onclick="toggleHistoireDropdown()">
+              <span id="histoire-select-label" style="color:var(--text3)">— Choisir une histoire —</span>
+              <span style="color:var(--text3);font-size:10px">▾</span>
+            </div>
+            <div class="custom-select-list" id="histoire-select-list" style="display:none"></div>
+          </div>
+          <input type="hidden" id="ch-histoire" value="">
+        </div>
+        <div id="chapitres-existants" style="margin-bottom:16px;display:none">
+          <div style="font-size:10px;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Chapitres existants</div>
+          <div id="ch-list"></div>
+        </div>
+
+        <!-- FORMULAIRE ÉDITION CHAPITRE -->
+        <div id="edit-chapitre-form" style="display:none;margin-bottom:16px">
+          <div style="font-size:10px;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Modifier le chapitre</div>
+          <div class="card">
+            <div class="form-row">
+              <div class="form-group" style="display:flex;flex-direction:column;justify-content:flex-end">
+                <label class="form-label">Numéro</label>
+                <input type="number" class="form-input" id="edit-chap-num" min="1">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Titre *</label>
+                <div class="editor-wrap">
+                  <div class="editor-toolbar">
+                    <button type="button" class="tb-btn" onclick="fmt('edit-chap-titre','bold')"><b>G</b></button>
+                    <button type="button" class="tb-btn" onclick="fmt('edit-chap-titre','italic')"><i>I</i></button>
+                  </div>
+                  <input type="text" class="form-input" id="edit-chap-titre" style="border:none;border-radius:0">
+                </div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Citation <span style="color:var(--text3);font-size:9px">(optionnel)</span></label>
+                <div class="editor-wrap">
+                  <div class="editor-toolbar">
+                    <button type="button" class="tb-btn" onclick="fmt('edit-chap-citation','bold')"><b>G</b></button>
+                    <button type="button" class="tb-btn" onclick="fmt('edit-chap-citation','italic')"><i>I</i></button>
+                  </div>
+                  <input type="text" class="form-input" id="edit-chap-citation" placeholder="« Une citation… »" style="border:none;border-radius:0;font-style:italic">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Auteur <span style="color:var(--text3);font-size:9px">(optionnel)</span></label>
+                <div class="editor-wrap">
+                  <div class="editor-toolbar">
+                    <button type="button" class="tb-btn" onclick="fmt('edit-chap-citation-auteur','bold')"><b>G</b></button>
+                    <button type="button" class="tb-btn" onclick="fmt('edit-chap-citation-auteur','italic')"><i>I</i></button>
+                  </div>
+                  <input type="text" class="form-input" id="edit-chap-citation-auteur" placeholder="— Auteur" style="border:none;border-radius:0">
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Contenu *</label>
+              <div id="edit-ch-blocs"></div>
+              <div style="display:flex;gap:8px;margin-top:8px">
+                <button type="button" class="btn btn-sm" onclick="ajouterBlocTexte()">+ Texte</button>
+                <button type="button" class="btn btn-sm btn-accent" onclick="ajouterBlocPOV()">✦ + POV</button>
+                <button type="button" class="btn btn-sm" onclick="ajouterBlocImage()" style="background:rgba(126,159,212,.1);border-color:rgba(126,159,212,.3);color:var(--accent)">🖼 + Image</button>
+              </div>
+              <div class="form-hint" id="edit-chap-wordcount">0 mots</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Accès</label>
+              <div style="display:flex;gap:8px">
+                <button type="button" class="btn" id="edit-chap-gratuit" onclick="setEditChapGratuit(true)" style="flex:1">✦ Gratuit</button>
+                <button type="button" class="btn" id="edit-chap-payant" onclick="setEditChapGratuit(false)" style="flex:1">🎟 Payant</button>
+              </div>
+              <input type="hidden" id="edit-chap-gratuit-val" value="true">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Scène spicy ?</label>
+              <div style="display:flex;gap:8px">
+                <button type="button" class="btn btn-accent" id="edit-chap-spicy-non" onclick="setEditChapSpicy(false)">Non</button>
+                <button type="button" class="btn" id="edit-chap-spicy-oui" onclick="setEditChapSpicy(true)">Oui 🌶</button>
+              </div>
+              <input type="hidden" id="edit-chap-spicy" value="false">
+            </div>
+            <div id="edit-chap-soft-wrap" style="display:none" class="form-group">
+              <label class="form-label">Version soft <span style="color:var(--text3);font-size:9px">(version alternative sans scènes explicites)</span></label>
+              <div id="edit-ch-soft-blocs"></div>
+              <div style="display:flex;gap:8px;margin-top:8px">
+                <button type="button" class="btn btn-sm" onclick="ajouterBlocTexte('edit-ch-soft-blocs')">+ Texte</button>
+                <button type="button" class="btn btn-sm btn-accent" onclick="ajouterBlocPOV('edit-ch-soft-blocs')">✦ + POV</button>
+                <button type="button" class="btn btn-sm" onclick="ajouterBlocImage('edit-ch-soft-blocs')" style="background:rgba(126,159,212,.1);border-color:rgba(126,159,212,.3);color:var(--accent)">🖼 + Image</button>
+              </div>
+              <div class="form-hint" id="edit-chap-soft-wordcount">0 mots</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Publication programmée <span style="color:var(--text3);font-size:9px">(laisser vide = publier maintenant)</span></label>
+              <input type="datetime-local" class="form-input" id="edit-chap-date-publication">
+              <div class="form-hint">Fuseau horaire local. Laisser vide pour une publication immédiate.</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Trigger warnings <span style="color:var(--text3);font-size:9px">(spécifiques à ce chapitre)</span></label>
+              <div class="tags-wrap" id="edit-ch-tw-wrap" onclick="document.getElementById('edit-ch-tw-input').focus()">
+                <input type="text" id="edit-ch-tw-input" placeholder="Violence, Mort…" onkeydown="handleEditChTwInput(event)">
+              </div>
+              <div id="edit-ch-tw-suggestions-label" style="font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:10px;margin-bottom:5px;display:none">Suggestions</div>
+              <div id="edit-ch-tw-suggestions" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Musique d'ambiance <span style="color:var(--text3);font-size:9px">(optionnel · laisser vide pour ne pas changer)</span></label>
+              <input type="file" accept="audio/*" class="form-input" style="padding:6px" id="edit-chap-musique-file" onchange="editChapPreviewMusique(this)">
+              <div id="edit-chap-musique-preview" style="display:none;margin-top:6px;font-size:11px;color:var(--accent)"></div>
+              <div id="edit-chap-musique-actuelle" style="display:none;margin-top:4px;font-size:11px;color:var(--text3)"></div>
+              <input type="hidden" id="edit-chap-musique-url" value="">
+            </div>
+            <div style="display:flex;gap:10px;margin-top:8px">
+              <button class="btn btn-full" onclick="fermerEditionChapitre()" style="flex:1">Annuler</button>
+              <button class="btn btn-full btn-accent" id="edit-chap-save-btn" onclick="sauvegarderChapitre()" style="flex:2">✦ Sauvegarder</button>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="display:flex;flex-direction:column;justify-content:flex-end">
+            <label class="form-label">Numéro *</label>
+            <input type="number" class="form-input" id="ch-num" value="1" min="1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Titre *</label>
+            <div class="editor-wrap">
+              <div class="editor-toolbar">
+                <button type="button" class="tb-btn" onclick="fmt('ch-titre','bold')"><b>G</b></button>
+                <button type="button" class="tb-btn" onclick="fmt('ch-titre','italic')"><i>I</i></button>
+              </div>
+              <input type="text" class="form-input" id="ch-titre" placeholder="Titre du chapitre" style="border:none;border-radius:0">
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Citation <span style="color:var(--text3);font-size:9px">(optionnel — italique centré par défaut)</span></label>
+            <div class="editor-wrap">
+              <div class="editor-toolbar">
+                <button type="button" class="tb-btn" onclick="fmt('ch-citation','bold')"><b>G</b></button>
+                <button type="button" class="tb-btn" onclick="fmt('ch-citation','italic')"><i>I</i></button>
+              </div>
+              <input type="text" class="form-input" id="ch-citation" placeholder="« Une citation… »" style="border:none;border-radius:0;font-style:italic">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Auteur <span style="color:var(--text3);font-size:9px">(optionnel — gras centré par défaut)</span></label>
+            <div class="editor-wrap">
+              <div class="editor-toolbar">
+                <button type="button" class="tb-btn" onclick="fmt('ch-citation-auteur','bold')"><b>G</b></button>
+                <button type="button" class="tb-btn" onclick="fmt('ch-citation-auteur','italic')"><i>I</i></button>
+              </div>
+              <input type="text" class="form-input" id="ch-citation-auteur" placeholder="— Auteur" style="border:none;border-radius:0">
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contenu *</label>
+          <div id="ch-blocs"></div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button type="button" class="btn btn-sm" onclick="ajouterBlocTexte()">+ Texte</button>
+            <button type="button" class="btn btn-sm btn-accent" onclick="ajouterBlocPOV()">✦ + POV</button>
+            <button type="button" class="btn btn-sm" onclick="ajouterBlocImage()" style="background:rgba(126,159,212,.1);border-color:rgba(126,159,212,.3);color:var(--accent)">🖼 + Image</button>
+          </div>
+          <div class="form-hint" id="ch-wordcount">0 mots</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Trigger warnings <span style="color:var(--text3);font-size:9px">(spécifiques à ce chapitre — Entrée pour ajouter)</span></label>
+          <div class="tags-wrap" id="ch-tw-wrap" onclick="document.getElementById('ch-tw-input').focus()">
+            <input type="text" id="ch-tw-input" placeholder="Scènes spicy, Violence…" onkeydown="handleChTwInput(event)">
+          </div>
+          <div id="ch-tw-suggestions-label" style="font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:10px;margin-bottom:5px;display:none">Suggestions</div>
+          <div id="ch-tw-suggestions" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Scène spicy ?</label>
+          <div style="display:flex;gap:8px">
+            <button type="button" class="btn btn-accent" id="ch-spicy-non" onclick="setChSpicy(false)">Non</button>
+            <button type="button" class="btn" id="ch-spicy-oui" onclick="setChSpicy(true)">Oui 🌶</button>
+          </div>
+          <input type="hidden" id="ch-spicy" value="false">
+        </div>
+        <div id="ch-soft-wrap" style="display:none" class="form-group">
+          <label class="form-label">Version soft <span style="color:var(--text3);font-size:9px">(version alternative sans scènes explicites)</span></label>
+          <div id="ch-soft-blocs"></div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button type="button" class="btn btn-sm" onclick="ajouterBlocTexte('ch-soft-blocs')">+ Texte</button>
+            <button type="button" class="btn btn-sm btn-accent" onclick="ajouterBlocPOV('ch-soft-blocs')">✦ + POV</button>
+            <button type="button" class="btn btn-sm" onclick="ajouterBlocImage('ch-soft-blocs')" style="background:rgba(126,159,212,.1);border-color:rgba(126,159,212,.3);color:var(--accent)">🖼 + Image</button>
+          </div>
+          <div class="form-hint" id="ch-soft-wordcount">0 mots</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Accès</label>
+          <div style="display:flex;gap:8px">
+            <button type="button" class="btn btn-accent" id="gratuit-gratuit" onclick="setGratuit(true)" style="flex:1">✦ Gratuit</button>
+            <button type="button" class="btn" id="gratuit-payant" onclick="setGratuit(false)" style="flex:1">🎟 Payant</button>
+          </div>
+          <input type="hidden" id="ch-gratuit" value="true">
+        </div>
+            <div class="form-group">
+              <label class="form-label">Publication programmée <span style="color:var(--text3);font-size:9px">(laisser vide = publier maintenant)</span></label>
+              <input type="datetime-local" class="form-input" id="ch-date-publication">
+              <div class="form-hint">Fuseau horaire local. Laisser vide pour une publication immédiate.</div>
+            </div>
+          <div class="form-group">
+            <label class="form-label">Musique d'ambiance <span style="color:var(--text3);font-size:9px">(optionnel · MP3, OGG, WAV)</span></label>
+            <input type="file" accept="audio/*" class="form-input" style="padding:6px" id="ch-musique-file" onchange="chPreviewMusique(this)">
+            <div id="ch-musique-preview" style="display:none;margin-top:6px;font-size:11px;color:var(--accent)"></div>
+            <input type="hidden" id="ch-musique-url" value="">
+          </div>
+        <button class="btn btn-accent btn-full" onclick="ajouterChapitre()" style="margin-top:8px">✦ Publier le chapitre</button>
+      </div>
+    </div>
+
+    <!-- PANEL TAGS & TW -->
+    <div class="panel" id="panel-tags">
+      <div id="alert-tags" class="alert"></div>
+
+      <!-- Ajouter un tag -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Ajouter un tag</div>
+        <div style="display:flex;gap:10px">
+          <input type="text" class="form-input" id="new-tag-input" placeholder="Nom du tag…" onkeydown="if(event.key==='Enter')ajouterTag()" style="flex:1">
+          <button class="btn btn-accent" onclick="ajouterTag()">✦ Ajouter</button>
+        </div>
+      </div>
+
+      <!-- Tags -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+          <span>Tags existants</span>
+          <button class="btn btn-sm btn-danger" id="btn-suppr-tags" style="display:none" onclick="ouvrirPopupSupprMultiple('tag')">🗑 Supprimer la sélection</button>
+        </div>
+        <div id="tags-gestion-list"><div class="loading"><span class="spinner"></span>Chargement…</div></div>
+      </div>
+
+      <!-- TW -->
+      <div class="card">
+        <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+          <span>Trigger warnings existants</span>
+          <button class="btn btn-sm btn-danger" id="btn-suppr-tws" style="display:none" onclick="ouvrirPopupSupprMultiple('tw')">🗑 Supprimer la sélection</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <input type="text" class="form-input" id="new-tw-input" placeholder="Nom du TW…" onkeydown="if(event.key==='Enter')ajouterTW()" style="flex:1">
+          <button class="btn btn-accent" onclick="ajouterTW()">✦ Ajouter</button>
+        </div>
+        <div id="tw-gestion-list"><div class="loading"><span class="spinner"></span>Chargement…</div></div>
+      </div>
+    </div>
+
+    <!-- POP-UP SUPPRESSION MULTIPLE -->
+    <div id="popup-suppr-multiple" style="display:none;position:fixed;inset:0;background:rgba(10,12,25,.7);z-index:100;align-items:center;justify-content:center">
+      <div style="background:#1e2438;border:1px solid rgba(180,190,230,.2);border-radius:18px;padding:28px 24px;width:320px;text-align:center">
+        <div style="font-size:32px;margin-bottom:12px">🗑</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:20px;margin-bottom:10px" id="popup-suppr-titre">Supprimer la sélection ?</div>
+        <p style="font-size:12px;color:#9aa2c8;line-height:1.7;margin-bottom:22px" id="popup-suppr-desc">Cette action est irréversible.</p>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-full" onclick="fermerPopupSupprMultiple()">Annuler</button>
+          <button class="btn btn-full btn-danger" onclick="confirmerSupprMultiple()">Oui, supprimer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL RÔLES -->
+    <div class="panel" id="panel-roles">
+      <div id="alert-roles" class="alert"></div>
+      <div class="card">
+        <div class="card-title">👑 Attribuer un rôle</div>
+        <p style="font-size:12px;color:var(--text3);margin-bottom:16px;line-height:1.7">Recherche un compte par e-mail et attribue-lui un rôle. Le changement prend effet à la prochaine connexion de l'utilisatrice.</p>
+        <div class="form-group">
+          <label class="form-label">E-mail du compte</label>
+          <div style="display:flex;gap:8px">
+            <input type="email" class="form-input" id="role-email-input" placeholder="prenom@mail.com">
+            <button class="btn btn-accent" onclick="rechercherCompteRole()" style="flex-shrink:0;padding:0 16px">Rechercher</button>
+          </div>
+        </div>
+        <div id="role-resultat" style="display:none;margin-top:16px;padding:16px;background:var(--glass);border:1px solid var(--glass-border);border-radius:12px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+            <div style="font-size:22px">☽</div>
+            <div>
+              <div id="role-res-pseudo" style="font-size:14px;font-weight:600;color:var(--text)"></div>
+              <div id="role-res-email" style="font-size:11px;color:var(--text3)"></div>
+            </div>
+            <div id="role-res-badge" style="margin-left:auto;font-size:11px;padding:3px 10px;border-radius:20px"></div>
+          </div>
+          <label class="form-label">Rôle</label>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border-radius:10px;border:1px solid var(--glass-border);background:var(--glass)">
+              <input type="radio" name="role-choix" value="lectrice" style="accent-color:var(--accent)" onchange="document.getElementById('role-autrice-select-wrap').style.display='none'">
+              <div>
+                <div style="font-size:13px;color:var(--text)">Lectrice</div>
+                <div style="font-size:11px;color:var(--text3)">Compte standard</div>
+              </div>
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border-radius:10px;border:1px solid rgba(200,169,110,.3);background:rgba(200,169,110,.06)">
+              <input type="radio" name="role-choix" value="autrice" style="accent-color:#c8a96e" onchange="document.getElementById('role-autrice-select-wrap').style.display='block'">
+              <div>
+                <div style="font-size:13px;color:#c8a96e">Auteur·ice ✍</div>
+                <div style="font-size:11px;color:var(--text3)">Macaron + accès gratuit à ses histoires</div>
+              </div>
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border-radius:10px;border:1px solid rgba(192,132,252,.3);background:rgba(192,132,252,.06)">
+              <input type="radio" name="role-choix" value="admin" style="accent-color:#c084fc" onchange="document.getElementById('role-autrice-select-wrap').style.display='none'">
+              <div>
+                <div style="font-size:13px;color:#c084fc">Administratrice ✦</div>
+                <div style="font-size:11px;color:var(--text3)">Macaron violet + accès à tout le catalogue</div>
+              </div>
+            </label>
+          </div>
+          <div id="role-autrice-select-wrap" style="display:none;margin-bottom:12px;">
+            <label class="form-label">Auteur·ice</label>
+            <div style="position:relative">
+              <div id="role-autrice-selected" onclick="toggleAutriceDropdown()" style="width:100%;background:rgba(140,150,195,.1);border:1px solid rgba(180,190,230,.16);border-radius:8px;color:var(--text);font-family:'Jost',sans-serif;font-size:13px;padding:10px 12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+                <span id="role-autrice-selected-txt">— Choisir un·e auteur·ice —</span>
+                <span style="font-size:10px;color:var(--text3)">∨</span>
+              </div>
+              <div id="role-autrice-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#1e2438;border:1px solid rgba(180,190,230,.16);border-radius:8px;z-index:50;overflow:hidden;margin-top:4px;">
+              </div>
+            </div>
+            <input type="hidden" id="role-autrice-select">
+          </div>
+          <input type="hidden" id="role-user-id">
+          <button class="btn btn-full btn-accent" onclick="sauvegarderRole()">✦ Sauvegarder le rôle</button>
+        </div>
+        <div id="role-introuvable" style="display:none;margin-top:12px;font-size:12px;color:var(--danger)">Aucun compte trouvé avec cet e-mail.</div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="card-title">Liste des rôles attribués</div>
+        <div id="roles-liste"><div class="loading"><span class="spinner"></span>Chargement…</div></div>
+      </div>
+    </div>
+
+  <!-- PANEL BANNIÈRES -->
+    <div class="panel" id="panel-bannieres">
+      <div id="alert-bannieres" class="alert"></div>
+
+      <!-- Ajouter une bannière -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-title">Ajouter une bannière</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div>
+            <label class="form-label">Image <span style="color:var(--text3);font-size:10px">(jpg, png, webp, gif — max 10 Mo)</span></label>
+            <input type="file" id="ban-image-input" accept="image/jpeg,image/png,image/webp,image/gif" class="form-input" style="padding:6px">
+            <div id="ban-image-preview" style="margin-top:8px;display:none"><img id="ban-preview-img" style="max-width:100%;max-height:160px;border-radius:8px;object-fit:cover"></div>
+          </div>
+          <div>
+            <label class="form-label">Type de lien</label>
+            <div class="ban-dropdown" id="ban-dropdown-type">
+              <button type="button" class="ban-dropdown-btn" onclick="toggleBanDropdown('type')">
+                <span id="ban-type-label">Aucun lien</span>
+                <span class="ban-dropdown-arrow">▾</span>
+              </button>
+              <div class="ban-dropdown-menu" id="ban-dropdown-type-menu">
+                <div class="ban-dropdown-item" data-value="" onclick="banPickType(this)">Aucun lien</div>
+                <div class="ban-dropdown-item" data-value="histoire" onclick="banPickType(this)">→ Page d'une histoire</div>
+                <div class="ban-dropdown-item" data-value="chapitre" onclick="banPickType(this)">→ Chapitre spécifique</div>
+                <div class="ban-dropdown-item" data-value="interne" onclick="banPickType(this)">→ Page du site</div>
+                <div class="ban-dropdown-item" data-value="externe" onclick="banPickType(this)">→ URL externe</div>
+              </div>
+            </div>
+            <input type="hidden" id="ban-type-lien" value="">
+          </div>
+          <div id="ban-lien-histoire" style="display:none">
+            <label class="form-label">Histoire</label>
+            <div class="ban-dropdown" id="ban-dropdown-histoire">
+              <button type="button" class="ban-dropdown-btn" onclick="toggleBanDropdown('histoire')">
+                <span id="ban-histoire-label">— Choisir une histoire —</span>
+                <span class="ban-dropdown-arrow">▾</span>
+              </button>
+              <div class="ban-dropdown-menu" id="ban-dropdown-histoire-menu"></div>
+            </div>
+            <input type="hidden" id="ban-histoire-select" value="">
+          </div>
+          <div id="ban-lien-chapitre" style="display:none">
+            <label class="form-label">Numéro de chapitre</label>
+            <input type="number" id="ban-chapitre-num" class="form-input" placeholder="ex: 3" min="1">
+          </div>
+          <div id="ban-lien-interne" style="display:none">
+            <label class="form-label">ID de la page</label>
+            <input type="text" id="ban-interne-select" class="form-input" placeholder="ex: p-main"
+              oninput="filterBanPages(this.value)" autocomplete="off">
+            <div id="ban-pages-suggestions" class="ban-pages-suggestions"></div>
+            <div style="margin-top:8px;font-size:11px;color:var(--text3);line-height:1.8">
+              Pages disponibles :<br>
+              <span id="ban-pages-liste" style="color:var(--accent);letter-spacing:.3px"></span>
+            </div>
+          </div>
+          <div id="ban-lien-externe" style="display:none">
+            <label class="form-label">URL externe</label>
+            <input type="url" id="ban-url-input" class="form-input" placeholder="https://…">
+          </div>
+          <div>
+            <label class="form-label">Ordre d'affichage</label>
+            <input type="number" id="ban-ordre" class="form-input" placeholder="ex: 1" min="0" value="0">
+          </div>
+          <button class="btn btn-accent btn-full" id="ban-submit-btn" onclick="ajouterBanniere()">✦ Ajouter la bannière</button>
+          <button class="btn btn-full" id="ban-annuler-btn" onclick="annulerEditionBanniere()" style="display:none">Annuler la modification</button>
+        </div>
+      </div>
+
+      <!-- Liste des bannières -->
+      <div class="card">
+        <div class="card-title">Bannières actives</div>
+        <div id="ban-liste">
+          <div style="color:var(--text3);font-size:13px;text-align:center;padding:16px">Chargement…</div>
+        </div>
+      </div>
+    </div>
+
+  <!-- PANEL NOUVELLE BD -->
+    <div class="panel" id="panel-bd-nouvelle">
+      <div id="alert-bd" class="alert"></div>
+
+      <!-- Créer une histoire BD -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-title">Créer une histoire BD</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div>
+            <label class="form-label">Titre</label>
+            <input type="text" id="bd-titre" class="form-input" placeholder="Titre de la BD…">
+          </div>
+          <div>
+            <label class="form-label">Auteur·ice</label>
+            <div class="ban-dropdown" id="bd-dropdown-auteur">
+              <button type="button" class="ban-dropdown-btn" onclick="toggleBanDropdown_id('bd-dropdown-auteur')">
+                <span id="bd-auteur-label">— Choisir un·e auteur·ice —</span>
+                <span class="ban-dropdown-arrow">▾</span>
+              </button>
+              <div class="ban-dropdown-menu" id="bd-dropdown-bd-auteur-menu"></div>
+            </div>
+            <input type="hidden" id="bd-auteur" value="">
+          </div>
+          <div>
+            <label class="form-label">Résumé</label>
+            <textarea id="bd-resume" class="form-input" rows="3" placeholder="Description…" style="resize:vertical"></textarea>
+          </div>
+          <div class="form-row">
+            <div>
+              <label class="form-label">Cover</label>
+              <div class="img-upload" id="bd-cover-zone">
+                <input type="file" accept="image/*" onchange="bdPreviewCover(this)">
+                <div class="img-upload-text">📎 Cliquer ou glisser</div>
+              </div>
+            </div>
+            <div>
+              <label class="form-label">Bannière</label>
+              <div class="img-upload" id="bd-banner-zone">
+                <input type="file" accept="image/*" onchange="bdPreviewBanner(this)">
+                <div class="img-upload-text">📎 Cliquer ou glisser</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <label class="form-label">Statut</label>
+            <div style="display:flex;gap:8px">
+              <button type="button" class="btn btn-accent" id="bd-s-brouillon" onclick="setBDStatut('brouillon')" style="flex:1">Brouillon</button>
+              <button type="button" class="btn" id="bd-s-encours" onclick="setBDStatut('en-cours')" style="flex:1">En cours</button>
+              <button type="button" class="btn" id="bd-s-pause" onclick="setBDStatut('pause')" style="flex:1">En pause</button>
+              <button type="button" class="btn" id="bd-s-termine" onclick="setBDStatut('termine')" style="flex:1">Terminé</button>
+            </div>
+            <input type="hidden" id="bd-statut" value="brouillon">
+          </div>
+          <div>
+            <label class="form-label">Accessibilité par âge</label>
+            <div style="display:flex;gap:8px">
+              <button type="button" class="btn btn-accent" id="bd-age-tout" onclick="setBDAge('tout')" style="flex:1">Tout public</button>
+              <button type="button" class="btn" id="bd-age-moins18" onclick="setBDAge('moins18')" style="flex:1">-18 ans</button>
+              <button type="button" class="btn" id="bd-age-adulte" onclick="setBDAge('adulte')" style="flex:1">18+ seulement</button>
+            </div>
+            <input type="hidden" id="bd-age-val" value="tout">
+          </div>
+          <div>
+            <label class="form-label">Tags <span style="color:var(--text3);font-size:9px">(Entrée pour ajouter)</span></label>
+            <div class="tags-wrap" id="bd-tags-wrap" onclick="document.getElementById('bd-tags-input').focus()">
+              <input type="text" id="bd-tags-input" placeholder="Romance, Fantastique…" onkeydown="handleBDTagInput(event)">
+            </div>
+            <div id="bd-tags-suggestions" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"></div>
+          </div>
+          <div>
+            <label class="form-label">Trigger warnings <span style="color:var(--text3);font-size:9px">(Entrée pour ajouter)</span></label>
+            <div class="tags-wrap" id="bd-tw-wrap" onclick="document.getElementById('bd-tw-input').focus()">
+              <input type="text" id="bd-tw-input" placeholder="Scènes violentes…" onkeydown="handleBDTwInput(event)">
+            </div>
+            <div id="bd-tw-suggestions" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"></div>
+          </div>
+          <div>
+            <label class="form-label">Gratuit jusqu'à l'épisode</label>
+            <input type="number" id="bd-gratuit" class="form-input" value="2" min="0">
+          </div>
+          <button class="btn btn-accent btn-full" id="bd-creer-btn" onclick="creerHistoireBD()">✦ Créer la BD</button>
+        </div>
+      </div>
+
+      <!-- Ajouter un épisode -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-title">Ajouter un épisode</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div>
+            <label class="form-label">Histoire BD</label>
+            <div class="ban-dropdown" id="bd-dropdown-ep-histoire">
+              <button type="button" class="ban-dropdown-btn" onclick="toggleBanDropdown_id('bd-dropdown-ep-histoire')">
+                <span id="bd-ep-histoire-label">— Choisir une BD —</span>
+                <span class="ban-dropdown-arrow">▾</span>
+              </button>
+              <div class="ban-dropdown-menu" id="bd-dropdown-bd-ep-histoire-menu"></div>
+            </div>
+            <input type="hidden" id="bd-ep-histoire" value="">
+          </div>
+          <div class="form-row">
+            <div>
+              <label class="form-label">Numéro d'épisode</label>
+              <input type="number" id="bd-ep-num" class="form-input" min="1" placeholder="ex: 1">
+            </div>
+            <div>
+              <label class="form-label">Titre de l'épisode</label>
+              <input type="text" id="bd-ep-titre" class="form-input" placeholder="Titre…">
+            </div>
+          </div>
+          <div>
+            <label class="form-label">Planches <span style="color:var(--text3);font-size:10px">(jpg, png, webp — tu peux en ajouter plusieurs fois)</span></label>
+            <input type="file" id="bd-ep-images" accept="image/*" multiple class="form-input" style="padding:6px" onchange="bdAjouterPlanches(this)">
+            <div id="bd-ep-preview" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
+            <div style="margin-top:6px;display:flex;justify-content:space-between;align-items:center">
+              <span id="bd-ep-count" style="font-size:11px;color:var(--text3)">0 planche(s)</span>
+              <button type="button" class="btn btn-sm btn-danger" onclick="bdViderPlanches()" style="display:none" id="bd-ep-vider">✕ Tout effacer</button>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <label style="font-size:12px;color:var(--text2)">Gratuit</label>
+            <label class="tgl">
+              <input type="checkbox" id="bd-ep-gratuit" checked>
+              <div class="tgl-track"></div><div class="tgl-thumb"></div>
+            </label>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Publication programmée <span style="color:var(--text3);font-size:9px">(laisser vide = publier maintenant)</span></label>
+            <input type="datetime-local" class="form-input" id="bd-ep-date-publication">
+            <div class="form-hint">Fuseau horaire local. Laisser vide pour une publication immédiate.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Trigger warnings <span style="color:var(--text3);font-size:9px">(spécifiques à cet épisode)</span></label>
+            <div class="tags-wrap" id="ep-tw-wrap" onclick="document.getElementById('ep-tw-input').focus()">
+              <input type="text" id="ep-tw-input" placeholder="Violence, Mort…" onkeydown="handleEpTwInput(event)">
+            </div>
+            <div id="ep-tw-suggestions-label" style="font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:10px;margin-bottom:5px;display:none">Suggestions</div>
+            <div id="ep-tw-suggestions" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Musique d'ambiance <span style="color:var(--text3);font-size:9px">(optionnel · MP3, OGG, WAV)</span></label>
+            <input type="file" accept="audio/*" class="form-input" style="padding:6px" id="bd-ep-musique-file" onchange="bd-epPreviewMusique(this)">
+            <div id="bd-ep-musique-preview" style="display:none;margin-top:6px;font-size:11px;color:var(--accent)"></div>
+            <input type="hidden" id="bd-ep-musique-url" value="">
+          </div>
+          <button class="btn btn-accent btn-full" id="bd-ep-btn" onclick="ajouterEpisodeBD()">✦ Publier l'épisode</button>
+          <div id="bd-ep-progress" style="display:none;font-size:12px;color:var(--accent);text-align:center"></div>
+        </div>
+      </div>
+
+    </div>
+
+  <!-- PANEL BD PUBLIÉES -->
+
+
+  <!-- PANEL NOUVEAU WEBTOON -->
+    <div class="panel" id="panel-nouveau-webtoon">
+      <div id="alert-wt-form" class="alert"></div>
+
+      <!-- Créer un webtoon -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-title">Créer un webtoon</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div>
+            <label class="form-label">Titre</label>
+            <input type="text" id="wt-titre" class="form-input" placeholder="Titre du webtoon…">
+          </div>
+          <div>
+            <label class="form-label">Auteur·ice</label>
+            <div class="ban-dropdown" id="wt-dropdown-auteur">
+              <button type="button" class="ban-dropdown-btn" onclick="toggleBanDropdown_id('wt-dropdown-auteur')">
+                <span id="wt-auteur-label">— Choisir un·e auteur·ice —</span>
+                <span class="ban-dropdown-arrow">▾</span>
+              </button>
+              <div class="ban-dropdown-menu" id="wt-dropdown-auteur-menu"></div>
+            </div>
+            <input type="hidden" id="wt-auteur" value="">
+          </div>
+          <div>
+            <label class="form-label">Résumé</label>
+            <textarea id="wt-resume" class="form-input" rows="3" placeholder="Description…" style="resize:vertical"></textarea>
+          </div>
+          <div class="form-row">
+            <div>
+              <label class="form-label">Cover</label>
+              <div class="img-upload" id="wt-cover-zone">
+                <input type="file" accept="image/*" onchange="wtPreviewCover(this)">
+                <div class="img-upload-text">📎 Cliquer ou glisser</div>
+              </div>
+            </div>
+            <div>
+              <label class="form-label">Bannière</label>
+              <div class="img-upload" id="wt-banner-zone">
+                <input type="file" accept="image/*" onchange="wtPreviewBanner(this)">
+                <div class="img-upload-text">📎 Cliquer ou glisser</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <label class="form-label">Statut</label>
+            <div style="display:flex;gap:8px">
+              <button type="button" class="btn btn-accent" id="wt-s-encours" onclick="setWTStatut('en-cours')" style="flex:1">En cours</button>
+              <button type="button" class="btn" id="wt-s-brouillon" onclick="setWTStatut('brouillon')" style="flex:1">Brouillon</button>
+              <button type="button" class="btn" id="wt-s-pause" onclick="setWTStatut('pause')" style="flex:1">En pause</button>
+              <button type="button" class="btn" id="wt-s-termine" onclick="setWTStatut('termine')" style="flex:1">Terminé</button>
+            </div>
+            <input type="hidden" id="wt-statut" value="en-cours">
+          </div>
+          <div>
+            <label class="form-label">Accessibilité par âge</label>
+            <div style="display:flex;gap:8px">
+              <button type="button" class="btn btn-accent" id="wt-age-tout" onclick="setWTAge('tout')" style="flex:1">Tout public</button>
+              <button type="button" class="btn" id="wt-age-moins18" onclick="setWTAge('moins18')" style="flex:1">-18 ans</button>
+              <button type="button" class="btn" id="wt-age-adulte" onclick="setWTAge('adulte')" style="flex:1">18+ seulement</button>
+            </div>
+            <input type="hidden" id="wt-age-val" value="tout">
+          </div>
+          <div>
+            <label class="form-label">Tags <span style="color:var(--text3);font-size:9px">(Entrée pour ajouter)</span></label>
+            <div class="tags-wrap" id="wt-tags-wrap" onclick="document.getElementById('wt-tags-input').focus()">
+              <input type="text" id="wt-tags-input" placeholder="Romance, Fantastique…" onkeydown="handleWTTagInput(event)">
+            </div>
+            <div id="wt-tags-suggestions" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"></div>
+          </div>
+          <div>
+            <label class="form-label">Trigger warnings <span style="color:var(--text3);font-size:9px">(Entrée pour ajouter)</span></label>
+            <div class="tags-wrap" id="wt-tw-wrap" onclick="document.getElementById('wt-tw-input').focus()">
+              <input type="text" id="wt-tw-input" placeholder="Scènes violentes…" onkeydown="handleWTTwInput(event)">
+            </div>
+            <div id="wt-tw-suggestions" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"></div>
+          </div>
+          <div class="form-row">
+            <div>
+              <label class="form-label">Gratuit jusqu'à l'épisode</label>
+              <input type="number" id="wt-gratuit" class="form-input" value="3" min="0">
+            </div>
+            <div>
+              <label class="form-label">Prix par épisode (tickets)</label>
+              <input type="number" id="wt-prix" class="form-input" value="1" min="1">
+            </div>
+          </div>
+          <button class="btn btn-accent btn-full" id="wt-creer-btn" onclick="creerWebtoon()">✦ Créer le webtoon</button>
+        </div>
+      </div>
+
+      <!-- Ajouter un épisode -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-title">Ajouter un épisode</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div>
+            <label class="form-label">Webtoon</label>
+            <div class="ban-dropdown" id="wt-dropdown-ep-histoire">
+              <button type="button" class="ban-dropdown-btn" onclick="toggleBanDropdown_id('wt-dropdown-ep-histoire')">
+                <span id="wt-ep-histoire-label">— Choisir un webtoon —</span>
+                <span class="ban-dropdown-arrow">▾</span>
+              </button>
+              <div class="ban-dropdown-menu" id="wt-dropdown-ep-histoire-menu"></div>
+            </div>
+            <input type="hidden" id="wt-ep-histoire" value="">
+          </div>
+          <div class="form-row">
+            <div>
+              <label class="form-label">Numéro d'épisode</label>
+              <input type="number" id="wt-ep-num" class="form-input" min="1" placeholder="ex: 1">
+            </div>
+            <div>
+              <label class="form-label">Titre de l'épisode</label>
+              <input type="text" id="wt-ep-titre" class="form-input" placeholder="Titre…">
+            </div>
+          </div>
+          <div>
+            <label class="form-label">Images <span style="color:var(--text3);font-size:10px">(jpg, png, webp — tu peux en ajouter plusieurs fois)</span></label>
+            <input type="file" id="wt-ep-images-input" accept="image/*" multiple class="form-input" style="padding:6px" onchange="wtAjouterStrips(this)">
+            <div id="wt-ep-preview" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
+            <div style="margin-top:6px;display:flex;justify-content:space-between;align-items:center">
+              <span id="wt-ep-count" style="font-size:11px;color:var(--text3)">0 image(s)</span>
+              <button type="button" class="btn btn-sm btn-danger" onclick="wtViderStrips()" style="display:none" id="wt-ep-vider">✕ Tout effacer</button>
+            </div>
+          </div>
+          <div>
+            <label class="form-label">Accès</label>
+            <div style="display:flex;gap:8px">
+              <button type="button" class="btn btn-accent" id="wt-ep-gratuit-btn" onclick="setWTEpAcces(true)" style="flex:1">✦ Gratuit</button>
+              <button type="button" class="btn" id="wt-ep-payant-btn" onclick="setWTEpAcces(false)" style="flex:1">🎟 Payant</button>
+            </div>
+            <input type="hidden" id="wt-ep-gratuit" value="true">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Publication programmée <span style="color:var(--text3);font-size:9px">(laisser vide = publier maintenant)</span></label>
+            <input type="datetime-local" class="form-input" id="wt-ep-date-publication">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Trigger warnings <span style="color:var(--text3);font-size:9px">(spécifiques à cet épisode)</span></label>
+            <div class="tags-wrap" id="wt-ep-tw-wrap" onclick="document.getElementById('wt-ep-tw-input').focus()">
+              <input type="text" id="wt-ep-tw-input" placeholder="Violence, Mort…" onkeydown="handleWTEpTwInput(event)">
+            </div>
+            <div id="wt-ep-tw-suggestions-label" style="font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:10px;margin-bottom:5px;display:none">Suggestions</div>
+            <div id="wt-ep-tw-suggestions" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Musique d'ambiance <span style="color:var(--text3);font-size:9px">(optionnel · MP3, OGG, WAV)</span></label>
+            <input type="file" accept="audio/*" class="form-input" style="padding:6px" id="wt-ep-musique-file" onchange="wt-epPreviewMusique(this)">
+            <div id="wt-ep-musique-preview" style="display:none;margin-top:6px;font-size:11px;color:var(--accent)"></div>
+            <input type="hidden" id="wt-ep-musique-url" value="">
+          </div>
+          <button class="btn btn-accent btn-full" id="wt-ep-btn" onclick="ajouterEpisodeWT()">✦ Publier l'épisode</button>
+          <div id="wt-ep-progress" style="display:none;font-size:12px;color:var(--accent);text-align:center"></div>
+        </div>
+      </div>
+    </div>
+
+
+
+  <!-- PANEL NOUVEAU LIVRE AUDIO -->
+  <div class="panel" id="panel-nouveau-audio">
+    <div id="alert-audio" class="alert"></div>
+
+    <!-- Créer un livre audio -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title">Créer un livre audio</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div>
+          <label class="form-label">Titre *</label>
+          <input type="text" class="form-input" id="audio-titre" placeholder="Titre du livre audio">
+        </div>
+        <div>
+          <label class="form-label">Auteur·ices</label>
+          <div class="ban-dropdown" id="audio-dropdown-auteur">
+            <button type="button" class="ban-dropdown-btn" onclick="toggleBanDropdown_id('audio-dropdown-auteur')">
+              <span id="audio-auteur-label">— Choisir un·e auteur·ice —</span>
+              <span class="ban-dropdown-arrow">▾</span>
+            </button>
+            <div class="ban-dropdown-menu" id="audio-dropdown-auteur-menu"></div>
+          </div>
+          <input type="hidden" id="audio-auteur" value="">
+        </div>
+        <div>
+          <label class="form-label">Résumé *</label>
+          <textarea class="form-input" id="audio-resume" rows="3" placeholder="Résumé du livre audio…" style="resize:vertical"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Couverture (portrait 2:3)</label>
+            <div class="img-upload" id="audio-cover-zone">
+              <input type="file" accept="image/*" id="audio-cover-input" onchange="previewImg(this,'audio-cover-preview','audio-cover-zone')">
+              <div class="img-upload-text">📎 Cliquer ou glisser une image</div>
+              <img id="audio-cover-preview" class="img-preview">
+            </div>
+            <button class="btn btn-sm btn-danger" style="margin-top:6px;display:none" id="audio-cover-remove" onclick="removeImg('audio-cover')">✕ Supprimer</button>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Bannière (paysage 2:1)</label>
+            <div class="img-upload" id="audio-banner-zone">
+              <input type="file" accept="image/*" id="audio-banner-input" onchange="previewImg(this,'audio-banner-preview','audio-banner-zone')">
+              <div class="img-upload-text">📎 Cliquer ou glisser une image</div>
+              <img id="audio-banner-preview" class="img-preview">
+            </div>
+            <button class="btn btn-sm btn-danger" style="margin-top:6px;display:none" id="audio-banner-remove" onclick="removeImg('audio-banner')">✕ Supprimer</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tags <span style="color:var(--text3);font-size:9px">(Entrée pour ajouter)</span></label>
+          <div class="tags-wrap" id="audio-tags-wrap" onclick="document.getElementById('audio-tags-input').focus()">
+            <input type="text" id="audio-tags-input" placeholder="Romance, Fantastique…" onkeydown="handleAudioTagInput(event)">
+          </div>
+          <div id="audio-tags-suggestions-label" style="font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:10px;margin-bottom:5px;">Suggestions</div>
+          <div id="audio-tags-suggestions" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Trigger warnings <span style="color:var(--text3);font-size:9px">(Entrée pour ajouter)</span></label>
+          <div class="tags-wrap" id="audio-tw-wrap" onclick="document.getElementById('audio-tw-input').focus()">
+            <input type="text" id="audio-tw-input" placeholder="Violence, Mort…" onkeydown="handleAudioTWInput(event)">
+          </div>
+          <div id="audio-tw-suggestions-label" style="font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:10px;margin-bottom:5px;display:none">Suggestions</div>
+          <div id="audio-tw-suggestions" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Chapitres gratuits</label>
+            <input type="number" class="form-input" id="audio-gratuit" value="2" min="0">
+            <div class="form-hint">Les X premiers chapitres sont gratuits</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Prix par chapitre (tickets)</label>
+            <input type="number" class="form-input" id="audio-prix" value="1" min="1">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Contenu adulte</label>
+            <div style="display:flex;gap:8px">
+              <button type="button" class="btn btn-accent" id="audio-adulte-non" onclick="setAudioAdulte(false)" style="flex:1">Non</button>
+              <button type="button" class="btn" id="audio-adulte-oui" onclick="setAudioAdulte(true)" style="flex:1">Oui</button>
+            </div>
+            <input type="hidden" id="audio-adulte" value="false">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Statut</label>
+            <div style="display:flex;gap:8px">
+              <button type="button" class="btn" id="audio-s-brouillon" onclick="setAudioStatut('brouillon')" style="flex:1">Brouillon</button>
+              <button type="button" class="btn btn-accent" id="audio-s-encours" onclick="setAudioStatut('en-cours')" style="flex:1">En cours</button>
+              <button type="button" class="btn" id="audio-s-pause" onclick="setAudioStatut('pause')" style="flex:1">En pause</button>
+              <button type="button" class="btn" id="audio-s-termine" onclick="setAudioStatut('termine')" style="flex:1">Terminé</button>
+            </div>
+            <input type="hidden" id="audio-statut" value="en-cours">
+          </div>
+        </div>
+        <div id="audio-options-adulte" style="display:none" class="form-group">
+          <label class="form-label">Version soft des scènes spicy ?</label>
+          <div style="display:flex;gap:8px">
+            <button type="button" class="btn" id="audio-soft-non" onclick="setAudioOption('audio-soft','false')" style="flex:1">Non</button>
+            <button type="button" class="btn" id="audio-soft-oui" onclick="setAudioOption('audio-soft','true')" style="flex:1">Oui</button>
+          </div>
+          <input type="hidden" id="audio-soft" value="false">
+          <div id="audio-moins18-wrap" style="display:none;margin-top:10px">
+            <label class="form-label">Adapté à un public -18 ans ?</label>
+            <div style="display:flex;gap:8px">
+              <button type="button" class="btn" id="audio-moins18-non" onclick="setAudioOption('audio-moins18','false')" style="flex:1">Non</button>
+              <button type="button" class="btn btn-accent" id="audio-moins18-oui" onclick="setAudioOption('audio-moins18','true')" style="flex:1">Oui</button>
+            </div>
+            <input type="hidden" id="audio-moins18" value="true">
+          </div>
+        </div>
+        <div id="audio-options-non-adulte" class="form-group">
+          <label class="form-label">Adapté à un public -16 ans ?</label>
+          <div style="display:flex;gap:8px">
+            <button type="button" class="btn" id="audio-moins16-non" onclick="setAudioOption('audio-moins16','false')" style="flex:1">Non</button>
+            <button type="button" class="btn btn-accent" id="audio-moins16-oui" onclick="setAudioOption('audio-moins16','true')" style="flex:1">Oui</button>
+          </div>
+          <input type="hidden" id="audio-moins16" value="true">
+          <div style="margin-top:10px">
+            <label class="form-label">Adapté à un public -18 ans ?</label>
+            <div style="display:flex;gap:8px">
+              <button type="button" class="btn" id="audio-moins18b-non" onclick="setAudioOption('audio-moins18b','false')" style="flex:1">Non</button>
+              <button type="button" class="btn btn-accent" id="audio-moins18b-oui" onclick="setAudioOption('audio-moins18b','true')" style="flex:1">Oui</button>
+            </div>
+            <input type="hidden" id="audio-moins18b" value="true">
+          </div>
+        </div>
+        <button class="btn btn-accent btn-full" id="audio-creer-btn" onclick="creerLivreAudio()">✦ Créer le livre audio</button>
+      </div>
+    </div>
+
+    <!-- Ajouter un épisode audio -->
+    <div class="card">
+      <div class="card-title">Ajouter un chapitre audio</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div>
+          <label class="form-label">Livre audio *</label>
+          <div class="ban-dropdown" id="audio-ep-histoire-dropdown">
+            <button type="button" class="ban-dropdown-btn" onclick="toggleBanDropdown_id('audio-ep-histoire-dropdown')">
+              <span id="audio-ep-histoire-label">— Choisir un livre audio —</span>
+              <span class="ban-dropdown-arrow">▾</span>
+            </button>
+            <div class="ban-dropdown-menu" id="audio-ep-histoire-menu"></div>
+          </div>
+          <input type="hidden" id="audio-ep-histoire" value="">
+        </div>
+        <div style="display:flex;gap:12px">
+          <div style="flex:1">
+            <label class="form-label">Numéro *</label>
+            <input type="number" id="audio-ep-num" class="form-input" min="1" placeholder="ex: 1">
+          </div>
+          <div style="flex:2">
+            <label class="form-label">Titre</label>
+            <input type="text" id="audio-ep-titre" class="form-input" placeholder="Titre…">
+          </div>
+        </div>
+        <div>
+          <label class="form-label">Fichier audio * (MP3, OGG, WAV)</label>
+          <input type="file" accept="audio/*" id="audio-ep-file" class="form-input" style="padding:6px" onchange="audioEpPreviewFile(this)">
+          <div id="audio-ep-preview" style="display:none;margin-top:6px;font-size:11px;color:var(--accent)"></div>
+        </div>
+        <div>
+          <label class="form-label">Accès</label>
+          <div style="display:flex;gap:8px">
+            <button type="button" class="btn btn-accent" id="audio-ep-gratuit-btn" onclick="setAudioEpAcces(true)" style="flex:1">✦ Gratuit</button>
+            <button type="button" class="btn" id="audio-ep-payant-btn" onclick="setAudioEpAcces(false)" style="flex:1">🎟 Payant</button>
+          </div>
+          <input type="hidden" id="audio-ep-gratuit" value="true">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Image du chapitre <span style="color:var(--text3);font-size:9px">(optionnel · carré 1:1)</span></label>
+          <div class="img-upload" id="audio-ep-cover-zone">
+            <input type="file" accept="image/*" id="audio-ep-cover-input" onchange="previewImg(this,'audio-ep-cover-preview','audio-ep-cover-zone')">
+            <div class="img-upload-text">📎 Cliquer ou glisser une image</div>
+            <img id="audio-ep-cover-preview" class="img-preview" style="aspect-ratio:1/1;object-fit:cover;">
+          </div>
+          <button class="btn btn-sm btn-danger" style="margin-top:6px;display:none" id="audio-ep-cover-remove" onclick="removeImg('audio-ep-cover')">✕ Supprimer</button>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Trigger warnings <span style="color:var(--text3);font-size:9px">(spécifiques à ce chapitre)</span></label>
+          <div class="tags-wrap" id="audio-ep-tw-wrap" onclick="document.getElementById('audio-ep-tw-input').focus()">
+            <input type="text" id="audio-ep-tw-input" placeholder="Violence, Mort…" onkeydown="handleAudioEpTwInput(event)">
+          </div>
+          <div id="audio-ep-tw-suggestions-label" style="font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:10px;margin-bottom:5px;display:none">Suggestions</div>
+          <div id="audio-ep-tw-suggestions" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Publication programmée <span style="color:var(--text3);font-size:9px">(laisser vide = publier maintenant)</span></label>
+          <input type="datetime-local" class="form-input" id="audio-ep-date-publication">
+        </div>
+        <button class="btn btn-accent btn-full" id="audio-ep-btn" onclick="ajouterChapitreAudio()">✦ Publier le chapitre</button>
+        <div id="audio-ep-progress" style="display:none;font-size:12px;color:var(--accent);text-align:center"></div>
+      </div>
+    </div>
+  </div>
+  </div>
+</div>
+
+
+  <!-- POPUP MODIFIER LIVRE AUDIO -->
+  <div id="popup-edit-audio" style="display:none;position:fixed;inset:0;background:rgba(10,12,25,.8);z-index:200;align-items:flex-start;justify-content:center;overflow-y:auto;padding:24px 16px">
+    <div style="background:#1e2438;border:1px solid rgba(180,190,230,.2);border-radius:18px;padding:28px 24px;width:100%;max-width:640px;margin:auto">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:20px;margin-bottom:20px">Modifier le livre audio</div>
+      <div id="alert-edit-audio" class="alert"></div>
+
+      <div class="form-group">
+        <label class="form-label">Titre *</label>
+        <input type="text" class="form-input" id="eaudio-titre">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Auteur·ice</label>
+        <div class="ban-dropdown" id="eaudio-dropdown-auteur">
+          <button type="button" class="ban-dropdown-btn" onclick="toggleBanDropdown_id('eaudio-dropdown-auteur')">
+            <span id="eaudio-auteur-label">— Choisir un·e auteur·ice —</span>
+            <span class="ban-dropdown-arrow">▾</span>
+          </button>
+          <div class="ban-dropdown-menu" id="eaudio-dropdown-auteur-menu"></div>
+        </div>
+        <input type="hidden" id="eaudio-auteur" value="">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Résumé</label>
+        <textarea class="form-input" id="eaudio-resume" rows="3" style="resize:vertical"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Couverture (portrait 2:3)</label>
+          <div class="img-upload" id="eaudio-cover-zone">
+            <input type="file" accept="image/*" id="eaudio-cover-input" onchange="previewImg(this,'eaudio-cover-preview','eaudio-cover-zone')">
+            <div class="img-upload-text">📎 Cliquer ou glisser</div>
+            <img id="eaudio-cover-preview" class="img-preview">
+          </div>
+          <button class="btn btn-sm btn-danger" style="margin-top:6px;display:none" id="eaudio-cover-remove" onclick="removeImg('eaudio-cover')">✕ Supprimer</button>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Bannière (paysage 2:1)</label>
+          <div class="img-upload" id="eaudio-banner-zone">
+            <input type="file" accept="image/*" id="eaudio-banner-input" onchange="previewImg(this,'eaudio-banner-preview','eaudio-banner-zone')">
+            <div class="img-upload-text">📎 Cliquer ou glisser</div>
+            <img id="eaudio-banner-preview" class="img-preview">
+          </div>
+          <button class="btn btn-sm btn-danger" style="margin-top:6px;display:none" id="eaudio-banner-remove" onclick="removeImg('eaudio-banner')">✕ Supprimer</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tags <span style="color:var(--text3);font-size:9px">(Entrée pour ajouter)</span></label>
+        <div class="tags-wrap" id="eaudio-tags-wrap" onclick="document.getElementById('eaudio-tags-input').focus()">
+          <input type="text" id="eaudio-tags-input" placeholder="Romance, Fantastique…" onkeydown="handleEAudioTagInput(event)">
+        </div>
+        <div id="eaudio-tags-suggestions-label" style="font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:10px;margin-bottom:5px;display:none">Suggestions</div>
+        <div id="eaudio-tags-suggestions" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Trigger warnings <span style="color:var(--text3);font-size:9px">(Entrée pour ajouter)</span></label>
+        <div class="tags-wrap" id="eaudio-tw-wrap" onclick="document.getElementById('eaudio-tw-input').focus()">
+          <input type="text" id="eaudio-tw-input" placeholder="Violence, Mort…" onkeydown="handleEAudioTWInput(event)">
+        </div>
+        <div id="eaudio-tw-suggestions-label" style="font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:10px;margin-bottom:5px;display:none">Suggestions</div>
+        <div id="eaudio-tw-suggestions" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Chapitres gratuits</label>
+          <input type="number" class="form-input" id="eaudio-gratuit" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Prix par chapitre (tickets)</label>
+          <input type="number" class="form-input" id="eaudio-prix" value="1" min="1">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Contenu adulte</label>
+          <div style="display:flex;gap:8px">
+            <button type="button" class="btn btn-accent" id="eaudio-adulte-non" onclick="setEAudioAdulte(false)" style="flex:1">Non</button>
+            <button type="button" class="btn" id="eaudio-adulte-oui" onclick="setEAudioAdulte(true)" style="flex:1">Oui</button>
+          </div>
+          <input type="hidden" id="eaudio-adulte" value="false">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Statut</label>
+          <div style="display:flex;gap:8px">
+            <button type="button" class="btn" id="eaudio-s-brouillon" onclick="setEAudioStatut('brouillon')" style="flex:1">Brouillon</button>
+            <button type="button" class="btn btn-accent" id="eaudio-s-encours" onclick="setEAudioStatut('en-cours')" style="flex:1">En cours</button>
+            <button type="button" class="btn" id="eaudio-s-pause" onclick="setEAudioStatut('pause')" style="flex:1">En pause</button>
+            <button type="button" class="btn" id="eaudio-s-termine" onclick="setEAudioStatut('termine')" style="flex:1">Terminé</button>
+          </div>
+          <input type="hidden" id="eaudio-statut" value="en-cours">
+        </div>
+      </div>
+      <div id="eaudio-options-adulte" style="display:none" class="form-group">
+        <label class="form-label">Version soft des scènes spicy ?</label>
+        <div style="display:flex;gap:8px">
+          <button type="button" class="btn" id="eaudio-soft-non" onclick="setEAudioOption('eaudio-soft','false')" style="flex:1">Non</button>
+          <button type="button" class="btn" id="eaudio-soft-oui" onclick="setEAudioOption('eaudio-soft','true')" style="flex:1">Oui</button>
+        </div>
+        <input type="hidden" id="eaudio-soft" value="false">
+        <div id="eaudio-moins18-wrap" style="display:none;margin-top:10px">
+          <label class="form-label">Adapté à un public -18 ans ?</label>
+          <div style="display:flex;gap:8px">
+            <button type="button" class="btn" id="eaudio-moins18-non" onclick="setEAudioOption('eaudio-moins18','false')" style="flex:1">Non</button>
+            <button type="button" class="btn btn-accent" id="eaudio-moins18-oui" onclick="setEAudioOption('eaudio-moins18','true')" style="flex:1">Oui</button>
+          </div>
+          <input type="hidden" id="eaudio-moins18" value="true">
+        </div>
+      </div>
+      <div id="eaudio-options-non-adulte" class="form-group">
+        <label class="form-label">Adapté à un public -16 ans ?</label>
+        <div style="display:flex;gap:8px">
+          <button type="button" class="btn" id="eaudio-moins16-non" onclick="setEAudioOption('eaudio-moins16','false')" style="flex:1">Non</button>
+          <button type="button" class="btn btn-accent" id="eaudio-moins16-oui" onclick="setEAudioOption('eaudio-moins16','true')" style="flex:1">Oui</button>
+        </div>
+        <input type="hidden" id="eaudio-moins16" value="true">
+        <div style="margin-top:10px">
+          <label class="form-label">Adapté à un public -18 ans ?</label>
+          <div style="display:flex;gap:8px">
+            <button type="button" class="btn" id="eaudio-moins18b-non" onclick="setEAudioOption('eaudio-moins18b','false')" style="flex:1">Non</button>
+            <button type="button" class="btn btn-accent" id="eaudio-moins18b-oui" onclick="setEAudioOption('eaudio-moins18b','true')" style="flex:1">Oui</button>
+          </div>
+          <input type="hidden" id="eaudio-moins18b" value="true">
+        </div>
+      </div>
+      <input type="hidden" id="eaudio-id">
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <button class="btn btn-full" onclick="fermerPopupEditAudio()" style="flex:1">Annuler</button>
+        <button class="btn btn-full btn-accent" id="eaudio-save-btn" onclick="sauvegarderAudio()" style="flex:2">✦ Sauvegarder</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP SUPPRIMER LIVRE AUDIO -->
+  <div id="popup-suppr-audio" style="display:none;position:fixed;inset:0;background:rgba(10,12,25,.7);z-index:200;align-items:center;justify-content:center">
+    <div style="background:#1e2438;border:1px solid rgba(180,190,230,.2);border-radius:18px;padding:28px 24px;width:300px;text-align:center">
+      <div style="font-size:32px;margin-bottom:12px">🗑</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:20px;margin-bottom:10px">Supprimer ce livre audio ?</div>
+      <p style="font-size:12px;color:#9aa2c8;line-height:1.7;margin-bottom:22px">Tous les chapitres seront supprimés. Action irréversible.</p>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-full" onclick="fermerPopupSupprAudio()">Annuler</button>
+        <button class="btn btn-full btn-danger" onclick="confirmerSupprAudio()">Oui, supprimer</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- POPUP MODIFIER CHAPITRE AUDIO -->
+  <div id="popup-edit-audio-chap" style="display:none;position:fixed;inset:0;background:rgba(10,12,25,.8);z-index:200;align-items:flex-start;justify-content:center;overflow-y:auto;padding:24px 16px">
+    <div style="background:#1e2438;border:1px solid rgba(180,190,230,.2);border-radius:18px;padding:28px 24px;width:100%;max-width:640px;margin:auto">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:20px;margin-bottom:20px">Modifier le chapitre</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Numéro</label>
+          <input type="number" class="form-input" id="eaudio-chap-num" min="1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Titre</label>
+          <input type="text" class="form-input" id="eaudio-chap-titre">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Fichier audio <span style="color:var(--text3);font-size:9px">(laisser vide pour ne pas changer)</span></label>
+        <input type="file" accept="audio/*" id="eaudio-chap-file" class="form-input" style="padding:6px" onchange="eAudioChapPreviewFile(this)">
+        <div id="eaudio-chap-file-preview" style="display:none;margin-top:6px;font-size:11px;color:var(--accent)"></div>
+        <div id="eaudio-chap-file-actuel" style="display:none;margin-top:4px;font-size:11px;color:var(--text3)"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Accès</label>
+        <div style="display:flex;gap:8px">
+          <button type="button" class="btn btn-accent" id="eaudio-chap-gratuit-btn" onclick="setEAudioChapAcces(true)" style="flex:1">✦ Gratuit</button>
+          <button type="button" class="btn" id="eaudio-chap-payant-btn" onclick="setEAudioChapAcces(false)" style="flex:1">🎟 Payant</button>
+        </div>
+        <input type="hidden" id="eaudio-chap-gratuit" value="true">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Image du chapitre <span style="color:var(--text3);font-size:9px">(optionnel · carré 1:1)</span></label>
+        <div class="img-upload" id="eaudio-chap-cover-zone">
+          <input type="file" accept="image/*" id="eaudio-chap-cover-input" onchange="previewImg(this,'eaudio-chap-cover-preview','eaudio-chap-cover-zone')">
+          <div class="img-upload-text">📎 Cliquer ou glisser une image</div>
+          <img id="eaudio-chap-cover-preview" class="img-preview" style="aspect-ratio:1/1;object-fit:cover;">
+        </div>
+        <button class="btn btn-sm btn-danger" style="margin-top:6px;display:none" id="eaudio-chap-cover-remove" onclick="removeImg('eaudio-chap-cover')">✕ Supprimer</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Trigger warnings <span style="color:var(--text3);font-size:9px">(spécifiques à ce chapitre)</span></label>
+        <div class="tags-wrap" id="eaudio-chap-tw-wrap" onclick="document.getElementById('eaudio-chap-tw-input').focus()">
+          <input type="text" id="eaudio-chap-tw-input" placeholder="Violence, Mort…" onkeydown="handleEAudioChapTwInput(event)">
+        </div>
+        <div id="eaudio-chap-tw-suggestions-label" style="font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:10px;margin-bottom:5px;display:none">Suggestions</div>
+        <div id="eaudio-chap-tw-suggestions" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Publication programmée <span style="color:var(--text3);font-size:9px">(laisser vide = immédiat)</span></label>
+        <input type="datetime-local" class="form-input" id="eaudio-chap-date">
+      </div>
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <button class="btn btn-full" onclick="fermerPopupEditChapitreAudio()" style="flex:1">Annuler</button>
+        <button class="btn btn-full btn-accent" id="eaudio-chap-save-btn" onclick="sauvegarderChapitreAudio()" style="flex:2">✦ Sauvegarder</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP MODIFIER BD -->
+  <div id="popup-edit-bd" style="display:none;position:fixed;inset:0;background:rgba(10,12,25,.8);z-index:200;align-items:flex-start;justify-content:center;overflow-y:auto;padding:24px 16px">
+    <div style="background:#1e2438;border:1px solid rgba(180,190,230,.2);border-radius:18px;padding:28px 24px;width:100%;max-width:480px;margin:auto">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:20px;margin-bottom:20px">Modifier la BD</div>
+      <div class="form-group">
+        <label class="form-label">Titre *</label>
+        <input type="text" class="form-input" id="ebd-titre">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Résumé</label>
+        <textarea class="form-input" id="ebd-resume" rows="3" style="resize:vertical"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Statut</label>
+        <div style="display:flex;gap:8px">
+          <button type="button" class="btn" id="ebd-s-encours" onclick="setEBDStatut('en-cours')" style="flex:1">En cours</button>
+          <button type="button" class="btn" id="ebd-s-pause" onclick="setEBDStatut('pause')" style="flex:1">En pause</button>
+          <button type="button" class="btn" id="ebd-s-termine" onclick="setEBDStatut('termine')" style="flex:1">Terminé</button>
+          <button type="button" class="btn" id="ebd-s-brouillon" onclick="setEBDStatut('brouillon')" style="flex:1">Brouillon</button>
+        </div>
+        <input type="hidden" id="ebd-statut" value="en-cours">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Gratuit jusqu'à l'épisode</label>
+        <input type="number" class="form-input" id="ebd-gratuit" min="0">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nouvelle cover <span style="color:var(--text3);font-size:9px">(optionnel)</span></label>
+          <div class="img-upload" id="ebd-cover-zone">
+            <input type="file" accept="image/*" id="ebd-cover-input" onchange="previewImgGeneric(this,'ebd-cover-preview')">
+            <div class="img-upload-text">📎 Changer</div>
+            <img id="ebd-cover-preview" class="img-preview">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nouvelle bannière <span style="color:var(--text3);font-size:9px">(optionnel)</span></label>
+          <div class="img-upload" id="ebd-banner-zone">
+            <input type="file" accept="image/*" id="ebd-banner-input" onchange="previewImgGeneric(this,'ebd-banner-preview')">
+            <div class="img-upload-text">📎 Changer</div>
+            <img id="ebd-banner-preview" class="img-preview">
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Accessibilité par âge</label>
+        <div style="display:flex;gap:8px">
+          <button type="button" class="btn" id="ebd-age-tout" onclick="setEBDAge('tout')" style="flex:1">Tout public</button>
+          <button type="button" class="btn" id="ebd-age-moins18" onclick="setEBDAge('moins18')" style="flex:1">-18 ans</button>
+          <button type="button" class="btn" id="ebd-age-adulte" onclick="setEBDAge('adulte')" style="flex:1">18+ seulement</button>
+        </div>
+        <input type="hidden" id="ebd-age-val" value="tout">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tags</label>
+        <div class="tags-wrap" id="ebd-tags-wrap" onclick="document.getElementById('ebd-tags-input').focus()">
+          <input type="text" id="ebd-tags-input" placeholder="Ajouter un tag…" onkeydown="handleEBDTagInput(event)">
+        </div>
+        <div id="ebd-tags-suggestions" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Trigger warnings</label>
+        <div class="tags-wrap" id="ebd-tw-wrap" onclick="document.getElementById('ebd-tw-input').focus()">
+          <input type="text" id="ebd-tw-input" placeholder="Ajouter un TW…" onkeydown="handleEBDTwInput(event)">
+        </div>
+        <div id="ebd-tw-suggestions" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"></div>
+      </div>
+      <input type="hidden" id="ebd-id">
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <button class="btn btn-full" onclick="fermerPopupEditBD()" style="flex:1">Annuler</button>
+        <button class="btn btn-full btn-accent" id="ebd-save-btn" onclick="sauvegarderBD()" style="flex:2">✦ Sauvegarder</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP MODIFIER ÉPISODE -->
+  <div id="popup-edit-ep" style="display:none;position:fixed;inset:0;background:rgba(10,12,25,.8);z-index:200;align-items:flex-start;justify-content:center;overflow-y:auto;padding:24px 16px">
+    <div style="background:#1e2438;border:1px solid rgba(180,190,230,.2);border-radius:18px;padding:28px 24px;width:100%;max-width:480px;margin:auto">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:20px;margin-bottom:20px">Modifier l'épisode</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Numéro</label>
+          <input type="number" class="form-input" id="eep-num" min="1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Titre</label>
+          <input type="text" class="form-input" id="eep-titre">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Accès</label>
+        <div style="display:flex;gap:8px">
+          <button type="button" class="btn" id="eep-gratuit-btn" onclick="setEEPGratuit(true)" style="flex:1">✦ Gratuit</button>
+          <button type="button" class="btn" id="eep-payant-btn" onclick="setEEPGratuit(false)" style="flex:1">🎟 Payant</button>
+        </div>
+        <input type="hidden" id="eep-gratuit" value="true">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Planches actuelles</label>
+        <div id="eep-planches-actuelles" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"></div>
+        <label class="form-label" style="margin-top:8px">Ajouter des planches <span style="color:var(--text3);font-size:9px">(ajoutées à la suite des existantes)</span></label>
+        <input type="file" id="eep-images" accept="image/*" multiple class="form-input" style="padding:6px" onchange="eepPreviewAjout(this)">
+        <div id="eep-preview" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
+        <div id="eep-ajout-count" style="font-size:11px;color:var(--text3);margin-top:4px"></div>
+      </div>
+      <input type="hidden" id="eep-id">
+      <input type="hidden" id="eep-histoire-id">
+      <input type="hidden" id="eep-ancien-num">
+      <div class="form-group">
+        <label class="form-label">Publication programmée <span style="color:var(--text3);font-size:9px">(laisser vide = immédiat)</span></label>
+        <input type="datetime-local" class="form-input" id="eep-date-publication">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Trigger warnings <span style="color:var(--text3);font-size:9px">(spécifiques à cet épisode)</span></label>
+        <div class="tags-wrap" id="eep-tw-wrap" onclick="document.getElementById('eep-tw-input').focus()">
+          <input type="text" id="eep-tw-input" placeholder="Violence, Mort…" onkeydown="handleEepTwInput(event)">
+        </div>
+        <div id="eep-tw-suggestions-label" style="font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:10px;margin-bottom:5px;display:none">Suggestions</div>
+        <div id="eep-tw-suggestions" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Musique d'ambiance <span style="color:var(--text3);font-size:9px">(optionnel · laisser vide pour ne pas changer)</span></label>
+        <input type="file" accept="audio/*" class="form-input" style="padding:6px" id="eep-musique-file" onchange="eepPreviewMusique(this)">
+        <div id="eep-musique-preview" style="display:none;margin-top:6px;font-size:11px;color:var(--accent)"></div>
+        <div id="eep-musique-actuelle" style="display:none;margin-top:4px;font-size:11px;color:var(--text3)"></div>
+        <input type="hidden" id="eep-musique-url" value="">
+      </div>
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <button class="btn btn-full" onclick="fermerPopupEditEp()" style="flex:1">Annuler</button>
+        <button class="btn btn-full btn-accent" id="eep-save-btn" onclick="sauvegarderEpisode()" style="flex:2">✦ Sauvegarder</button>
+      </div>
+      <div id="eep-progress" style="display:none;font-size:12px;color:var(--accent);text-align:center;margin-top:10px"></div>
+    </div>
+  </div>
+
+  <!-- POPUP SUPPRIMER BD -->
+  <div id="popup-suppr-bd" style="display:none;position:fixed;inset:0;background:rgba(10,12,25,.7);z-index:200;align-items:center;justify-content:center">
+    <div style="background:#1e2438;border:1px solid rgba(180,190,230,.2);border-radius:18px;padding:28px 24px;width:300px;text-align:center">
+      <div style="font-size:32px;margin-bottom:12px">🗑</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:20px;margin-bottom:10px">Supprimer cette BD ?</div>
+      <p style="font-size:12px;color:#9aa2c8;line-height:1.7;margin-bottom:22px">Tous les épisodes et planches seront supprimés. Action irréversible.</p>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-full" onclick="fermerPopupSupprBD()">Annuler</button>
+        <button class="btn btn-full btn-danger" onclick="confirmerSupprBD()">Oui, supprimer</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- POPUP MODIFIER WEBTOON -->
+  <div id="popup-edit-wt" style="display:none;position:fixed;inset:0;background:rgba(10,12,25,.8);z-index:200;align-items:flex-start;justify-content:center;overflow-y:auto;padding:24px 16px">
+    <div style="background:#1e2438;border:1px solid rgba(180,190,230,.2);border-radius:18px;padding:28px 24px;width:100%;max-width:480px;margin:auto">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:20px;margin-bottom:20px">Modifier le webtoon</div>
+      <div class="form-group"><label class="form-label">Titre *</label><input type="text" class="form-input" id="ewt-titre"></div>
+      <div class="form-group"><label class="form-label">Résumé</label><textarea class="form-input" id="ewt-resume" rows="3" style="resize:vertical"></textarea></div>
+      <div class="form-group">
+        <label class="form-label">Statut</label>
+        <div style="display:flex;gap:8px">
+          <button type="button" class="btn" id="ewt-s-encours" onclick="setEWTStatut('en-cours')" style="flex:1">En cours</button>
+          <button type="button" class="btn" id="ewt-s-pause" onclick="setEWTStatut('pause')" style="flex:1">En pause</button>
+          <button type="button" class="btn" id="ewt-s-termine" onclick="setEWTStatut('termine')" style="flex:1">Terminé</button>
+          <button type="button" class="btn" id="ewt-s-brouillon" onclick="setEWTStatut('brouillon')" style="flex:1">Brouillon</button>
+        </div>
+        <input type="hidden" id="ewt-statut" value="en-cours">
+      </div>
+      <div class="form-group"><label class="form-label">Gratuit jusqu'à l'épisode</label><input type="number" class="form-input" id="ewt-gratuit" min="0"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nouvelle cover <span style="color:var(--text3);font-size:9px">(optionnel)</span></label>
+          <div class="img-upload" id="ewt-cover-zone"><input type="file" accept="image/*" id="ewt-cover-input" onchange="previewImgGeneric(this,'ewt-cover-preview')"><div class="img-upload-text">📎 Changer</div><img id="ewt-cover-preview" class="img-preview"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nouvelle bannière <span style="color:var(--text3);font-size:9px">(optionnel)</span></label>
+          <div class="img-upload" id="ewt-banner-zone"><input type="file" accept="image/*" id="ewt-banner-input" onchange="previewImgGeneric(this,'ewt-banner-preview')"><div class="img-upload-text">📎 Changer</div><img id="ewt-banner-preview" class="img-preview"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Accessibilité par âge</label>
+        <div style="display:flex;gap:8px">
+          <button type="button" class="btn" id="ewt-age-tout" onclick="setEWTAge('tout')" style="flex:1">Tout public</button>
+          <button type="button" class="btn" id="ewt-age-moins18" onclick="setEWTAge('moins18')" style="flex:1">-18 ans</button>
+          <button type="button" class="btn" id="ewt-age-adulte" onclick="setEWTAge('adulte')" style="flex:1">18+ seulement</button>
+        </div>
+        <input type="hidden" id="ewt-age-val" value="tout">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tags</label>
+        <div class="tags-wrap" id="ewt-tags-wrap" onclick="document.getElementById('ewt-tags-input').focus()"><input type="text" id="ewt-tags-input" placeholder="Ajouter un tag…" onkeydown="handleEWTTagInput(event)"></div>
+        <div id="ewt-tags-suggestions" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Trigger warnings</label>
+        <div class="tags-wrap" id="ewt-tw-wrap" onclick="document.getElementById('ewt-tw-input').focus()"><input type="text" id="ewt-tw-input" placeholder="Ajouter un TW…" onkeydown="handleEWTTwInput(event)"></div>
+        <div id="ewt-tw-suggestions" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"></div>
+      </div>
+      <input type="hidden" id="ewt-id">
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <button class="btn btn-full" onclick="fermerPopupEditWT()" style="flex:1">Annuler</button>
+        <button class="btn btn-full btn-accent" id="ewt-save-btn" onclick="sauvegarderWT()" style="flex:2">✦ Sauvegarder</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP MODIFIER ÉPISODE WEBTOON -->
+  <div id="popup-edit-wt-ep" style="display:none;position:fixed;inset:0;background:rgba(10,12,25,.8);z-index:200;align-items:flex-start;justify-content:center;overflow-y:auto;padding:24px 16px">
+    <div style="background:#1e2438;border:1px solid rgba(180,190,230,.2);border-radius:18px;padding:28px 24px;width:100%;max-width:480px;margin:auto">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:20px;margin-bottom:20px">Modifier l'épisode</div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Numéro</label><input type="number" class="form-input" id="weep-num" min="1"></div>
+        <div class="form-group"><label class="form-label">Titre</label><input type="text" class="form-input" id="weep-titre"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Accès</label>
+        <div style="display:flex;gap:8px">
+          <button type="button" class="btn" id="weep-gratuit-btn" onclick="setWEEPGratuit(true)" style="flex:1">✦ Gratuit</button>
+          <button type="button" class="btn" id="weep-payant-btn" onclick="setWEEPGratuit(false)" style="flex:1">🎟 Payant</button>
+        </div>
+        <input type="hidden" id="weep-gratuit" value="true">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Images actuelles</label>
+        <div id="weep-strips-actuels" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"></div>
+        <label class="form-label" style="margin-top:8px">Ajouter des images <span style="color:var(--text3);font-size:9px">(ajoutées à la suite)</span></label>
+        <input type="file" id="weep-images" accept="image/*" multiple class="form-input" style="padding:6px" onchange="weepPreviewAjout(this)">
+        <div id="weep-preview" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
+        <div id="weep-ajout-count" style="font-size:11px;color:var(--text3);margin-top:4px"></div>
+      </div>
+      <input type="hidden" id="weep-id">
+      <input type="hidden" id="weep-histoire-id">
+      <input type="hidden" id="weep-ancien-num">
+      <div class="form-group">
+        <label class="form-label">Publication programmée <span style="color:var(--text3);font-size:9px">(laisser vide = immédiat)</span></label>
+        <input type="datetime-local" class="form-input" id="weep-date-publication">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Trigger warnings</label>
+        <div class="tags-wrap" id="weep-tw-wrap" onclick="document.getElementById('weep-tw-input').focus()"><input type="text" id="weep-tw-input" placeholder="Violence, Mort…" onkeydown="handleWEEPTwInput(event)"></div>
+        <div id="weep-tw-suggestions-label" style="font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:10px;margin-bottom:5px;display:none">Suggestions</div>
+        <div id="weep-tw-suggestions" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:8px">
+      <div class="form-group">
+        <label class="form-label">Musique d'ambiance <span style="color:var(--text3);font-size:9px">(optionnel · laisser vide pour ne pas changer)</span></label>
+        <input type="file" accept="audio/*" class="form-input" style="padding:6px" id="weep-musique-file" onchange="weepPreviewMusique(this)">
+        <div id="weep-musique-preview" style="display:none;margin-top:6px;font-size:11px;color:var(--accent)"></div>
+        <div id="weep-musique-actuelle" style="display:none;margin-top:4px;font-size:11px;color:var(--text3)"></div>
+        <input type="hidden" id="weep-musique-url" value="">
+      </div>
+        <button class="btn btn-full" onclick="fermerPopupEditWTEp()" style="flex:1">Annuler</button>
+        <button class="btn btn-full btn-accent" id="weep-save-btn" onclick="sauvegarderEpisodeWT()" style="flex:2">✦ Sauvegarder</button>
+      </div>
+      <div id="weep-progress" style="display:none;font-size:12px;color:var(--accent);text-align:center;margin-top:10px"></div>
+    </div>
+  </div>
+
+  <!-- POPUP SUPPRIMER WEBTOON -->
+  <div id="popup-suppr-wt" style="display:none;position:fixed;inset:0;background:rgba(10,12,25,.7);z-index:200;align-items:center;justify-content:center">
+    <div style="background:#1e2438;border:1px solid rgba(180,190,230,.2);border-radius:18px;padding:28px 24px;width:300px;text-align:center">
+      <div style="font-size:32px;margin-bottom:12px">🗑</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:20px;margin-bottom:10px">Supprimer ce webtoon ?</div>
+      <p style="font-size:12px;color:#9aa2c8;line-height:1.7;margin-bottom:22px">Tous les épisodes et images seront supprimés. Action irréversible.</p>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-full" onclick="fermerPopupSupprWT()">Annuler</button>
+        <button class="btn btn-full btn-danger" onclick="confirmerSupprWT()">Oui, supprimer</button>
+      </div>
+    </div>
+  </div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="admin.js"></script>
+<script src="webtoon_admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+// Connexion à Supabase
+const SUPA_URL='https://msownknywszovjnfekde.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zb3dua255d3N6b3ZqbmZla2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MDIxNDUsImV4cCI6MjA4ODk3ODE0NX0.kekcMQQowhhIazwYDhAa4OYWCnHp4-4I_g9RGkxTjy8';
+const db=window.supabase.createClient(SUPA_URL,SUPA_KEY);

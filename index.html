@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="theme-color" content="#1a1f2e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Astrolabe">
+  <link rel="manifest" href="manifest.json">
+  <title>Astrolabe</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="stars"></div>
+<div id="app">
+
+  <!-- SPLASH -->
+  <div class="page active" id="p-splash">
+    <div class="splash-inner">
+      <div class="splash-orb">✦</div>
+      <div class="splash-title">ASTROLABE</div>
+      <div class="splash-sub">Histoires d'amour · Safe · Sincères</div>
+    </div>
+  </div>
+
+  <!-- PAGE PRINCIPALE -->
+  <div class="page" id="p-main">
+    <div class="topbar" id="topbar-main">
+      <button class="btn" id="btn-inscription" onclick="go('p-inscription1')">Inscription</button>
+      <button class="btn" id="btn-deconnexion" style="display:none;padding:8px 18px" onclick="openModal('deco-popup-main')">✦ Déconnexion ✦</button>
+      <div class="topbar-center">
+        <div class="topbar-logo-box" onclick="go('p-apropos')">
+          <span class="tl-icon">✦</span>
+          <span class="tl-name">ASTROLABE</span>
+        </div>
+      </div>
+      <button class="btn" id="btn-connexion" onclick="go('p-connexion-modal')">Connexion</button>
+      <button class="btn btn-accent" id="btn-moncompte-top" style="display:none;align-items:center;gap:6px;padding:8px 18px;position:relative" onclick="go('p-moncompte')"><span id="topbar-avatar" style="font-size:14px">☽</span> Mon compte <span id="topbar-avatar2" style="font-size:14px;transform:scaleX(-1);display:inline-block">☽</span><span id="notif-badge" style="display:none;position:absolute;top:-4px;right:-6px;min-width:18px;height:18px;border-radius:10px;background:#e07070;color:#fff;font-size:10px;font-weight:700;font-family:'Jost',sans-serif;align-items:center;justify-content:center;padding:0 4px;line-height:1" id="notif-badge">0</span></button>
+    </div>
+    <!-- Pop-up déconnexion topbar -->
+    <div class="modal-overlay" id="deco-popup-main" onclick="closeModal(event,'deco-popup-main')" style="position:fixed;z-index:200">
+      <div class="modal-box" style="text-align:center">
+        <button class="modal-close" onclick="closeM('deco-popup-main')">✕</button>
+        <div class="modal-title">Se déconnecter</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Voulez-vous vous déconnecter de votre compte Astrolabe ?</p>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-full btn-accent" onclick="closeM('deco-popup-main');deconnexion()">Oui</button>
+          <button class="btn btn-full" onclick="closeM('deco-popup-main')">Non</button>
+        </div>
+      </div>
+    </div>
+    <div class="search-wrap">
+      <div class="search-bar" onclick="go('p-recherche')" style="gap:8px">
+        <svg id="search-icon-main" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Rechercher une histoire, un auteur…" readonly>
+      </div>
+    </div>
+    <div class="hashtag-band" id="hashtag-band">
+      <div class="tag-pill active" onclick="goHashtag(null)" id="tag-pill-all">✦ Tout</div>
+      
+    </div>
+    <div class="page-scroll">
+      <div class="banner-wrap" id="banner-wrap">
+        <button class="banner-arrow banner-arrow-left" onclick="clearInterval(bTimer);setBanner(bIdx-1);_startBannerTimer()">&#8249;</button>
+        <div class="banner-overflow">
+          <div class="banner-track" id="banner-track">
+            <!-- Slides chargées dynamiquement depuis Supabase -->
+          </div>
+        </div>
+        <div class="banner-dots" id="banner-dots"></div>
+        <button class="banner-arrow banner-arrow-right" onclick="clearInterval(bTimer);setBanner(bIdx+1);_startBannerTimer()">&#8250;</button>
+      </div>
+      <button class="btn btn-full" onclick="ouvrirTagsCroises()" style="max-width:300px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;letter-spacing:1px;">⊕ &nbsp;Recherche par tags croisés</button>
+      <div class="section-label">Histoires</div>
+      <div class="book-grid" id="book-grid"></div>
+      <div class="main-footer">
+        <div class="footer-divider"></div>
+        <div class="footer-links">
+          <button onclick="go('p-mentions-legales')" class="footer-link">Politique de confidentialité</button>
+          <span class="footer-sep">·</span>
+          <button onclick="go('p-cgv')" class="footer-link">CGV</button>
+          <span class="footer-sep">·</span>
+          <button onclick="go('p-cgu')" class="footer-link">CGU</button>
+          <span class="footer-sep">·</span>
+          <button onclick="openModal('cookie-detail-popup')" class="footer-link">Cookies</button>
+          <span class="footer-sep">·</span>
+          <button onclick="openModal('confidentialite-popup')" class="footer-link">Confidentialité</button>
+        </div>
+        <p class="footer-copy">© Astrolabe · Histoires d'amour safe et sincères</p>
+      </div>
+    </div>
+    <div class="modal-overlay" id="p-connexion-modal" onclick="closeModal(event,'p-connexion-modal')">
+      <div class="modal-box">
+        <button class="modal-close" onclick="closeM('p-connexion-modal')">✕</button>
+        <div class="modal-title">Connexion</div>
+        <div class="form-group">
+          <label class="form-label">Adresse e-mail</label>
+          <input type="email" class="form-input" id="connexion-email" placeholder="ton@mail.com">
+          <button class="form-link" onclick="go('p-identifiant-oublie');closeM('p-connexion-modal')">E-mail oublié ?</button>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mot de passe</label>
+          <div style="position:relative">
+            <input type="password" class="form-input" id="connexion-mdp" placeholder="••••••••" style="padding-right:40px">
+            <button type="button" onclick="togglePwd('connexion-mdp','eye-conn')" id="eye-conn" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--accent);font-size:14px">👁</button>
+          </div>
+          <button class="form-link" onclick="go('p-mdp-oublie');closeM('p-connexion-modal')">Mot de passe oublié ?</button>
+        </div>
+        <div id="connexion-error" style="font-size:11px;color:var(--danger);margin-bottom:8px;display:none;"></div>
+        <button class="btn btn-full btn-accent" onclick="handleConnexion()">Valider</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- À PROPOS -->
+  <div class="page" id="p-apropos">
+    <div class="page-header"><button class="btn" onclick="go('p-main')">← Retour</button></div>
+    <div class="placeholder-box">
+      <span class="placeholder-icon">✦</span>
+      <div class="page-title" style="margin:0">À propos d'Astrolabe</div>
+      <div class="placeholder-text">Cette page sera complétée prochainement.</div>
+    </div>
+  </div>
+
+  <!-- MENTIONS LÉGALES = POLITIQUE DE CONFIDENTIALITÉ -->
+  <div class="page" id="p-mentions-legales">
+    <div class="page-header"><button class="btn" onclick="go('p-main')">← Retour</button></div>
+    <div class="page-scroll"><div class="page-body">
+      <div class="page-title">Politique de confidentialité</div>
+
+      <div class="ml-section">
+        <div class="ml-titre">1. Données collectées</div>
+        <p class="ml-texte">Nous collectons et traitons certaines données personnelles pour permettre l'accès et l'utilisation du site :</p>
+        <ul class="ml-liste">
+          <li>Adresse e-mail et mot de passe pour créer et gérer un compte</li>
+          <li>Date de naissance pour vérifier l'âge et adapter le contenu</li>
+          <li>Données de paiement uniquement lorsque vous souscrivez à un abonnement ou achetez du contenu payant</li>
+        </ul>
+      </div>
+
+      <div class="ml-section">
+        <div class="ml-titre">2. Finalité de la collecte</div>
+        <p class="ml-texte">Ces données sont utilisées uniquement pour :</p>
+        <ul class="ml-liste">
+          <li>Créer et gérer votre compte utilisateur</li>
+          <li>Vérifier que vous êtes majeur pour accéder au contenu adulte</li>
+          <li>Gérer les achats et abonnements</li>
+          <li>Assurer la sécurité et le bon fonctionnement du site</li>
+        </ul>
+      </div>
+
+      <div class="ml-section">
+        <div class="ml-titre">3. Hébergement et prestataires</div>
+        <p class="ml-texte">Vos données sont hébergées et traitées par des prestataires tiers sécurisés :</p>
+        <ul class="ml-liste">
+          <li>Base de données : Supabase</li>
+          <li>Paiement : service tiers sécurisé</li>
+        </ul>
+        <p class="ml-texte">Ces prestataires ne vendent pas vos données et les traitent uniquement pour le compte du site.</p>
+      </div>
+
+      <div class="ml-section">
+        <div class="ml-titre">4. Confidentialité et partage</div>
+        <ul class="ml-liste">
+          <li>Nous ne vendons ni ne partageons vos données à des tiers à d'autres fins</li>
+          <li>Les données sont utilisées uniquement pour les finalités indiquées</li>
+        </ul>
+      </div>
+
+      <div class="ml-section">
+        <div class="ml-titre">5. Sécurité</div>
+        <p class="ml-texte">Nous mettons en place des mesures techniques et organisationnelles pour protéger vos données contre :</p>
+        <ul class="ml-liste">
+          <li>L'accès non autorisé</li>
+          <li>La perte ou modification accidentelle</li>
+          <li>Tout usage abusif</li>
+        </ul>
+      </div>
+
+      <div class="ml-section">
+        <div class="ml-titre">6. Droits des utilisateurs (RGPD)</div>
+        <p class="ml-texte">Conformément au RGPD, vous disposez de :</p>
+        <ul class="ml-liste">
+          <li>Droit d'accès à vos données</li>
+          <li>Droit de rectification ou suppression</li>
+          <li>Droit de retirer votre consentement</li>
+        </ul>
+        <p class="ml-texte">Pour exercer vos droits, vous pouvez nous contacter à : <span class="ml-placeholder">[ton e-mail]</span></p>
+      </div>
+
+      <div class="ml-section">
+        <div class="ml-titre">7. Acceptation</div>
+        <p class="ml-texte">En créant un compte ou en utilisant le site, vous acceptez que vos données soient collectées et utilisées conformément à cette politique.</p>
+      </div>
+
+      <p class="ml-texte" style="margin-top:24px;color:var(--text3);">Dernière mise à jour : <span class="ml-placeholder">[Date]</span></p>
+    </div></div>
+  </div>
+
+  <!-- CGV -->
+  <div class="page" id="p-cgv">
+    <div class="page-header"><button class="btn" onclick="go('p-main')">← Retour</button></div>
+    <div class="page-scroll"><div class="page-body">
+      <div class="page-title">Conditions Générales de Vente</div>
+
+      <div class="ml-section">
+        <div class="ml-titre">1. Objet</div>
+        <p class="ml-texte">Les présentes Conditions Générales de Vente régissent la vente de contenus numériques sur le site. Elles s'appliquent à tous les utilisateurs souhaitant accéder à des chapitres payants ou à un abonnement.</p>
+      </div>
+
+      <div class="ml-section">
+        <div class="ml-titre">2. Produits et services</div>
+        <p class="ml-texte">Le site propose :</p>
+        <ul class="ml-liste">
+          <li>Des chapitres ou histoires numériques payants</li>
+          <li>Des abonnements donnant accès à plusieurs contenus</li>
+        </ul>
+        <p class="ml-texte">Ces contenus sont numériques, accessibles uniquement après paiement, et réservés aux utilisateurs majeurs (18 ans ou plus).</p>
+      </div>
+
+      <div class="ml-section">
+        <div class="ml-titre">3. Prix et paiement</div>
+        <ul class="ml-liste">
+          <li>Les prix sont indiqués en euros, toutes taxes comprises.</li>
+          <li>Le paiement s'effectue via les moyens proposés (carte bancaire, service tiers sécurisé).</li>
+          <li>L'utilisateur accepte le prix et le contenu proposé en validant le paiement.</li>
+        </ul>
+      </div>
+
+      <div class="ml-section">
+        <div class="ml-titre">4. Accès aux contenus payants</div>
+        <ul class="ml-liste">
+          <li>L'accès au contenu est immédiat après validation du paiement.</li>
+          <li>Les contenus numériques sont non remboursables, sauf disposition légale contraire.</li>
+          <li>L'utilisateur est responsable du moyen de paiement utilisé et de la sécurité de son compte.</li>
+        </ul>
+      </div>
+
+      <div class="ml-section">
+        <div class="ml-titre">5. Compte utilisateur</div>
+        <ul class="ml-liste">
+          <li>Seuls les utilisateurs disposant d'un compte actif peuvent accéder au contenu adulte payant.</li>
+          <li>L'utilisateur certifie être majeur (18+) pour souscrire à ces services.</li>
+          <li>Toute utilisation frauduleuse ou contournement des règles peut entraîner la suspension du compte et l'accès au contenu.</li>
+        </ul>
+      </div>
+
+      <div class="ml-section">
+        <div class="ml-titre">6. Responsabilité</div>
+        <p class="ml-texte">Le site décline toute responsabilité :</p>
+        <ul class="ml-liste">
+          <li>Pour les problèmes techniques liés au paiement ou à l'accès au contenu</li>
+          <li>Pour toute utilisation frauduleuse du compte</li>
+          <li>Pour tout accès non autorisé résultant d'une mauvaise manipulation de l'utilisateur</li>
+        </ul>
+      </div>
+
+      <div class="ml-section">
+        <div class="ml-titre">7. Droit de rétractation</div>
+        <p class="ml-texte">Conformément à la loi, les contenus numériques fournis immédiatement après paiement ne sont pas remboursables, sauf défaut manifeste ou erreur dans la livraison.</p>
+      </div>
+
+      <div class="ml-section">
+        <div class="ml-titre">8. Propriété intellectuelle</div>
+        <ul class="ml-liste">
+          <li>Les contenus achetés restent la propriété du site et de leurs auteurs.</li>
+          <li>Toute reproduction, diffusion ou redistribution sans autorisation est interdite.</li>
+        </ul>
+      </div>
+
+      <div class="ml-section">
+        <div class="ml-titre">9. Acceptation des CGV</div>
+        <ul class="ml-liste">
+          <li>La validation du paiement vaut acceptation pleine et entière des présentes CGV.</li>
+          <li>L'utilisateur reconnaît avoir lu et compris ces conditions avant toute transaction.</li>
+        </ul>
+      </div>
+
+      <div class="ml-section">
+        <div class="ml-titre">10. Droit applicable</div>
+        <p class="ml-texte">Les présentes CGV sont régies par le droit français.</p>
+      </div>
+
+      <p class="ml-texte" style="margin-top:24px;color:var(--text3);">Dernière mise à jour : <span class="ml-placeholder">[Date]</span></p>
+    </div></div>
+  </div>
+
+  <!-- CGU -->
+  <div class="page" id="p-cgu">
+    <div class="page-header"><button class="btn" onclick="go('p-main')">← Retour</button></div>
+    <div class="page-scroll"><div class="page-body">
+      <div class="page-title">Conditions Générales d'Utilisation</div>
+
+      <div class="ml-section">
+        <div class="ml-titre">1. Objet</div>
+        <p class="ml-texte">Les présentes Conditions Générales d'Utilisation ont pour objet de définir les modalités d'accès et d'utilisation de la plateforme de lecture proposée par le site.</p>
+      </div>
+
+      <div class="ml-section">
+        <div class="ml-titre">2. Accès au site</div>
+        <p class="ml-texte">Le site est accessible gratuitement à tout utilisateur disposant d'un accès à Internet.</p>
+        <p class="ml-texte">Le contenu non explicite est accessible aux utilisateurs âgés de 13 ans et plus. Le contenu adulte est strictement réservé aux utilisateurs majeurs (18 ans ou plus) et nécessite la création d'un compte.</p>
+      </div>
+
+      <div class="ml-section">
+        <div class="ml-titre">3. Création de compte</div>
+        <p class="ml-texte">L'accès à certaines fonctionnalités, notamment au contenu adulte, nécessite la création d'un compte.</p>
+        <p class="ml-texte">L'utilisateur s'engage à fournir des informations exactes lors de son inscription, notamment concernant son âge. L'accès au contenu adulte est conditionné à la déclaration de majorité (18 ans ou plus).</p>
+      </div>
+
+      <div class="ml-section">
+        <div class="ml-titre">4. Déclaration d'âge</div>
+        <p class="ml-texte">L'utilisateur reconnaît être responsable de l'exactitude des informations fournies concernant son âge.</p>
+        <p class="ml-texte">Le site met en place des mesures raisonnables de vérification de l'âge, notamment par déclaration de l'utilisateur. Le site ne saurait être tenu responsable en cas de fausse déclaration permettant à un mineur d'accéder à du contenu adulte.</p>
+      </div>
+
+      <div class="ml-section">
+        <div class="ml-titre">5. Contenu proposé</div>
+        <p class="ml-texte">Le site propose :</p>
+        <ul class="ml-liste">
+          <li>Du contenu non explicite accessible aux utilisateurs de plus de 13 ans</li>
+          <li>Du contenu adulte à caractère sexuel explicite réservé aux utilisateurs majeurs</li>
+        </ul>
+        <p class="ml-texte">Le contenu adulte est strictement inaccessible sans authentification et validation de la majorité.</p>
+      </div>
+
+      <div class="ml-section">
+        <div class="ml-titre">6. Responsabilité</div>
+        <p class="ml-texte">L'utilisateur est seul responsable de l'utilisation qu'il fait du site.</p>
+        <p class="ml-texte">Le site ne pourra être tenu responsable :</p>
+        <ul class="ml-liste">
+          <li>En cas d'accès frauduleux ou détourné par un utilisateur</li>
+          <li>En cas de non-respect des présentes CGU par l'utilisateur</li>
+          <li>En cas de fausse déclaration d'âge</li>
+        </ul>
+      </div>
+
+      <div class="ml-section">
+        <div class="ml-titre">7. Propriété intellectuelle</div>
+        <p class="ml-texte">Les contenus présents sur la plateforme (textes, œuvres, éléments graphiques) sont protégés par le droit de la propriété intellectuelle.</p>
+        <p class="ml-texte">Toute reproduction, diffusion ou utilisation sans autorisation est interdite.</p>
+      </div>
+
+      <div class="ml-section">
+        <div class="ml-titre">8. Comportement des utilisateurs</div>
+        <p class="ml-texte">L'utilisateur s'engage à ne pas :</p>
+        <ul class="ml-liste">
+          <li>Publier de contenu illégal</li>
+          <li>Porter atteinte aux droits d'autrui</li>
+          <li>Utiliser le site à des fins frauduleuses</li>
+        </ul>
+        <p class="ml-texte">Le site se réserve le droit de suspendre ou supprimer tout compte ne respectant pas ces règles.</p>
+      </div>
+
+      <div class="ml-section">
+        <div class="ml-titre">9. Modification des CGU</div>
+        <p class="ml-texte">Le site se réserve le droit de modifier les présentes CGU à tout moment. Les utilisateurs seront informés en cas de modification.</p>
+      </div>
+
+      <div class="ml-section">
+        <div class="ml-titre">10. Droit applicable</div>
+        <p class="ml-texte">Les présentes CGU sont soumises au droit français.</p>
+      </div>
+
+      <div class="ml-section">
+        <div class="ml-titre">11. Paiement et contenu payant</div>
+        <p class="ml-texte">Certaines parties du contenu proposé sur le site sont accessibles uniquement après paiement.</p>
+        <p class="ml-texte">Les paiements permettent d'accéder à des contenus numériques (chapitres, œuvres). Toute validation de paiement vaut acceptation du prix et du contenu proposé.</p>
+        <p class="ml-texte">Sauf disposition contraire, les contenus achetés sont non remboursables, conformément à la réglementation applicable aux contenus numériques fournis immédiatement après achat.</p>
+        <p class="ml-texte">L'utilisateur est responsable des moyens de paiement utilisés. Le site ne saurait être tenu responsable en cas d'utilisation frauduleuse d'un moyen de paiement.</p>
+      </div>
+
+      <p class="ml-texte" style="margin-top:24px;color:var(--text3);font-size:11px;">Dernière mise à jour : <span class="ml-placeholder">[Date]</span></p>
+    </div></div>
+  </div>
+
+  <!-- IDENTIFIANT OUBLIÉ -->
+  <div class="page" id="p-identifiant-oublie">
+    <div class="page-header"><button class="btn" onclick="go('p-connexion-modal')">← Retour</button></div>
+    <div class="simple-page">
+      <div class="page-title">Identifiant oublié</div>
+      <div class="page-subtitle">Saisis ton adresse e-mail, on t'envoie ton identifiant.</div>
+      <div class="form-group"><label class="form-label">Adresse e-mail</label><input type="email" class="form-input" placeholder="ton@mail.com"></div>
+      <button class="btn btn-full btn-accent" onclick="go('p-main')">Envoyer</button>
+    </div>
+  </div>
+
+  <!-- MDP OUBLIÉ -->
+  <div class="page" id="p-mdp-oublie">
+    <div class="page-header"><button class="btn" onclick="go('p-connexion-modal')">← Retour</button></div>
+    <div class="simple-page">
+      <div class="page-title">Mot de passe oublié</div>
+      <div class="page-subtitle">Saisis ton adresse e-mail, on t'envoie un lien de réinitialisation.</div>
+      <div class="form-group">
+        <label class="form-label">Adresse e-mail</label>
+        <input type="email" class="form-input" id="mdp-oublie-email" placeholder="ton@mail.com">
+        <span id="mdp-oublie-error" style="font-size:11px;color:var(--danger);display:none;margin-top:4px;display:none;"></span>
+        <span id="mdp-oublie-ok" style="font-size:12px;color:#7ec89a;display:none;margin-top:6px;line-height:1.6;display:none;">✦ E-mail envoyé ! Vérifie ta boîte mail (et tes spams).</span>
+      </div>
+      <button class="btn btn-full btn-accent" onclick="handleMdpOublie()">Envoyer</button>
+    </div>
+  </div>
+
+  <!-- INSCRIPTION 1 -->
+  <div class="page" id="p-inscription1">
+    <div class="page-header"><button class="btn" onclick="go('p-main')">← Retour</button></div>
+    <div class="page-scroll"><div class="page-body">
+      <div class="step-stars"><span class="sstar on">✦</span><span class="sstar">✦</span><span class="sstar">✦</span><span class="sstar">✦</span></div>
+      <div class="page-title">Bienvenue sur Astrolabe</div>
+      <div class="page-subtitle">Des histoires d'amour faites avec amour et safe ✦</div>
+      <div class="form-group">
+        <label class="form-label">Identifiant <span style="font-size:9px;color:var(--text3)">(affiché dans les commentaires)</span></label>
+        <input type="text" class="form-input" id="insc-pseudo" placeholder="Ton pseudo" onblur="verifierPseudo()">
+        <span class="form-error" id="pseudo-error">Pseudo non disponible.</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mot de passe</label>
+        <div style="position:relative">
+          <input type="password" class="form-input" id="insc-mdp" placeholder="••••••••" style="padding-right:40px">
+          <button type="button" onclick="togglePwd('insc-mdp','eye-mdp')" id="eye-mdp" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--accent);font-size:14px">👁</button>
+        </div>
+        <span class="form-error" id="mdp-length-error">Le mot de passe doit faire au moins 6 caractères.</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Valider le mot de passe</label>
+        <div style="position:relative">
+          <input type="password" class="form-input" id="insc-mdp2" placeholder="••••••••" style="padding-right:40px">
+          <button type="button" onclick="togglePwd('insc-mdp2','eye-mdp2')" id="eye-mdp2" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--accent);font-size:14px">👁</button>
+        </div>
+        <span class="form-error" id="mdp-error">Les deux mots de passe ne correspondent pas.</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Adresse e-mail</label>
+        <input type="email" class="form-input" id="insc-mail" placeholder="ton@mail.com" onblur="verifierEmail()">
+        <span class="form-error" id="email-error">E-mail invalide ou déjà associé à un compte.</span>
+        <span class="form-hint">Astrolabe ne revend pas tes données.</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date de naissance</label>
+        <input type="date" class="form-input dob-desktop" id="dob-date" style="display:none">
+        <div class="dob-mobile" style="display:none;flex-direction:row;gap:8px">
+          <div style="flex:1;text-align:center"><div style="font-size:10px;color:var(--text3);margin-bottom:4px">Jour</div><select class="form-select" id="dob-jour" style="text-align:center"></select></div>
+          <div style="flex:2;text-align:center"><div style="font-size:10px;color:var(--text3);margin-bottom:4px">Mois</div><select class="form-select" id="dob-mois" style="text-align:center"></select></div>
+          <div style="flex:2;text-align:center"><div style="font-size:10px;color:var(--text3);margin-bottom:4px">Année</div><select class="form-select" id="dob-annee" style="text-align:center"></select></div>
+        </div>
+      </div>
+      <button class="btn btn-full btn-accent" onclick="handleInscription1()">Valider →</button>
+    </div></div>
+  </div>
+
+  <!-- REFUS < 13 ANS -->
+  <div class="page" id="p-inscription-refuse">
+    <div class="page-scroll"><div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:40px 24px;">
+      <div style="font-size:52px;margin-bottom:20px">🌙</div>
+      <div class="page-title">Bonjour mon petit chat !</div>
+      <p style="font-size:14px;color:var(--text2);line-height:1.9;margin-bottom:30px;max-width:340px">
+        Tu me sembles encore un peu jeune pour entrer sur Astrolabe.<br><br>
+        C'est super de vouloir lire plein d'histoires mais, ici, nous proposons surtout des histoires pour adolescents et adultes, et nous voulons être certains que chaque lecteur et lectrice découvre des récits adaptés à son âge.<br><br>
+        Ce n'est pas grave : nous serons toujours là quand tu seras plus grand ou plus grande, alors ne perds pas la passion de la lecture d'ici là !
+      </p>
+      <p style="font-size:14px;color:var(--text2);margin-bottom:24px">À bientôt ✦ Astrolabe</p>
+      <button class="btn btn-full btn-accent" style="max-width:300px" onclick="go('p-main')">Ok ✦</button>
+    </div></div>
+  </div>
+
+  <!-- ACCORD PARENTAL — choix de l'ado 13-16 -->
+  <div class="page" id="p-inscription-accord">
+    <div class="page-header"><button class="btn" onclick="go('p-inscription1')">← Retour</button></div>
+    <div class="page-scroll"><div class="page-body">
+      <div class="step-stars"><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar">✦</span><span class="sstar">✦</span></div>
+      <div class="page-title">Bienvenue sur Astrolabe !</div>
+      <p style="font-size:14px;color:var(--text2);line-height:1.9;margin-bottom:24px">
+        Merci d'avoir rejoint le club de lecture d'Astrolabe !<br><br>
+        Tu peux commencer à explorer notre catalogue dès à présent. Cependant, certaines fonctionnalités comme les options d'achat nécessitent l'accord d'un parent ou d'un tuteur légal.<br><br>
+        Sans cet accord, tu ne pourras pas débloquer la suite des histoires.
+      </p>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <button class="btn btn-full btn-accent" onclick="demanderAccordParental()">Demander l'accord parental</button>
+        <button class="btn btn-full" onclick="accordParentalPlusTard()">Continuer sans achat</button>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- PAGE PARENT -->
+  <div class="page" id="p-accord-parent">
+    <div class="page-header"><button class="btn" onclick="go('p-inscription-accord')">← Retour</button></div>
+    <div class="page-scroll"><div class="page-body">
+      <div style="text-align:center;margin-bottom:24px">
+        <div style="font-size:13px;letter-spacing:2px;color:var(--text);font-style:italic;margin-bottom:8px">À l'intention de l'adulte responsable</div>
+        <div class="page-title" style="font-size:22px">Bonjour ✦</div>
+      </div>
+      <p style="font-size:13px;color:var(--text2);line-height:1.9;margin-bottom:20px">
+        Votre enfant souhaite s'inscrire sur Astrolabe, une plateforme de lecture en ligne proposant principalement des histoires de romances, mais pas que !
+      </p>
+      <p style="font-size:13px;color:var(--text2);line-height:1.9;margin-bottom:20px">
+        Nous accordons une attention particulière à la sécurité et au bien-être des lecteurs et lectrices. C'est pourquoi les contenus explicites (sexuels ou gore) sont bloqués pour les utilisateurs de moins de 16 ans, et limités à des romances douces pour les utilisateurs de moins de 18 ans. Nous avons de plus mis en place un système de filtre par Trigger Warnings qui permet d'adapter les lectures proposées à chaque utilisateur.
+      </p>
+      <p style="font-size:13px;color:var(--text2);line-height:1.9;margin-bottom:20px">
+        Notre plateforme propose un système d'abonnement ou d'achat par chapitre. En validant, vous autorisez votre enfant à accéder aux fonctionnalités payantes, sous votre responsabilité.
+      </p>
+      <p style="font-size:13px;color:var(--text2);line-height:1.9;margin-bottom:28px">
+        Nous vous recommandons de consulter les contenus disponibles pour vous assurer qu'ils correspondent à vos attentes.
+      </p>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <button class="btn btn-full btn-accent" onclick="parentAutorise()">✦ J'autorise ce compte à accéder aux options d'achat</button>
+        <button class="btn btn-full" style="color:var(--danger);border-color:rgba(212,126,126,.3)" onclick="openModal('parent-refuse-popup')">Je ne souhaite pas valider l'inscription</button>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- POP-UP CONFIRMATION REFUS PARENT -->
+  <div class="modal-overlay" id="parent-refuse-popup" style="position:fixed;z-index:200">
+    <div class="modal-box" style="text-align:center">
+      <div style="font-size:36px;margin-bottom:12px">⚠️</div>
+      <div class="modal-title">Confirmer le refus</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">
+        En confirmant, le compte en cours de création sera définitivement supprimé. Cette action est irréversible.
+      </p>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-full" style="color:var(--danger);border-color:rgba(212,126,126,.3)" onclick="closeM('parent-refuse-popup');parentRefuse()">Confirmer</button>
+        <button class="btn btn-full btn-accent" onclick="closeM('parent-refuse-popup')">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- INSCRIPTION 2 — TW (13-18 ans) -->
+  <div class="page" id="p-inscription2">
+    <div class="page-header"><button class="btn" onclick="go('p-inscription1')">← Retour</button></div>
+    <div class="page-scroll"><div class="page-body">
+      <div class="step-stars"><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar">✦</span></div>
+      <div class="page-title">Ton confort de lecture</div>
+      <div class="page-subtitle">Sur Astrolabe, nous souhaitons que tu te sentes bien et aies la meilleure expérience possible.</div>
+      <!-- Soft spicy : visible uniquement pour les 16-18, géré par afficherSoftSpicySiAdo() -->
+      <div id="soft-spicy-row" style="display:none">
+        <div style="height:1px;background:rgba(180,190,255,.07);margin:6px 0"></div>
+        <div class="toggle-row">
+          <span class="toggle-label">Activer les scènes romantiques en version douce</span>
+          <label class="tgl"><input type="checkbox" id="soft-spicy3"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
+        </div>
+        <span class="form-hint" style="margin-top:4px;display:block">Versions alternatives des scènes intimes, adaptées aux -18 ans.</span>
+        <div style="height:1px;background:rgba(180,190,255,.07);margin:10px 0"></div>
+      </div>
+      <div class="toggle-row"><span class="toggle-label">Afficher les trigger warnings au début de chaque histoire</span><label class="tgl"><input type="checkbox" id="twr2-histoire" checked><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+      <div class="toggle-row"><span class="toggle-label">Afficher les trigger warnings au début de chaque chapitre</span><label class="tgl"><input type="checkbox" id="twr2-chapitre"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+      <span class="form-hint" style="margin-top:14px;display:block;">Tu peux modifier ces options depuis les paramètres de ton compte.</span>
+      <button class="btn btn-full btn-accent" style="margin-top:20px" onclick="go('p-inscription4')">Valider →</button>
+    </div></div>
+  </div>
+
+  <!-- INSCRIPTION 3 adultes -->
+  <div class="page" id="p-inscription3">
+    <div class="page-header"><button class="btn" onclick="go('p-inscription1')">← Retour</button></div>
+    <div class="page-scroll"><div class="page-body">
+      <div class="step-stars"><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar">✦</span></div>
+      <div class="page-title">Personnalise ton expérience</div>
+      <div class="page-subtitle">Sur Astrolabe, nous souhaitons que tu te sentes bien et aies la meilleure expérience possible.</div>
+      <div class="toggle-row"><span class="toggle-label">Activer l'accès au contenu pour adulte</span><label class="tgl"><input type="checkbox" id="adult3"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+      <div style="height:1px;background:rgba(180,190,255,.07);margin:6px 0"></div>
+      <div class="toggle-row"><span class="toggle-label">Afficher les trigger warnings au début de chaque histoire</span><label class="tgl"><input type="checkbox" id="twr3-histoire" checked><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+      <div class="toggle-row"><span class="toggle-label">Afficher les trigger warnings au début de chaque chapitre</span><label class="tgl"><input type="checkbox" id="twr3-chapitre"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+      <span class="form-hint" style="margin-top:14px;display:block;">Tu peux modifier ces options depuis les paramètres de ton compte.</span>
+      <button class="btn btn-full btn-accent" style="margin-top:20px" onclick="go('p-inscription4')">Valider →</button>
+    </div></div>
+  </div>
+
+  <!-- INSCRIPTION 4 cadeau -->
+  <div class="page" id="p-inscription4">
+    <div class="gift-center">
+      <div class="step-stars"><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar">✦</span></div>
+      <span class="gift-emoji">🎁</span>
+      <div class="gift-title">Merci pour ton inscription !</div>
+      <div class="gift-desc">Pour fêter ça, Astrolabe t'offre</div>
+      <div class="tickets-badge">20 tickets ✦</div>
+      <div class="gift-desc">Bienvenue dans l'univers Astrolabe ✦</div>
+      <button class="btn btn-full btn-accent" style="max-width:320px" onclick="addTickets(20);go('p-inscription4b')">Continuer →</button>
+    </div>
+  </div>
+
+  <!-- INSCRIPTION 4B — Validation CGU -->
+  <div class="page" id="p-inscription4b">
+    <div class="page-header"><button class="btn" onclick="go('p-inscription4')">← Retour</button></div>
+    <div class="page-scroll" id="cgu-scroll-insc">
+      <div class="page-body">
+        <div class="step-stars"><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar on">✦</span></div>
+        <div class="page-title">Avant de commencer…</div>
+        <div class="page-subtitle">Merci de lire et accepter nos Conditions Générales d'Utilisation.</div>
+
+        <!-- CGU intégrées à défiler -->
+        <div class="cgu-scroll-box" id="cgu-scroll-box">
+          <div class="cgu-scroll-content" id="cgu-scroll-content">
+            <div class="ml-titre" style="font-size:16px;margin-bottom:14px">Conditions Générales d'Utilisation</div>
+
+            <div class="ml-section"><div class="ml-titre" style="font-size:14px">1. Objet</div><p class="ml-texte">Les présentes CGU ont pour objet de définir les modalités d'accès et d'utilisation de la plateforme de lecture proposée par le site.</p></div>
+            <div class="ml-section"><div class="ml-titre" style="font-size:14px">2. Accès au site</div><p class="ml-texte">Le site est accessible gratuitement à tout utilisateur disposant d'un accès à Internet. Le contenu non explicite est accessible aux utilisateurs âgés de 13 ans et plus. Le contenu adulte est strictement réservé aux utilisateurs majeurs (18 ans ou plus) et nécessite la création d'un compte.</p></div>
+            <div class="ml-section"><div class="ml-titre" style="font-size:14px">3. Création de compte</div><p class="ml-texte">L'accès à certaines fonctionnalités nécessite la création d'un compte. L'utilisateur s'engage à fournir des informations exactes, notamment concernant son âge.</p></div>
+            <div class="ml-section"><div class="ml-titre" style="font-size:14px">4. Déclaration d'âge</div><p class="ml-texte">L'utilisateur reconnaît être responsable de l'exactitude des informations fournies concernant son âge. Le site ne saurait être tenu responsable en cas de fausse déclaration.</p></div>
+            <div class="ml-section"><div class="ml-titre" style="font-size:14px">5. Contenu proposé</div><p class="ml-texte">Le site propose du contenu non explicite accessible aux 13 ans et plus, et du contenu adulte réservé aux majeurs. Le contenu adulte est strictement inaccessible sans authentification et validation de la majorité.</p></div>
+            <div class="ml-section"><div class="ml-titre" style="font-size:14px">6. Responsabilité</div><p class="ml-texte">L'utilisateur est seul responsable de l'utilisation qu'il fait du site. Le site ne pourra être tenu responsable en cas d'accès frauduleux, de non-respect des CGU ou de fausse déclaration d'âge.</p></div>
+            <div class="ml-section"><div class="ml-titre" style="font-size:14px">7. Propriété intellectuelle</div><p class="ml-texte">Les contenus présents sur la plateforme sont protégés par le droit de la propriété intellectuelle. Toute reproduction sans autorisation est interdite.</p></div>
+            <div class="ml-section"><div class="ml-titre" style="font-size:14px">8. Comportement des utilisateurs</div><p class="ml-texte">L'utilisateur s'engage à ne pas publier de contenu illégal, porter atteinte aux droits d'autrui, ou utiliser le site à des fins frauduleuses. Le site se réserve le droit de suspendre ou supprimer tout compte ne respectant pas ces règles.</p></div>
+            <div class="ml-section"><div class="ml-titre" style="font-size:14px">9. Modification des CGU</div><p class="ml-texte">Le site se réserve le droit de modifier les présentes CGU à tout moment. Les utilisateurs seront informés en cas de modification.</p></div>
+            <div class="ml-section"><div class="ml-titre" style="font-size:14px">10. Droit applicable</div><p class="ml-texte">Les présentes CGU sont soumises au droit français.</p></div>
+            <div class="ml-section"><div class="ml-titre" style="font-size:14px">11. Paiement et contenu payant</div><p class="ml-texte">Certaines parties du contenu sont accessibles uniquement après paiement. Les contenus numériques achetés sont non remboursables, conformément à la réglementation applicable. L'utilisateur est responsable des moyens de paiement utilisés.</p></div>
+
+            <div class="cgu-scroll-fin" id="cgu-scroll-fin">✦ Fin des Conditions Générales d'Utilisation ✦</div>
+          </div>
+        </div>
+
+        <!-- Indicateur de défilement -->
+        <div class="cgu-scroll-hint" id="cgu-scroll-hint">↓ Fais défiler pour lire les CGU en entier</div>
+
+        <!-- Cases à cocher — désactivées jusqu'à la fin du défilement -->
+        <div id="cgu-checks" class="cgu-checks cgu-checks-disabled">
+          <label class="cgu-check-row">
+            <input type="checkbox" id="check-cgu" disabled>
+            <span>J'ai lu et j'accepte les <button onclick="go('p-cgu')" style="background:none;border:none;color:var(--accent);font-family:'Jost',sans-serif;font-size:12px;cursor:pointer;padding:0;text-decoration:underline;">Conditions Générales d'Utilisation</button></span>
+          </label>
+          <label class="cgu-check-row" style="margin-top:10px">
+            <input type="checkbox" id="check-age">
+            <span>Je certifie que la date de naissance que j'ai renseignée est exacte et que j'ai l'âge requis pour accéder aux contenus choisis</span>
+          </label>
+        </div>
+        <span id="cgu-check-error" style="font-size:11px;color:var(--danger);display:none;margin-top:6px;">Merci de lire les CGU et de cocher les deux cases pour continuer.</span>
+        <button class="btn btn-full btn-accent" style="margin-top:16px" onclick="validerCGUInscription()">Valider et continuer →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- INSCRIPTION 5 -->
+  <div class="page" id="p-inscription5">
+    <div class="page-scroll"><div class="page-body">
+      <div class="step-stars"><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar on">✦</span><span class="sstar on">✦</span></div>
+      <div class="page-title">C'est à toi de choisir !</div>
+      <div class="page-subtitle">Les 8 premiers chapitres de chaque histoire sont gratuits. Les suivants sont publiés chaque semaine.</div>
+      <div class="choice-cards">
+        <div class="choice-card" onclick="go('p-abonnement')"><div class="cc-title">✦ Prendre un abonnement</div><div class="cc-desc">Accès illimité à tout le contenu, nouveautés en avant-première.</div></div>
+        <div class="choice-card" onclick="goAcheterTickets('p-inscription5')"><div class="cc-title">✦ Acheter des tickets</div><div class="cc-desc">Débloquer des chapitres à la carte, selon tes envies.</div></div>
+        <div class="choice-card featured" onclick="finishInscription()"><div class="cc-title" style="color:var(--accent)">✦ Commencer ma lecture</div><div class="cc-desc">Explorer avec les <span id="ticket-count-insc">20</span> tickets offerts par Astrolabe.</div></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ABONNEMENT -->
+  <div class="page" id="p-abonnement">
+    <div class="page-header"><button class="btn" id="abo-back-btn" onclick="go('p-inscription5')">← Retour</button></div>
+    <div class="placeholder-box">
+      <span class="placeholder-icon">✦</span>
+      <div class="page-title" style="margin:0">Abonnement</div>
+      <div class="placeholder-text">Cette page sera complétée prochainement.</div>
+      <button class="btn btn-full btn-accent" style="max-width:280px;margin-top:10px" onclick="finishInscription()">Valider →</button>
+    </div>
+  </div>
+
+  <!-- ACHETER TICKETS -->
+  <div class="page" id="p-acheter-tickets">
+    <div class="page-header"><button class="btn" id="tickets-back-btn" onclick="retourDepuisTickets()">← Retour</button></div>
+    <div class="placeholder-box">
+      <span class="placeholder-icon">🎟</span>
+      <div class="page-title" style="margin:0">Acheter des tickets</div>
+      <div class="placeholder-text">Cette page sera complétée prochainement.</div>
+      <button class="btn btn-full btn-accent" style="max-width:280px;margin-top:10px" onclick="finishInscription()">Valider →</button>
+    </div>
+  </div>
+
+  <!-- RECHERCHE -->
+  <div class="page" id="p-recherche">
+    <div class="page-header"><button class="btn" onclick="go('p-main')">← Retour</button></div>
+    <div class="page-scroll"><div class="page-body">
+      <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:24px;padding:10px 16px;margin-bottom:16px" id="search-container">
+        <svg id="search-icon-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" style="flex:1;background:none;border:none;outline:none;color:var(--text);font-family:'Jost',sans-serif;font-size:13px;" placeholder="Rechercher…" id="search-input" oninput="handleSearch(this.value)" onfocus="document.getElementById('search-icon-svg').style.stroke='#fff'" onblur="document.getElementById('search-icon-svg').style.stroke='var(--accent)'">
+      </div>
+      <div class="search-results-title" id="search-label">Suggestions</div>
+      <div class="book-grid" id="search-grid"></div>
+    </div></div>
+  </div>
+
+  <!-- HASHTAG -->
+  <div class="page" id="p-hashtag">
+    <div class="page-header"><button class="btn" onclick="go('p-main')">← Retour</button></div>
+    <div class="hashtag-page-title" id="hashtag-title"># Romance</div>
+    <div class="hashtag-count" id="hashtag-count"></div>
+    <div class="page-scroll"><div class="book-grid" id="hashtag-grid" style="padding-top:8px"></div></div>
+  </div>
+
+  <!-- PAGE TAGS CROISÉS -->
+  <div class="page" id="p-tags-croises">
+    <div class="page-header"><button class="btn" onclick="go('p-main')">← Retour</button></div>
+    <div class="hashtag-page-title">⊕ Recherche avancée</div>
+    <div class="page-scroll">
+
+      <!-- SECTION 1 : Tags à inclure -->
+      <div style="padding:0 16px 4px;">
+        <div style="font-size:11px;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin-bottom:8px;">✦ Tags à inclure <span style="color:var(--text3);font-size:10px;letter-spacing:0;">(3 max)</span></div>
+        <div id="tags-croises-selection" style="font-size:12px;color:var(--accent);min-height:18px;margin-bottom:8px;letter-spacing:0.5px;font-style:italic;"></div>
+        <div class="hashtag-band" id="tags-croises-band" style="flex-wrap:wrap;overflow-x:visible;padding:0 0 4px;gap:8px;"></div>
+      </div>
+
+      <div style="height:1px;background:rgba(180,190,255,0.08);margin:12px 16px;"></div>
+
+      <!-- SECTION 2 : Tags à exclure -->
+      <div style="padding:0 16px 4px;">
+        <div style="font-size:11px;letter-spacing:1.5px;color:#e07070;text-transform:uppercase;margin-bottom:8px;">✕ Tags à exclure <span style="color:var(--text3);font-size:10px;letter-spacing:0;">(2 max)</span></div>
+        <div id="tags-exclus-selection" style="font-size:12px;color:#e07070;min-height:18px;margin-bottom:8px;letter-spacing:0.5px;font-style:italic;"></div>
+        <div class="hashtag-band" id="tags-exclus-band" style="flex-wrap:wrap;overflow-x:visible;padding:0 0 4px;gap:8px;"></div>
+      </div>
+
+      <div style="height:1px;background:rgba(180,190,255,0.08);margin:12px 16px;"></div>
+
+      <!-- SECTION 3 : TW à exclure -->
+      <div style="padding:0 16px 4px;">
+        <div style="font-size:11px;letter-spacing:1.5px;color:#e07070;text-transform:uppercase;margin-bottom:8px;">⚠ Trigger warnings à exclure</div>
+        <div id="tw-exclus-selection" style="font-size:12px;color:#e07070;min-height:18px;margin-bottom:8px;letter-spacing:0.5px;font-style:italic;"></div>
+        <div class="hashtag-band" id="tw-exclus-band" style="flex-wrap:wrap;overflow-x:visible;padding:0 0 4px;gap:8px;"></div>
+      </div>
+
+      <div style="height:1px;background:rgba(180,190,255,0.08);margin:12px 16px;"></div>
+
+      <!-- RÉSULTATS -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px 4px;">
+        <div id="tags-croises-count" style="font-size:11px;color:var(--text3);"></div>
+        <button class="btn" onclick="reinitialiserTagsCroises()" style="font-size:11px;padding:5px 14px;letter-spacing:1px;">↺ Réinitialiser</button>
+      </div>
+      <div class="book-grid" id="tags-croises-grid" style="padding:8px 0 16px;"></div>
+
+      <!-- NOTE -->
+      <div style="margin:8px 16px 24px;padding:14px 16px;background:rgba(126,159,212,0.06);border:1px solid rgba(180,190,255,0.1);border-radius:12px;">
+        <p style="font-size:11px;color:var(--text3);line-height:1.8;margin:0;">
+          Les filtres ici ne prennent pas en compte les préférences sélectionnées dans les paramètres. N'oubliez pas d'indiquer les Trigger Warnings que vous souhaitez éviter pour une expérience de lecture plus agréable.
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- HISTOIRE -->
+  <div class="page" id="p-histoire">
+    <div class="page-header" style="justify-content:space-between">
+      <button class="btn" id="histoire-back-btn" onclick="go('p-main')">← Retour</button>
+      <button class="btn btn-icon" id="histoire-opt-btn" onclick="openOptionsPopup(currentHistoireId)" style="font-size:16px;background:none;border:1px solid rgba(180,190,255,.2);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center">⚙</button>
+    </div>
+    <div class="page-scroll">
+      <div class="histoire-banner" id="histoire-banner"></div>
+      <div class="histoire-title-wrap">
+        <div class="histoire-title" id="histoire-title"></div>
+        <button id="pal-btn" class="btn-pal" onclick="clickPAL()" style="display:none" title="Ajouter à ma Pile à Lire">
+          <span class="pal-icon">📚</span><span class="pal-plus" id="pal-plus">+</span>
+        </button>
+      </div>
+      <div id="histoire-author-wrap" style="display:flex;flex-wrap:wrap;gap:4px;padding:0 16px 10px;align-items:baseline"></div>
+      <div class="histoire-tags" id="histoire-tags"></div>
+      <div id="bandeau-spicy" style="display:none;margin:0 16px 14px;padding:14px 16px;background:linear-gradient(135deg,rgba(212,126,126,.12),rgba(126,159,212,.12));border:1px solid rgba(212,126,126,.3);border-radius:12px;font-size:12px;color:var(--text);line-height:1.8;text-align:center;letter-spacing:.3px;"><span style="font-size:20px;display:block;margin-bottom:6px">🌶 🌸</span>Cette histoire contient des scènes spicy et existe aussi en version soft.<br>Tu peux choisir la version que tu préfères dans les paramètres !<br><span style="color:var(--accent);font-size:11px;letter-spacing:.5px">✦ Bonne lecture ! ✦</span></div>
+      <button id="tw-reveal-btn" style="display:none;margin:0 16px 10px;background:none;border:1px solid rgba(167,143,212,.3);border-radius:8px;padding:7px 14px;color:rgba(167,143,212,.8);font-family:'Jost',sans-serif;font-size:11px;cursor:pointer;width:calc(100% - 32px)" onclick="document.getElementById('tw-box-reveal').style.display='block';this.style.display='none'">⚠ Afficher les trigger warnings</button>
+      <div class="tw-box" id="tw-box" style="display:none">
+        <div class="tw-label">Trigger warnings</div>
+        <div class="tw-text" id="tw-text"></div>
+      </div>
+      <div class="tw-box" id="tw-box-reveal" style="display:none">
+        <div class="tw-label">Trigger warnings</div>
+        <div class="tw-text" id="tw-text-reveal"></div>
+      </div>
+      <div class="histoire-desc" id="histoire-desc"></div>
+      <!-- ABONNEMENT -->
+      <div id="abo-bloc" style="display:none;padding:0 16px 12px">
+        <button id="abo-btn" onclick="toggleAbonnement()" class="btn-abo">Chargement…</button>
+      </div>
+      <!-- NOTE ÉTOILES -->
+      <div class="note-bloc" id="note-bloc">
+        <div class="note-stars">
+          <button class="note-star">★</button>
+          <button class="note-star">★</button>
+          <button class="note-star">★</button>
+          <button class="note-star">★</button>
+          <button class="note-star">★</button>
+        </div>
+        <div class="note-moyenne">Chargement…</div>
+      </div>
+      <!-- TOTAL LIKES HISTOIRE -->
+      <div id="histoire-likes-total" style="display:none;text-align:center;padding:4px 0 14px;font-size:13px;color:var(--text3);letter-spacing:.3px;"></div>
+      <!-- COUPS DE CŒUR -->
+      <div id="top-coms-bloc" style="display:none;padding:0 16px 4px">
+        <div class="chapitres-label" style="padding-left:0">✦ Coups de cœur</div>
+        <div id="top-coms-liste"></div>
+      </div>
+      <button id="btn-lecture-rapide" style="display:none;margin:0 16px 14px;width:calc(100% - 32px);padding:14px;background:rgba(126,159,212,.15);border:1px solid rgba(126,159,212,.4);border-radius:12px;color:#eef0fa;font-family:'Jost',sans-serif;font-size:14px;letter-spacing:.5px;cursor:pointer;" onclick="lancerLectureRapide()">Commencer l'histoire</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 10px">
+        <div class="chapitres-label" style="margin:0;padding:0">Chapitres</div>
+        <button id="btn-ordre-chaps" onclick="toggleOrdreChapitres()" style="background:none;border:1px solid rgba(180,190,255,.15);border-radius:20px;padding:6px 14px;font-size:11px;color:var(--text3);font-family:'Jost',sans-serif;cursor:pointer;white-space:nowrap">↑↓ Le plus ancien</button>
+      </div>
+      <div id="chapitres-list"></div>
+    </div>
+  </div>
+
+  <!-- PAGE AUTEUR -->
+  <div class="page" id="p-auteur">
+    <div class="page-header" style="justify-content:space-between">
+      <button class="btn" id="auteur-back-btn">← Retour</button>
+    </div>
+    <div class="page-scroll">
+      <div id="auteur-content" style="padding:20px 16px 40px"></div>
+    </div>
+  </div>
+
+  <!-- LECTURE -->
+  <div class="page" id="p-lecture">
+    <!-- Barre de progression lecture -->
+    <div id="lecture-progress-bar"></div>
+    <div class="lecture-header" id="lecture-header">
+      <button class="btn" id="lecture-back-btn" onclick="go('p-histoire')">← Retour</button>
+      <div class="lecture-titre" id="lecture-titre" style="color:inherit"></div>
+      <button class="btn btn-icon" onclick="openOptionsPopup(currentHistoireId)" style="font-size:16px;background:none;border:1px solid rgba(180,190,255,.2);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;flex-shrink:0">⚙</button>
+      <button id="musique-btn-roman" class="musique-btn-header" onclick="toggleMusique()" style="display:none" title="Musique">♪</button>
+    </div>
+    <div class="page-scroll" id="lecture-scroller">
+      <div class="lecture-body" id="lecture-body"></div>
+      <!-- J'AIME CHAPITRE -->
+      <div class="chapitre-like-bloc" id="chapitre-like-bloc">
+        <button id="chapitre-like-btn" class="chapitre-like-btn" onclick="toggleLikeChapitre()">
+          <span id="chapitre-like-icone">♡</span>
+          <span id="chapitre-like-count">0</span>
+        </button>
+        <div id="chapitre-like-msg" class="chapitre-like-msg"></div>
+      </div>
+      <div class="lecture-nav" id="lecture-nav"></div>
+      <!-- SECTION COMMENTAIRES -->
+      <div class="com-section" id="com-section">
+        <div class="com-section-title">✦ Commentaires</div>
+        <div id="com-spicy-msg" style="display:none;font-size:12px;color:var(--text2);background:rgba(126,159,212,.07);border:1px solid rgba(180,190,255,.12);border-radius:10px;padding:10px 14px;margin-bottom:12px;line-height:1.7;">🌶 Les commentaires sont communs aux versions spicy et soft des chapitres. Merci d'éviter les descriptions explicites dans les commentaires afin de respecter tous les lecteurs.</div>
+        <!-- Formulaire nouveau commentaire -->
+        <div id="com-form-wrap">
+          <textarea id="com-input" class="com-input" placeholder="Laisse un commentaire…" maxlength="1000" rows="3"></textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+            <span id="com-char-count" class="com-char-count">0 / 1000</span>
+            <div class="com-tags-wrap">
+              <label class="com-tag-label" id="com-tag-spoiler-wrap">
+                <input type="checkbox" id="com-tag-spoiler"> ⚠️ Spoiler
+              </label>
+              <label class="com-tag-label" id="com-tag-spicy-wrap" style="display:none">
+                <input type="checkbox" id="com-tag-spicy"> 🌶 Spicy
+              </label>
+            </div>
+            <button class="btn btn-accent com-submit-btn" onclick="soumettreCommentaire()">Publier ✦</button>
+          </div>
+          <div id="com-error" class="com-error" style="display:none"></div>
+        </div>
+        <div id="com-login-msg" class="com-login-msg" style="display:none">
+          <span>Connecte-toi pour laisser un commentaire</span>
+          <button class="btn btn-accent" style="font-size:12px;padding:6px 14px" onclick="go('p-connexion-modal')">Se connecter</button>
+        </div>
+        <!-- Liste des commentaires -->
+        <div id="com-liste"></div>
+        <div id="com-loading" class="com-loading">Chargement…</div>
+        <button id="com-load-more" class="com-load-more" style="display:none" onclick="chargerPlusCommentaires()">Voir plus de commentaires</button>
+      </div>
+    </div>
+    <!-- Bouton mode immersif -->
+    <button id="btn-immersif" onclick="toggleImmersif()" title="Mode immersif">✦</button>
+  </div>
+
+  <!-- VISIONNEUSE BD -->
+  <div class="page" id="p-bd">
+    <div class="bd-header" id="bd-header">
+      <button class="btn" id="bd-back-btn">← Retour</button>
+      <div class="bd-titre" id="bd-titre"></div>
+      <div class="bd-compteur" id="bd-compteur"></div>
+      <button id="musique-btn-bd" class="musique-btn-header" onclick="toggleMusique()" style="display:none" title="Musique">♪</button>
+    </div>
+    <div class="bd-viewer" id="bd-viewer">
+      <button class="bd-nav-btn bd-nav-prev" id="bd-prev" onclick="bdNaviger(-1)">&#8249;</button>
+      <!-- Vue image -->
+      <div class="bd-image-wrap" id="bd-image-wrap">
+        <img id="bd-image" src="" alt="" draggable="false">
+      </div>
+      <!-- Page de fin -->
+      <div id="bd-fin-wrap" style="display:none;width:100%;height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100%;padding:32px 24px;gap:20px;box-sizing:border-box;">
+          <div style="font-size:28px;letter-spacing:6px;color:rgba(200,210,255,0.3);">✦ · ✦ · ✦</div>
+          <div id="bd-fin-titre" style="font-family:'Georgia',serif;font-size:15px;color:var(--text2);text-align:center;letter-spacing:1px;"></div>
+          <!-- Like -->
+          <div class="chapitre-like-bloc">
+            <button id="bd-like-btn" class="chapitre-like-btn" onclick="toggleLikeChapitre()">
+              <span id="bd-like-icone">♡</span>
+              <span id="bd-like-count">0</span>
+            </button>
+          </div>
+          <!-- Nav chapitres -->
+          <div id="bd-nav-chapitre" style="display:none;width:100%;max-width:320px;"></div>
+          <!-- Commentaires -->
+          <div class="com-section" id="bd-com-section" style="width:100%;max-width:480px;">
+            <div class="com-section-title">✦ Commentaires</div>
+            <div id="bd-com-form-wrap" style="display:none">
+              <textarea id="bd-com-input" class="com-input" placeholder="Laisse un commentaire…" maxlength="1000" rows="3"></textarea>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+                <span id="bd-com-char-count" class="com-char-count">0 / 1000</span>
+                <div class="com-tags-wrap">
+                  <label class="com-tag-label" id="bd-com-tag-spoiler-wrap">
+                    <input type="checkbox" id="bd-com-tag-spoiler"> ⚠️ Spoiler
+                  </label>
+                  <label class="com-tag-label" id="bd-com-tag-spicy-wrap" style="display:none">
+                    <input type="checkbox" id="bd-com-tag-spicy"> 🌶 Spicy
+                  </label>
+                </div>
+                <button class="btn btn-accent com-submit-btn" onclick="soumettreCommentaireBD()">Publier ✦</button>
+              </div>
+              <div id="bd-com-error" class="com-error" style="display:none"></div>
+            </div>
+
+            <div id="bd-com-login-msg" class="com-login-msg" style="display:none">
+              <span>Connecte-toi pour laisser un commentaire</span>
+              <button class="btn btn-accent" style="font-size:12px;padding:6px 14px" onclick="openModal('p-connexion-modal')">Se connecter</button>
+            </div>
+            <div id="bd-com-liste"></div>
+            <div id="bd-com-loading" class="com-loading">Chargement…</div>
+            <button id="bd-com-load-more" class="com-load-more" style="display:none" onclick="chargerPlusCommentaires()">Voir plus de commentaires</button>
+          </div>
+        </div>
+      </div>
+      <button class="bd-nav-btn bd-nav-next" id="bd-next" onclick="bdNaviger(1)">&#8250;</button>
+    </div>
+    <!-- bd-like-wrap vide conservé pour compatibilité JS -->
+    <div id="bd-like-wrap" style="display:none"></div>
+  </div>
+
+  <!-- PAGE AUDIO (contenu généré dynamiquement) -->
+  <div class="page" id="p-audio"></div>
+
+  <!-- PAGE WEBTOON (contenu généré dynamiquement par webtoon.js) -->
+  <div class="page" id="p-webtoon"></div>
+
+  <!-- MON COMPTE -->
+  <div class="page" id="p-moncompte">
+    <div class="page-header" style="justify-content:space-between">
+      <button class="btn" onclick="go('p-main')">← Retour</button>
+      <button class="btn btn-icon" onclick="openModal('deco-popup')" title="Déconnexion" style="font-size:16px;background:none;border:none;cursor:pointer;color:var(--text2)">🚪</button>
+    </div>
+    <!-- Pop-up déconnexion compte -->
+    <div class="modal-overlay" id="deco-popup" onclick="closeModal(event,'deco-popup')">
+      <div class="modal-box" style="text-align:center">
+        <button class="modal-close" onclick="closeM('deco-popup')">✕</button>
+        <div class="modal-title">Se déconnecter</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Voulez-vous vous déconnecter de votre compte Astrolabe ?</p>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-full btn-accent" onclick="closeM('deco-popup');deconnexion()">Oui</button>
+          <button class="btn btn-full" onclick="closeM('deco-popup')">Non</button>
+        </div>
+      </div>
+    </div>
+    <div class="page-scroll">
+      <div class="compte-top">
+        <div class="compte-avatar" id="compte-avatar" onclick="openAvatarPopup()" style="cursor:pointer">☽</div>
+        <div style="display:flex;align-items:center;gap:8px;justify-content:center">
+          <div class="compte-name-txt" id="compte-name">Astrolectrice</div>
+          <button onclick="openModal('modifier-pseudo-popup')" style="background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer;padding:2px 6px;font-family:'Jost',sans-serif;" title="Modifier le pseudo">✎</button>
+        </div>
+        <div class="compte-since">Membre depuis 2025</div>
+        <div class="badges-row"><span class="badge">BADGE</span></div>
+      </div>
+      <div class="compte-body">
+        <!-- ALERTES SIGNALEMENT -->
+        <div id="alerte-signalement-bloc" style="display:none;margin-bottom:16px;padding:14px 16px;background:rgba(212,126,126,.08);border:1px solid rgba(212,126,126,.3);border-radius:12px;">
+          <div style="font-size:13px;font-weight:600;color:var(--danger);margin-bottom:6px;">⚠ Commentaire signalé</div>
+          <div id="alerte-signalement-texte" style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:10px;"></div>
+          <div style="font-size:11px;color:var(--text3);line-height:1.6;">Un ou plusieurs de tes commentaires ont été signalés par la communauté et sont en attente de vérification. Si le contenu est conforme aux règles d'Astrolabe, il sera rétabli.</div>
+        </div>
+        <!-- NOTIFICATIONS -->
+        <div id="notifs-bloc" style="display:none;margin-bottom:16px;">
+          <button onclick="toggleNotifBloc()" style="width:100%;background:rgba(140,150,195,.08);border:1px solid rgba(180,190,255,.12);border-radius:12px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background .2s;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:13px;">🔔</span>
+              <span style="font-size:13px;font-weight:600;color:var(--text);letter-spacing:.3px;">Notifications</span>
+              <span id="notifs-count-label" style="font-size:11px;color:var(--text3);"></span>
+            </div>
+            <span id="notifs-chevron" style="font-size:12px;color:var(--text3);transition:transform .3s;">▼</span>
+          </button>
+          <div id="notifs-accordeon" style="overflow:hidden;max-height:0;transition:max-height .35s ease;">
+            <div style="padding-top:10px;">
+              <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+                <button onclick="marquerToutesLues()" style="background:none;border:none;color:var(--accent);font-family:'Jost',sans-serif;font-size:11px;cursor:pointer;letter-spacing:.3px;">Tout marquer comme lu</button>
+              </div>
+              <div id="notifs-liste"></div>
+            </div>
+          </div>
+        </div>
+        <div class="tickets-row" onclick="openModal('tickets-popup')">
+          <span class="tickets-row-label">Mes tickets</span>
+          <span class="tickets-row-val" id="compte-tickets">0 ✦</span>
+        </div>
+        <div class="divider"></div>
+        <div class="toggle-row" id="row-adulte"><span class="toggle-label">Contenu adulte</span><label class="tgl"><input type="checkbox" id="toggle-adulte" onchange="compte.adulte=this.checked;renderGrid('book-grid',BOOKS);savePrefs()"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+        <div class="toggle-row"><span class="toggle-label">Trigger warnings (histoires)</span><label class="tgl"><input type="checkbox" id="toggle-tw-histoire" checked onchange="compte.twrHistoire=this.checked;savePrefs()"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+        <div class="toggle-row"><span class="toggle-label">Trigger warnings (chapitres)</span><label class="tgl"><input type="checkbox" id="toggle-tw-chapitre" onchange="compte.twrChapitre=this.checked;savePrefs()"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+        <div class="divider"></div>
+        <!-- FILTRE TRIGGER WARNINGS -->
+        <div class="toggle-row">
+          <span class="toggle-label">Filtrer les Trigger Warnings</span>
+          <label class="tgl"><input type="checkbox" id="toggle-tw-filtre-actif" onchange="setTWFiltreActif(this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
+        </div>
+        <div id="tw-filtre-panel" style="display:none;padding:10px 0 6px">
+          <p style="font-size:11px;color:var(--text3);line-height:1.6;margin-bottom:10px">Les histoires contenant les triggers cochés seront masquées du catalogue.</p>
+          <div id="tw-filtre-liste" style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-size:11px;color:var(--text3);font-style:italic">Chargement…</span>
+          </div>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label">Masquer les options spicy/soft sur les chapitres <button onclick="toggleInfoSpicy()" style="background:none;border:1px solid rgba(180,190,255,.3);border-radius:50%;width:16px;height:16px;font-size:9px;cursor:pointer;color:var(--accent);line-height:1;padding:0;vertical-align:middle">?</button></span>
+          <label class="tgl"><input type="checkbox" id="toggle-afficher-version" onchange="setAfficherChoixVersion(this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
+        </div>
+        <div id="info-spicy" style="display:none;font-size:11px;color:var(--text2);line-height:1.7;margin:4px 0 10px;padding:10px 12px;background:rgba(126,159,212,.07);border-radius:8px;">Certaines histoires proposent des versions softs de chapitres spicy. Si tu ne veux pas que les options spicy/soft soient indiquées sur la liste des chapitres, active cette option et choisis quelle version sera affichée par défaut.</div>
+        <div id="row-version-defaut">
+          <div class="toggle-row" style="justify-content:space-between;align-items:center">
+            <span class="toggle-label">Version par défaut</span>
+            <div style="display:flex;gap:8px;align-items:center">
+              <span id="vdef-soft-btn" onclick="setVersionDefaut('soft')" class="ch-version-btn" title="Version douce">🌸</span>
+              <span id="vdef-spicy-btn" onclick="setVersionDefaut('spicy')" class="ch-version-btn ch-version-active" title="Version spicy">🌶</span>
+            </div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <!-- MODE LECTURE -->
+        <div class="toggle-row">
+          <span class="toggle-label">Mode lecture : <span id="mode-lecture-label">Nuit</span></span>
+          <label class="tgl tgl-mode"><input type="checkbox" id="toggle-mode-jour" onchange="toggleModeJour(this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
+        </div>
+        <div class="toggle-row" id="row-couleur-texte" style="justify-content:space-between;align-items:center;">
+          <span class="toggle-label">Couleur du texte en mode nuit</span>
+          <div style="display:flex;gap:8px">
+            <button id="btn-texte-bleu" onclick="setTexte('bleu')" style="background:rgba(126,159,212,.25);border:1.5px solid rgba(126,159,212,.6);color:var(--accent);font-family:'Jost',sans-serif;font-size:11px;padding:5px 14px;border-radius:20px;cursor:pointer;">Bleu</button>
+            <button id="btn-texte-blanc" onclick="setTexte('blanc')" style="background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);color:#eef0fa;font-family:'Jost',sans-serif;font-size:11px;padding:5px 14px;border-radius:20px;cursor:pointer;">Blanc</button>
+          </div>
+        </div>
+        <div class="toggle-row" style="justify-content:space-between;align-items:center;">
+          <span class="toggle-label">Taille du texte</span>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button id="compte-taille-p" onclick="setTaille('petit')" class="btn-taille" style="font-size:11px">A</button>
+            <button id="compte-taille-n" onclick="setTaille('normal')" class="btn-taille btn-taille-sel" style="font-size:13px">A</button>
+            <button id="compte-taille-g" onclick="setTaille('grand')" class="btn-taille" style="font-size:16px">A</button>
+            <button id="compte-taille-tg" onclick="setTaille('tres-grand')" class="btn-taille" style="font-size:19px">A</button>
+          </div>
+        </div>
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(180,190,255,.07)">
+          <button class="btn btn-full" style="font-size:11px;color:var(--danger);border-color:rgba(212,126,126,.3)" onclick="ouvrirPopupResetOptions()">↺ Réinitialiser les paramètres pour toutes les histoires</button>
+        </div>
+        <div class="divider"></div>
+        <!-- BIBLIOTHÈQUE -->
+        <div class="biblio-titre">Ma bibliothèque</div>
+
+        <div class="biblio-section-title">📚 Ma PAL</div>
+        <div class="biblio-row" id="biblio-pal"><span class="biblio-empty">Ta pile à lire est vide</span></div>
+
+        <div class="biblio-section-title">🔔 Mes abonnements</div>
+        <div class="biblio-row" id="biblio-abos"><span class="biblio-empty">Aucun abonnement</span></div>
+
+        <div class="biblio-section-title">▶ Continuer la lecture</div>
+        <div class="biblio-row" id="biblio-continuer"><span class="biblio-empty">Aucune lecture en cours</span></div>
+
+        <div class="biblio-section-title">⭐ À relire sans modération</div>
+        <div class="biblio-row" id="biblio-termines"><span class="biblio-empty">Aucun livre terminé</span></div>
+
+        <div class="divider"></div>
+        <!-- SUPPRESSION -->
+        <div class="divider"></div>
+        <!-- SIGNALER UN BUG -->
+        <div style="padding:4px 0 12px">
+          <button class="btn btn-full" style="font-size:12px;color:var(--text2);border-color:rgba(180,190,255,.2)" onclick="openModal('bug-report-popup')">🐛 Signaler un bug ou un problème</button>
+        </div>
+        <div class="divider"></div>
+        <div style="text-align:center;padding:8px 0 4px">
+          <button onclick="go('p-mentions-legales')" style="background:none;border:none;color:var(--text3);font-family:'Jost',sans-serif;font-size:11px;cursor:pointer;letter-spacing:.5px;text-decoration:underline;">Politique de confidentialité & CGU</button>
+        </div>
+        <div style="text-align:center;padding:4px 0 16px">
+          <button style="background:none;border:none;color:var(--danger);font-family:'Jost',sans-serif;font-size:11px;cursor:pointer;letter-spacing:.5px;opacity:.7" onclick="openModal('delete-popup1')">Supprimer mon compte</button>
+        </div>
+      </div>
+    </div>
+    <!-- Pop-up tickets -->
+    <div class="modal-overlay" id="tickets-popup" onclick="closeModal(event,'tickets-popup')">
+      <div class="modal-box" style="text-align:center">
+        <button class="modal-close" onclick="closeM('tickets-popup')">✕</button>
+        <div class="modal-title">Acheter des tickets</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.7">Tu souhaites acheter des tickets pour débloquer des chapitres ?</p>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-full btn-accent" onclick="closeM('tickets-popup');goAcheterTickets('p-moncompte')">Oui ✦</button>
+          <button class="btn btn-full" onclick="closeM('tickets-popup')">Non</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POP-UP SUPPRESSION 1 -->
+  <div class="modal-overlay" id="delete-popup1" onclick="closeModal(event,'delete-popup1')" style="position:fixed;z-index:200">
+    <div class="modal-box" style="text-align:center">
+      <button class="modal-close" onclick="closeM('delete-popup1')">✕</button>
+      <div class="modal-title">Supprimer mon compte</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Es-tu sûr·e de vouloir supprimer ton compte ? Toutes tes données seront perdues dans 30 jours.</p>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-full btn-danger" style="background:rgba(212,126,126,.15);border-color:rgba(212,126,126,.4);color:var(--danger)" onclick="closeM('delete-popup1');go('p-delete1')">Oui</button>
+        <button class="btn btn-full btn-accent" onclick="closeM('delete-popup1');openModal('delete-non-popup')">Non</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POP-UP OUF -->
+  <div class="modal-overlay" id="delete-non-popup" onclick="closeModal(event,'delete-non-popup')" style="position:fixed;z-index:200">
+    <div class="modal-box" style="text-align:center">
+      <button class="modal-close" onclick="closeM('delete-non-popup')">✕</button>
+      <div style="font-size:40px;margin-bottom:12px">😮‍💨</div>
+      <div class="modal-title">Ouf !</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">On a eu peur ! Content·e de te garder parmi nous ✦</p>
+      <button class="btn btn-full btn-accent" onclick="closeM('delete-non-popup')">Rester sur Astrolabe ✦</button>
+    </div>
+  </div>
+
+  <!-- PAGE RAISON SUPPRESSION -->
+  <div class="page" id="p-delete1">
+    <div class="page-header"><button class="btn" onclick="go('p-moncompte')">← Retour</button></div>
+    <div class="page-scroll"><div class="page-body">
+      <div class="page-title">Une dernière chose…</div>
+      <div class="page-subtitle">Pourquoi souhaites-tu supprimer ton compte ? (facultatif)</div>
+      <textarea id="delete-raison" style="width:100%;background:rgba(140,150,195,.1);border:1px solid rgba(180,190,230,.16);border-radius:10px;color:var(--text);font-family:'Jost',sans-serif;font-size:13px;padding:12px;outline:none;resize:none;min-height:100px;" placeholder="Ton retour nous aide à améliorer Astrolabe…"></textarea>
+      <button class="btn btn-full btn-accent" style="margin-top:16px" onclick="openModal('delete-popup2')">Valider →</button>
+    </div></div>
+  </div>
+
+  <!-- POP-UP SUPPRESSION 2 -->
+  <div class="modal-overlay" id="delete-popup2" onclick="closeModal(event,'delete-popup2')" style="position:fixed;z-index:200">
+    <div class="modal-box" style="text-align:center">
+      <button class="modal-close" onclick="closeM('delete-popup2')">✕</button>
+      <div class="modal-title">100% sûr·e ?</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Cette action est irréversible. Ton compte sera supprimé dans 30 jours.</p>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-full btn-danger" style="background:rgba(212,126,126,.15);border-color:rgba(212,126,126,.4);color:var(--danger)" onclick="closeM('delete-popup2');go('p-au-revoir')">Oui, supprimer</button>
+        <button class="btn btn-full btn-accent" onclick="closeM('delete-popup2');openModal('delete-non-popup')">Non</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE AU REVOIR -->
+  <div class="page" id="p-au-revoir">
+    <div class="page-scroll"><div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:40px 24px;">
+      <div style="font-size:52px;margin-bottom:20px">🌙</div>
+      <div class="page-title">Au revoir…</div>
+      <p style="font-size:13px;color:var(--text2);line-height:1.8;margin-bottom:30px">Ton compte sera supprimé dans 30 jours. Si tu changes d'avis, tu peux te reconnecter avant ce délai pour annuler.</p>
+      <button class="btn btn-full btn-accent" style="max-width:300px" onclick="supprimerCompteDefinitif()">Quitter Astrolabe</button>
+    </div></div>
+  </div>
+
+  <!-- POP-UP BIENVENUE -->
+  <div class="modal-overlay" id="bienvenue-popup" style="position:fixed;z-index:200">
+    <div class="modal-box" style="text-align:center">
+      <div style="font-size:40px;margin-bottom:12px">🎁</div>
+      <div class="modal-title" style="display:flex;align-items:center;justify-content:center;gap:8px"><span>✦</span><span>Bienvenue <span id="bienvenue-pseudo"></span></span><span>✦</span></div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:8px;line-height:1.7">Un e-mail de confirmation t'a été envoyé.<br>Clique sur le lien pour activer ton compte.</p>
+      <p style="font-size:11px;color:var(--text3);margin-bottom:22px;line-height:1.6">En attendant, tu peux explorer le site avec tes 20 tickets offerts ✦</p>
+      <button class="btn btn-full btn-accent" onclick="closeM('bienvenue-popup');updateTopbar();go('p-main')">Commencer l'aventure ✦</button>
+    </div>
+  </div>
+
+  <!-- POP-UP AVATAR -->
+  <div class="modal-overlay" id="avatar-popup" onclick="closeModal(event,'avatar-popup')" style="position:fixed;z-index:200">
+    <div class="modal-box" style="text-align:center">
+      <button class="modal-close" onclick="cancelAvatar()">✕</button>
+      <div class="modal-title">Changer ma photo de profil</div>
+      <div style="display:flex;justify-content:center;gap:16px;margin:20px 0 24px">
+        <div onclick="setAvatar('☽')" id="av-lune" style="width:64px;height:64px;border-radius:50%;border:1.5px solid rgba(180,190,255,.2);background:rgba(126,159,212,.08);display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;">☽</div>
+        <div onclick="setAvatar('✦')" id="av-etoile" style="width:64px;height:64px;border-radius:50%;border:1.5px solid rgba(180,190,255,.2);background:rgba(126,159,212,.08);display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;">✦</div>
+        <div onclick="setAvatar('☀')" id="av-soleil" style="width:64px;height:64px;border-radius:50%;border:1.5px solid rgba(180,190,255,.2);background:rgba(126,159,212,.08);display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;">☀</div>
+      </div>
+      <button class="btn btn-full btn-accent" onclick="confirmAvatar()">Valider</button>
+    </div>
+  </div>
+
+  <!-- POP-UP OPTIONS -->
+  <div class="modal-overlay" id="options-popup" style="position:fixed;z-index:200">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeM('options-popup')">✕</button>
+      <div class="modal-title" style="margin-bottom:16px">Paramètres de lecture</div>
+      <div style="display:flex;gap:10px;margin-bottom:20px">
+        <button id="opt-btn-cette" onclick="afficherOnglet('cette')" class="btn btn-full btn-accent" style="font-size:11px">Pour cette histoire</button>
+        <button id="opt-btn-toutes" onclick="afficherOnglet('toutes')" class="btn btn-full" style="font-size:11px">Pour toutes les histoires</button>
+      </div>
+      <div id="opt-panel-cette">
+        <div class="toggle-row"><span class="toggle-label">Mode lecture : <span id="opt-c-mode-label">Nuit</span></span><label class="tgl tgl-mode"><input type="checkbox" id="opt-c-mode-jour" onchange="optCModeChange(this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+        <div id="opt-c-row-couleur" class="toggle-row" style="justify-content:space-between;align-items:center">
+          <span class="toggle-label">Couleur du texte</span>
+          <div style="display:flex;gap:8px">
+            <button id="opt-c-btn-bleu" onclick="setOptCTexte('bleu')" style="background:rgba(126,159,212,.25);border:1.5px solid rgba(126,159,212,.6);color:var(--accent);font-family:'Jost',sans-serif;font-size:11px;padding:5px 14px;border-radius:20px;cursor:pointer;">Bleu</button>
+            <button id="opt-c-btn-blanc" onclick="setOptCTexte('blanc')" style="background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);color:#eef0fa;font-family:'Jost',sans-serif;font-size:11px;padding:5px 14px;border-radius:20px;cursor:pointer;">Blanc</button>
+          </div>
+        </div>
+        <div class="toggle-row" style="justify-content:space-between;align-items:center">
+          <span class="toggle-label">Taille du texte</span>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button id="opt-c-taille-p" onclick="setOptTaille('c','petit')" class="btn-taille" style="font-size:11px">A</button>
+            <button id="opt-c-taille-n" onclick="setOptTaille('c','normal')" class="btn-taille btn-taille-sel" style="font-size:13px">A</button>
+            <button id="opt-c-taille-g" onclick="setOptTaille('c','grand')" class="btn-taille" style="font-size:16px">A</button>
+            <button id="opt-c-taille-tg" onclick="setOptTaille('c','tres-grand')" class="btn-taille" style="font-size:19px">A</button>
+          </div>
+        </div>
+        <div class="toggle-row"><span class="toggle-label">TW par histoire</span><label class="tgl"><input type="checkbox" id="opt-c-tw-histoire"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+        <div class="toggle-row"><span class="toggle-label">TW par chapitre</span><label class="tgl"><input type="checkbox" id="opt-c-tw-chapitre"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+        <div class="toggle-row">
+          <span class="toggle-label">Masquer les options spicy/soft <button onclick="toggleInfoSpicy()" style="background:none;border:1px solid rgba(180,190,255,.3);border-radius:50%;width:16px;height:16px;font-size:9px;cursor:pointer;color:var(--accent);line-height:1;padding:0;vertical-align:middle">?</button></span>
+          <label class="tgl"><input type="checkbox" id="opt-c-afficher-version" onchange="setOptAfficherVersion('c',this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
+        </div>
+        <div id="opt-c-row-version-defaut">
+          <div class="toggle-row" style="justify-content:space-between;align-items:center">
+            <span class="toggle-label">Version par défaut</span>
+            <div style="display:flex;gap:8px;align-items:center">
+              <span id="opt-c-vdef-soft" onclick="setOptVersionDefaut('c','soft')" class="ch-version-btn" title="Version douce">🌸</span>
+              <span id="opt-c-vdef-spicy" onclick="setOptVersionDefaut('c','spicy')" class="ch-version-btn ch-version-active" title="Version spicy">🌶</span>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(180,190,255,.08)">
+          <button class="btn btn-full" style="font-size:11px;color:var(--danger);border-color:rgba(212,126,126,.3)" onclick="ouvrirPopupResetOptions()">↺ Réinitialiser les paramètres pour toutes les histoires</button>
+        </div>
+      </div>
+      <div id="opt-panel-toutes" style="display:none">
+        <div class="toggle-row"><span class="toggle-label">Mode lecture : <span id="opt-t-mode-label">Nuit</span></span><label class="tgl tgl-mode"><input type="checkbox" id="opt-t-mode-jour" onchange="optTModeChange(this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+        <div id="opt-t-row-couleur" class="toggle-row" style="justify-content:space-between;align-items:center">
+          <span class="toggle-label">Couleur du texte</span>
+          <div style="display:flex;gap:8px">
+            <button id="opt-t-btn-bleu" onclick="setOptTTexte('bleu')" style="background:rgba(126,159,212,.25);border:1.5px solid rgba(126,159,212,.6);color:var(--accent);font-family:'Jost',sans-serif;font-size:11px;padding:5px 14px;border-radius:20px;cursor:pointer;">Bleu</button>
+            <button id="opt-t-btn-blanc" onclick="setOptTTexte('blanc')" style="background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);color:#eef0fa;font-family:'Jost',sans-serif;font-size:11px;padding:5px 14px;border-radius:20px;cursor:pointer;">Blanc</button>
+          </div>
+        </div>
+        <div class="toggle-row" style="justify-content:space-between;align-items:center">
+          <span class="toggle-label">Taille du texte</span>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button id="opt-t-taille-p" onclick="setOptTaille('t','petit')" class="btn-taille" style="font-size:11px">A</button>
+            <button id="opt-t-taille-n" onclick="setOptTaille('t','normal')" class="btn-taille btn-taille-sel" style="font-size:13px">A</button>
+            <button id="opt-t-taille-g" onclick="setOptTaille('t','grand')" class="btn-taille" style="font-size:16px">A</button>
+            <button id="opt-t-taille-tg" onclick="setOptTaille('t','tres-grand')" class="btn-taille" style="font-size:19px">A</button>
+          </div>
+        </div>
+        <div class="toggle-row"><span class="toggle-label">TW par histoire</span><label class="tgl"><input type="checkbox" id="opt-t-tw-histoire"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+        <div class="toggle-row"><span class="toggle-label">TW par chapitre</span><label class="tgl"><input type="checkbox" id="opt-t-tw-chapitre"><div class="tgl-track"></div><div class="tgl-thumb"></div></label></div>
+        <div class="toggle-row">
+          <span class="toggle-label">Masquer les options spicy/soft <button onclick="toggleInfoSpicy()" style="background:none;border:1px solid rgba(180,190,255,.3);border-radius:50%;width:16px;height:16px;font-size:9px;cursor:pointer;color:var(--accent);line-height:1;padding:0;vertical-align:middle">?</button></span>
+          <label class="tgl"><input type="checkbox" id="opt-t-afficher-version" onchange="setOptAfficherVersion('t',this.checked)"><div class="tgl-track"></div><div class="tgl-thumb"></div></label>
+        </div>
+        <div id="opt-t-row-version-defaut">
+          <div class="toggle-row" style="justify-content:space-between;align-items:center">
+            <span class="toggle-label">Version par défaut</span>
+            <div style="display:flex;gap:8px;align-items:center">
+              <span id="opt-t-vdef-soft" onclick="setOptVersionDefaut('t','soft')" class="ch-version-btn" title="Version douce">🌸</span>
+              <span id="opt-t-vdef-spicy" onclick="setOptVersionDefaut('t','spicy')" class="ch-version-btn ch-version-active" title="Version spicy">🌶</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-full btn-accent" style="margin-top:20px" onclick="saveOptions()">Valider ✦</button>
+    </div>
+  </div>
+
+  <!-- POP-UP RESET OPTIONS 1 -->
+  <div class="modal-overlay" id="reset-options-popup" style="position:fixed;z-index:210">
+    <div class="modal-box" style="text-align:center">
+      <div class="modal-title">Réinitialiser ?</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Vous êtes sur le point de réinitialiser les paramètres particuliers à chaque histoire. Cette action est irréversible et toutes les histoires seront affichées avec les paramètres de votre compte.<br><br>Souhaitez-vous poursuivre ?</p>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-full btn-accent" onclick="confirmerResetOptions()">Oui</button>
+        <button class="btn btn-full" onclick="closeM('reset-options-popup');openModal('options-popup')">Non</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POP-UP RESET OPTIONS 2 -->
+  <div class="modal-overlay" id="reset-options-popup2" style="position:fixed;z-index:210">
+    <div class="modal-box" style="text-align:center">
+      <div style="font-size:36px;margin-bottom:12px">✦</div>
+      <div class="modal-title">C'est fait !</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Tous vos paramètres particuliers ont été réinitialisés. Désormais, toutes vos lectures s'afficheront avec les paramètres de votre compte.</p>
+      <button class="btn btn-full btn-accent" onclick="closeM('reset-options-popup2')">Ok</button>
+    </div>
+  </div>
+
+  <!-- POP-UP ANNIVERSAIRE 16 ANS -->
+  <div class="modal-overlay" id="anniversaire-16-popup" style="position:fixed;z-index:200">
+    <div class="modal-box" style="text-align:center">
+      <div style="font-size:48px;margin-bottom:12px">🎂</div>
+      <div class="modal-title">Joyeux anniversaire !</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Tu as maintenant accès à un catalogue plus large !<br><br>Tu peux désormais explorer davantage d'histoires et effectuer des achats sans accord parental.</p>
+      <button class="btn btn-full btn-accent" onclick="confirmer16Ans()">Super ✦</button>
+    </div>
+  </div>
+
+  <!-- POP-UP ANNIVERSAIRE 18 ANS -->
+  <div class="modal-overlay" id="anniversaire-popup" style="position:fixed;z-index:200">
+    <div class="modal-box" style="text-align:center">
+      <div style="font-size:48px;margin-bottom:12px">🎂</div>
+      <div class="modal-title">Joyeux anniversaire !</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.7">Tu as maintenant accès au contenu adulte si tu le souhaites. Cette option est modifiable depuis ton compte.<br><br>Souhaites-tu rendre visible le contenu pour adultes ?</p>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-full btn-accent" onclick="confirmerAdulte(true)">Oui ✦</button>
+        <button class="btn btn-full" onclick="confirmerAdulte(false)">Non</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POP-UP CHOIX VERSION NAV -->
+  <div class="modal-overlay" id="version-nav-popup" style="position:fixed;z-index:200" onclick="closeModal(event,'version-nav-popup')">
+    <div class="modal-box" style="text-align:center">
+      <button class="modal-close" onclick="closeM('version-nav-popup')">✕</button>
+      <div class="modal-title" style="margin-bottom:16px">Le chapitre suivant existe en version spicy et en version soft. Quelle version souhaites-tu lire ?</div>
+      <div style="display:flex;gap:16px;justify-content:center;margin-bottom:20px">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+          <div style="font-size:11px;letter-spacing:1px;color:var(--text2);text-transform:uppercase">Version soft</div>
+          <button onclick="closeM('version-nav-popup');ouvrirVersionChoisieNav(window._navBookId,window._navChapNum,'soft')" class="ch-version-btn ch-version-nav-big" title="Version douce">🌸</button>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+          <div style="font-size:11px;letter-spacing:1px;color:var(--text2);text-transform:uppercase">Version spicy</div>
+          <button onclick="closeM('version-nav-popup');ouvrirVersionChoisieNav(window._navBookId,window._navChapNum,'spicy')" class="ch-version-btn ch-version-nav-big" title="Version spicy">🌶</button>
+        </div>
+      </div>
+      <p style="font-size:11px;color:var(--text3);line-height:1.7;margin:0">Si tu ne souhaites pas que les chapitres spicy soient indiqués, tu peux régler cela dans les paramètres et choisir quelle version te sera proposée par défaut.</p>
+    </div>
+  </div>
+
+  <!-- POP-UP VÉRIFICATION D'ÂGE -->
+  <div class="modal-overlay" id="age-popup" style="position:fixed;z-index:300">
+    <div class="modal-box" style="text-align:center">
+      <div style="font-size:36px;margin-bottom:12px">✦</div>
+      <div class="modal-title">Bienvenue sur Astrolabe</div>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.7;font-style:italic;">Ce site propose du contenu réservé aux majeurs (18+) ; en accédant, vous confirmez avoir 18 ans ou plus.</p>
+      <div style="display:flex;gap:10px;margin-bottom:16px">
+        <div style="flex:1">
+          <label class="form-label">Mois</label>
+          <select class="form-select" id="age-mois-input" style="text-align:center"></select>
+        </div>
+        <div style="flex:1">
+          <label class="form-label">Année</label>
+          <select class="form-select" id="age-annee-input" style="text-align:center"></select>
+        </div>
+      </div>
+      <label style="display:flex;align-items:flex-start;gap:10px;text-align:left;margin-bottom:16px;cursor:pointer">
+        <input type="checkbox" id="age-confirm-check" style="margin-top:3px;flex-shrink:0;accent-color:var(--accent)">
+        <span style="font-size:11px;color:var(--text2);line-height:1.6;">Je confirme avoir saisi ma date de naissance correctement et avoir pris connaissance des <button onclick="openModal('cgu-popup')" style="background:none;border:none;color:var(--accent);font-family:'Jost',sans-serif;font-size:11px;cursor:pointer;padding:0;text-decoration:underline;">Conditions d'Utilisation</button> indiquant que le contenu accessible est réservé aux majeurs et adapté à l'âge déclaré.</span>
+      </label>
+      <span id="age-error" style="font-size:11px;color:var(--danger);display:none;margin-bottom:10px;display:none">Merci de remplir tous les champs et de cocher la case.</span>
+      <button class="btn btn-full btn-accent" onclick="validerAge()">Entrer ✦</button>
+    </div>
+  </div>
+
+  <!-- POP-UP CGU -->
+  <div class="modal-overlay" id="cgu-popup" style="position:fixed;z-index:400" onclick="closeModal(event,'cgu-popup')">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeM('cgu-popup')">✕</button>
+      <div class="modal-title" style="font-size:18px">Conditions d'Utilisation (CGU) – Accès Visiteur</div>
+      <p style="font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:12px">En accédant à ce site, vous déclarez avoir saisi votre date de naissance correctement. Le contenu proposé est destiné à un public correspondant à l'âge indiqué : 13 ans et plus pour le contenu soft, 18 ans et plus pour le contenu adulte.</p>
+      <p style="font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:12px">Le site décline toute responsabilité en cas de consultation par des mineurs ayant menti sur leur âge.</p>
+      <p style="font-size:12px;color:var(--text2);line-height:1.8;">En utilisant le site, vous acceptez ces conditions et vous engagez à respecter les limitations d'accès selon votre âge.</p>
+      <button class="btn btn-full btn-accent" style="margin-top:20px" onclick="closeM('cgu-popup')">J'ai compris ✦</button>
+    </div>
+  </div>
+
+  <!-- POP-UP REFUS < 13 ANS -->
+  <div class="modal-overlay" id="age-refuse-popup" style="position:fixed;z-index:300">
+    <div class="modal-box" style="text-align:center">
+      <div style="font-size:52px;margin-bottom:16px">🌙</div>
+      <div class="modal-title">Bonjour mon petit chat !</div>
+      <p style="font-size:13px;color:var(--text2);line-height:1.9;margin-bottom:24px">Tu me sembles encore un peu jeune pour entrer sur Astrolabe. Reviens nous voir quand tu seras plus grand·e !</p>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:24px;">À bientôt ✦ Astrolabe</p>
+      <button class="btn btn-full" onclick="window.location.href='about:blank'" style="color:var(--danger);border-color:rgba(212,126,126,.3)">Quitter</button>
+    </div>
+  </div>
+
+  <!-- POP-UP CONSEIL CRÉATION DE COMPTE -->
+  <div class="modal-overlay" id="compte-conseil-popup" style="position:fixed;z-index:300">
+    <div class="modal-box" style="text-align:center">
+      <div style="font-size:36px;margin-bottom:12px">☽</div>
+      <div class="modal-title">Une dernière chose…</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.7">Pour une meilleure expérience utilisateur, nous vous conseillons de créer un compte afin de pouvoir régler vos préférences de lecture.</p>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <button class="btn btn-full btn-accent" onclick="closeM('compte-conseil-popup');go('p-inscription1')">Créer un compte ✦</button>
+        <button class="btn btn-full" onclick="closeM('compte-conseil-popup')">Continuer sans compte</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POP-UP RETIRER DE LA PILE À LIRE -->
+  <div class="modal-overlay" id="pal-retire-popup" style="position:fixed;z-index:200" onclick="closeModal(event,'pal-retire-popup')">
+    <div class="modal-box" style="text-align:center">
+      <button class="modal-close" onclick="closeM('pal-retire-popup')">✕</button>
+      <div style="font-size:36px;margin-bottom:12px">📚</div>
+      <div class="modal-title">Pile à Lire</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.7">Retirer ce livre de ta Pile à Lire ?</p>
+      <div style="display:flex;gap:10px;margin-bottom:20px">
+        <button class="btn btn-full btn-accent" onclick="confirmerRetirerPAL()">Oui ✦</button>
+        <button class="btn btn-full" onclick="closeM('pal-retire-popup')">Non</button>
+      </div>
+      <button onclick="desactiverPopupRetirerPAL()" style="background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer;font-family:'Jost',sans-serif;text-decoration:underline;">Ne plus afficher ce message</button>
+    </div>
+  </div>
+
+  <!-- POP-UP PILE À LIRE -->
+  <!-- POP-UP MODIFIER PSEUDO -->
+  <div class="modal-overlay" id="modifier-pseudo-popup" style="position:fixed;z-index:200" onclick="closeModal(event,'modifier-pseudo-popup')">
+    <div class="modal-box" style="text-align:center">
+      <button class="modal-close" onclick="closeM('modifier-pseudo-popup')">✕</button>
+      <div class="modal-title">Modifier mon pseudo</div>
+      <div class="form-group" style="margin-top:8px">
+        <input type="text" class="form-input" id="nouveau-pseudo-input" placeholder="Nouveau pseudo" maxlength="30">
+        <span class="form-error" id="nouveau-pseudo-error" style="display:none">Pseudo non disponible ou invalide.</span>
+      </div>
+      <button class="btn btn-full btn-accent" onclick="sauvegarderNouveauPseudo()" style="margin-top:8px">Sauvegarder ✦</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="pal-popup" style="position:fixed;z-index:200" onclick="closeModal(event,'pal-popup')">
+    <div class="modal-box" style="text-align:center">
+      <button class="modal-close" onclick="closeM('pal-popup')">✕</button>
+      <div style="font-size:36px;margin-bottom:12px">📚</div>
+      <div class="modal-title">Pile à Lire</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.7">Ajouter ce livre à ta Pile à Lire ?</p>
+      <div style="display:flex;gap:10px;margin-bottom:20px">
+        <button class="btn btn-full btn-accent" onclick="confirmerPAL()">Oui ✦</button>
+        <button class="btn btn-full" onclick="closeM('pal-popup')">Non</button>
+      </div>
+      <button onclick="desactiverPopupPAL()" style="background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer;font-family:'Jost',sans-serif;text-decoration:underline;">Ne plus afficher ce message</button>
+    </div>
+  </div>
+
+  <!-- POP-UP SUGGESTION ABONNEMENT -->
+  <div class="modal-overlay" id="abo-suggestion-popup" style="position:fixed;z-index:200" onclick="closeModal(event,'abo-suggestion-popup')">
+    <div class="modal-box" style="text-align:center">
+      <div style="font-size:36px;margin-bottom:12px">🔔</div>
+      <div class="modal-title">Tu sembles déjà apprécier cette histoire !</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.7">Souhaites-tu t'abonner pour être notifiée à chaque nouveau chapitre ?</p>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-full btn-accent" onclick="accepterAboSuggestion()">Oui ✦</button>
+        <button class="btn btn-full" onclick="refuserAboSuggestion()">Non</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POP-UP POLITIQUE DE CONFIDENTIALITÉ -->
+  <div class="modal-overlay" id="confidentialite-popup" style="position:fixed;z-index:500" onclick="closeModal(event,'confidentialite-popup')">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeM('confidentialite-popup')">✕</button>
+      <div class="modal-title" style="font-size:18px">Politique de confidentialité</div>
+
+      <p style="font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:14px">Nous collectons et traitons certaines données personnelles des utilisateurs pour permettre l'accès au site et à ses fonctionnalités. Les informations collectées incluent :</p>
+
+      <ul style="font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:14px;padding-left:18px">
+        <li>Adresse e-mail et date de naissance pour créer un compte et vérifier l'âge.</li>
+        <li>Données de paiement uniquement lorsque vous souscrivez à un abonnement ou achetez du contenu payant.</li>
+      </ul>
+
+      <p style="font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:8px">Ces données sont hébergées et traitées par un prestataire tiers sécurisé (Supabase et le service de paiement utilisé). Elles ne sont jamais vendues à des tiers et ne servent qu'à :</p>
+
+      <ul style="font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:14px;padding-left:18px">
+        <li>Permettre l'accès aux contenus et fonctionnalités</li>
+        <li>Gérer les abonnements et transactions</li>
+        <li>Assurer la sécurité et la bonne utilisation du site</li>
+      </ul>
+
+      <p style="font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:8px">Conformément au RGPD, vous disposez :</p>
+
+      <ul style="font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:14px;padding-left:18px">
+        <li>D'un droit d'accès, de rectification et de suppression de vos données</li>
+        <li>Du droit de retirer votre consentement à tout moment</li>
+      </ul>
+
+      <p style="font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:20px">Pour exercer ces droits, contactez-nous à : <span class="ml-placeholder">[ton e-mail de contact]</span></p>
+
+      <button class="btn btn-full btn-accent" onclick="closeM('confidentialite-popup')">J'ai compris ✦</button>
+    </div>
+  </div>
+
+  <!-- BANDEAU COOKIES -->
+  <div id="cookie-banner" class="cookie-banner">
+    <div class="cookie-content">
+      <p class="cookie-text">🍪 Ce site utilise des cookies strictement nécessaires à son fonctionnement (authentification, préférences de lecture). Aucun cookie publicitaire ou de tracking n'est utilisé.</p>
+      <div class="cookie-actions">
+        <button class="btn btn-accent cookie-btn-accept" onclick="accepterCookies()">Accepter ✦</button>
+        <button class="btn cookie-btn-info" onclick="openModal('cookie-detail-popup')">En savoir plus</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POP-UP DÉTAIL COOKIES -->
+  <div class="modal-overlay" id="cookie-detail-popup" style="position:fixed;z-index:500" onclick="closeModal(event,'cookie-detail-popup')">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeM('cookie-detail-popup')">✕</button>
+      <div class="modal-title" style="font-size:18px">Politique de cookies</div>
+
+      <div style="margin-bottom:14px">
+        <div style="font-size:11px;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin-bottom:6px">Cookies nécessaires</div>
+        <p style="font-size:12px;color:var(--text2);line-height:1.8">Ces cookies sont indispensables au fonctionnement du site. Ils permettent de gérer ta session de connexion et ton authentification via Supabase. Sans eux, le site ne peut pas fonctionner correctement.</p>
+      </div>
+
+      <div style="margin-bottom:14px">
+        <div style="font-size:11px;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin-bottom:6px">Données de navigation locale</div>
+        <p style="font-size:12px;color:var(--text2);line-height:1.8">Certaines préférences (marque-pages, options de lecture, tranche d'âge) sont stockées localement sur ton appareil via localStorage. Ces données ne sont pas transmises à des tiers.</p>
+      </div>
+
+      <div style="margin-bottom:20px">
+        <div style="font-size:11px;letter-spacing:1.5px;color:var(--accent);text-transform:uppercase;margin-bottom:6px">Ressources externes</div>
+        <p style="font-size:12px;color:var(--text2);line-height:1.8">Ce site utilise Google Fonts pour l'affichage des polices. Cette connexion peut être enregistrée par Google selon leur propre politique de confidentialité.</p>
+      </div>
+
+      <p style="font-size:11px;color:var(--text3);line-height:1.7;margin-bottom:20px">Aucun cookie publicitaire, de tracking ou d'analyse n'est utilisé sur ce site.</p>
+
+      <button class="btn btn-full btn-accent" onclick="accepterCookies();closeM('cookie-detail-popup')">Accepter ✦</button>
+    </div>
+  </div>
+
+</div><!-- #app -->
+
+<div id="pwa-banner" class="hidden">
+  <span class="pwa-icon">✦</span>
+  <div class="pwa-text">
+    <strong>Installer Astrolabe</strong>
+    <span id="pwa-install-text">Ajoute l'appli sur ton écran d'accueil</span>
+  </div>
+  <button class="pwa-install-btn" id="pwa-install-btn" onclick="installPWA()">Installer</button>
+  <button class="pwa-close-btn" onclick="closePWABanner()">✕</button>
+</div>
+
+<!-- MODAL SUPPRIMER COMMENTAIRE -->
+<div class="modal-overlay" id="com-supprimer-popup" style="position:fixed;z-index:200" onclick="closeModal(event,'com-supprimer-popup')">
+  <div class="modal-box" style="max-width:320px;text-align:center;">
+    <div class="modal-title" style="font-size:20px;margin-bottom:12px;">Supprimer ce commentaire ?</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.7;">Cette action est irréversible.</p>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-full" style="color:rgba(220,100,100,.8);border-color:rgba(220,100,100,.3);" onclick="confirmerSuppression()">Supprimer</button>
+      <button class="btn btn-full" onclick="annulerSuppression()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SIGNALEMENT COMMENTAIRE -->
+<div class="modal-overlay" id="com-signalement-popup" style="position:fixed;z-index:200" onclick="closeModal(event,'com-signalement-popup')">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeM('com-signalement-popup')">✕</button>
+    <div class="modal-title">Signaler un commentaire</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.7">Pourquoi signales-tu ce commentaire ?</p>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">
+      <label class="com-signal-option"><input type="radio" name="signal-raison" value="inapproprie"> Contenu inapproprié</label>
+      <label class="com-signal-option"><input type="radio" name="signal-raison" value="spoiler"> Spoiler non signalé</label>
+      <label class="com-signal-option"><input type="radio" name="signal-raison" value="harcelement"> Harcèlement / attaque</label>
+      <label class="com-signal-option"><input type="radio" name="signal-raison" value="spam"> Spam</label>
+      <label class="com-signal-option"><input type="radio" name="signal-raison" value="autre"> Autre</label>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-full btn-accent" onclick="confirmerSignalement()">Signaler</button>
+      <button class="btn btn-full" onclick="closeM('com-signalement-popup')">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RÉPONDRE COMMENTAIRE -->
+<div class="modal-overlay" id="com-reponse-popup" style="position:fixed;z-index:200" onclick="closeModal(event,'com-reponse-popup')">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeM('com-reponse-popup')">✕</button>
+    <div class="modal-title">Répondre</div>
+    <div id="com-reponse-parent-apercu" class="com-reponse-apercu"></div>
+    <textarea id="com-reponse-input" class="com-input" placeholder="Ta réponse…" maxlength="1000" rows="3"></textarea>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+      <span id="com-reponse-char-count" class="com-char-count">0 / 1000</span>
+      <button class="btn btn-accent com-submit-btn" onclick="soumettreReponse()">Répondre ✦</button>
+    </div>
+    <div id="com-reponse-error" class="com-error" style="display:none"></div>
+  </div>
+</div>
+
+<!-- MODAL BUG REPORT -->
+<div class="modal-overlay" id="bug-report-popup" style="position:fixed;z-index:200" onclick="closeModal(event,'bug-report-popup')">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeM('bug-report-popup')">✕</button>
+    <div class="modal-title">Signaler un problème</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.7">Tu as trouvé un bug ou rencontré un problème ? Décris-le ici, ça m'aide beaucoup ✦</p>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;color:var(--text3);letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px">Sur quelle page ?</label>
+      <select id="bug-page-select" style="width:100%;background:rgba(180,190,255,.07);border:1px solid rgba(180,190,255,.18);border-radius:10px;padding:10px 12px;color:var(--text);font-family:'Jost',sans-serif;font-size:13px;appearance:none;">
+        <option value="">— Choisir —</option>
+        <option value="accueil">Page d'accueil / catalogue</option>
+        <option value="histoire">Page d'une histoire</option>
+        <option value="lecture">Lecture d'un chapitre</option>
+        <option value="mon-compte">Mon compte</option>
+        <option value="inscription">Inscription / connexion</option>
+        <option value="autre">Autre</option>
+      </select>
+    </div>
+    <div style="margin-bottom:8px">
+      <label style="font-size:11px;color:var(--text3);letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px">Description du problème</label>
+      <textarea id="bug-description" class="com-input" placeholder="Décris le bug ou le problème rencontré…" maxlength="2000" rows="4"></textarea>
+      <div style="display:flex;justify-content:flex-end;margin-top:4px">
+        <span id="bug-char-count" class="com-char-count">0 / 2000</span>
+      </div>
+    </div>
+    <div id="bug-error" class="com-error" style="display:none"></div>
+    <div id="bug-ok" style="display:none;font-size:13px;color:#7ecf7e;text-align:center;padding:10px 0">✦ Merci ! Ton signalement a bien été envoyé.</div>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn btn-full btn-accent" id="bug-submit-btn" onclick="soumettreSignalementBug()">Envoyer ✦</button>
+      <button class="btn btn-full" onclick="closeM('bug-report-popup')">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="app.js"></script>
+<script src="lecture.js"></script>
+<script src="auth.js"></script>
+<script src="commentaires.js"></script>
+<script src="notifications.js"></script>
+<script src="webtoon.js"></script>
+</body>
+</html>
