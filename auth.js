@@ -718,12 +718,17 @@ function _lancerApp() {
     _appLancee = true;
 
     const lastPage = sessionStorage.getItem('lastPage');
-    if (lastPage && lastPage !== 'p-splash' && document.getElementById(lastPage)) {
+    // Ne pas restaurer la lastPage si une URL partageable est présente dans le hash
+    const hashPresent = window.location.hash && window.location.hash.length > 1;
+    if (!hashPresent && lastPage && lastPage !== 'p-splash' && document.getElementById(lastPage)) {
       go(lastPage);
-    } else {
+    } else if (!hashPresent) {
       go('p-main');
     }
-    loadHistoires().catch(() => {});
+    loadHistoires().then(() => {
+      // Lire l'URL partageable après le chargement des histoires
+      if (typeof _lireURLInitiale === 'function') _lireURLInitiale().catch(() => {});
+    }).catch(() => {});
     if (typeof loadBannieres === 'function') loadBannieres().catch(() => {});
 
     if (!compte.loggedIn && !sessionStorage.getItem('visiteur_tranche')) {

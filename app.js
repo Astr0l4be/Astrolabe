@@ -229,7 +229,132 @@ async function loadContenuChapitre(bookId,chapNum){
 }
 
 /* NAV */
-function go(id){
+/* ══════════════════════════════════════════════════════
+   SYSTÈME D'URLs PARTAGEABLES
+   ══════════════════════════════════════════════════════ */
+
+// Correspondance page → segment d'URL lisible
+const _urlSegments = {
+  'p-main': '',
+  'p-moncompte': 'compte',
+  'p-recherche': 'recherche',
+  'p-apropos': 'apropos',
+  'p-mentions-legales': 'confidentialite',
+  'p-cgv': 'cgv',
+  'p-cgu': 'cgu',
+  'p-inscription1': 'inscription',
+  'p-abonnement': 'abonnement',
+  'p-acheter-tickets': 'tickets',
+  'p-hashtag': 'catalogue',
+  'p-tags-croises': 'recherche-avancee',
+};
+
+// Construit l'URL à afficher selon la page et le contexte courant
+function _construireURL(pageId, extra) {
+  const base = window.location.pathname; // ex: "/"
+  if (pageId === 'p-main' || pageId === 'p-splash') return base;
+  if (pageId === 'p-histoire' && extra?.histoireId) return base + '#histoire/' + extra.histoireId;
+  if (pageId === 'p-lecture' && extra?.histoireId && extra?.chapNum) return base + '#histoire/' + extra.histoireId + '/chapitre/' + extra.chapNum;
+  if (pageId === 'p-webtoon' && extra?.histoireId && extra?.chapNum) return base + '#histoire/' + extra.histoireId + '/webtoon/' + extra.chapNum;
+  if (pageId === 'p-bd' && extra?.histoireId && extra?.chapNum) return base + '#histoire/' + extra.histoireId + '/bd/' + extra.chapNum;
+  if (pageId === 'p-audio' && extra?.histoireId && extra?.chapNum) return base + '#histoire/' + extra.histoireId + '/audio/' + extra.chapNum;
+  const seg = _urlSegments[pageId];
+  if (seg) return base + '#' + seg;
+  return base; // pages système (inscription, delete…) → pas d'URL exposée
+}
+
+// Pousse une nouvelle entrée dans l'historique du navigateur
+function _pushURL(pageId, extra) {
+  const url = _construireURL(pageId, extra);
+  const state = { pageId, ...extra };
+  history.pushState(state, '', url);
+}
+
+// Lit le hash de l'URL au chargement et navigue vers la bonne page
+async function _lireURLInitiale() {
+  const hash = window.location.hash.slice(1); // retire le #
+  if (!hash) return; // page d'accueil, rien à faire
+
+  // #histoire/ID
+  const mHistoire = hash.match(/^histoire\/([^/]+)$/);
+  if (mHistoire) {
+    await _attendreBooks();
+    openHistoire(mHistoire[1], true);
+    return;
+  }
+
+  // #histoire/ID/chapitre/NUM
+  const mChapitre = hash.match(/^histoire\/([^/]+)\/chapitre\/(\d+)$/);
+  if (mChapitre) {
+    await _attendreBooks();
+    openHistoire(mChapitre[1], true);
+    setTimeout(() => openLecture(mChapitre[1], parseInt(mChapitre[2])), 300);
+    return;
+  }
+
+  // #histoire/ID/webtoon/NUM
+  const mWebtoon = hash.match(/^histoire\/([^/]+)\/webtoon\/(\d+)$/);
+  if (mWebtoon) {
+    await _attendreBooks();
+    openHistoire(mWebtoon[1], true);
+    setTimeout(() => openWebtoon(mWebtoon[1], parseInt(mWebtoon[2])), 300);
+    return;
+  }
+
+  // #histoire/ID/bd/NUM
+  const mBD = hash.match(/^histoire\/([^/]+)\/bd\/(\d+)$/);
+  if (mBD) {
+    await _attendreBooks();
+    openHistoire(mBD[1], true);
+    setTimeout(() => openLectureBD(mBD[1], parseInt(mBD[2])), 300);
+    return;
+  }
+
+  // #histoire/ID/audio/NUM
+  const mAudio = hash.match(/^histoire\/([^/]+)\/audio\/(\d+)$/);
+  if (mAudio) {
+    await _attendreBooks();
+    openHistoire(mAudio[1], true);
+    setTimeout(() => openAudio(mAudio[1], parseInt(mAudio[2])), 300);
+    return;
+  }
+
+  // Pages simples (#compte, #recherche…)
+  const pageId = Object.entries(_urlSegments).find(([, seg]) => seg === hash)?.[0];
+  if (pageId) { go(pageId, true); return; }
+}
+
+// Attend que BOOKS soit chargé (max 5 secondes)
+function _attendreBooks() {
+  return new Promise(resolve => {
+    if (BOOKS.length) { resolve(); return; }
+    let tries = 0;
+    const t = setInterval(() => {
+      if (BOOKS.length || ++tries > 50) { clearInterval(t); resolve(); }
+    }, 100);
+  });
+}
+
+// Bouton retour / avance du navigateur
+window.addEventListener('popstate', async (e) => {
+  const state = e.state;
+  if (!state) { go('p-main', true); return; }
+
+  if (state.pageId === 'p-lecture' && state.histoireId && state.chapNum) {
+    await _attendreBooks();
+    if (currentHistoireId !== state.histoireId) openHistoire(state.histoireId, true);
+    setTimeout(() => openLecture(state.histoireId, state.chapNum, true), currentHistoireId !== state.histoireId ? 300 : 0);
+  } else if (state.pageId === 'p-histoire' && state.histoireId) {
+    await _attendreBooks();
+    openHistoire(state.histoireId, true);
+  } else if (state.pageId) {
+    go(state.pageId, true);
+  } else {
+    go('p-main', true);
+  }
+});
+
+function go(id, _sansHistory){
   // Réinitialiser les cases spoiler/spicy quand on quitte le chapitre
   if (id !== 'p-lecture') {
     ['com-tag-spoiler','com-tag-spicy','bd-com-tag-spoiler','bd-com-tag-spicy'].forEach(cbId => {
@@ -264,6 +389,9 @@ function go(id){
   }
   if(id==='p-inscription4b' && typeof _initCGUScroll==='function') setTimeout(_initCGUScroll, 100);
   if(id!=='p-splash')sessionStorage.setItem('lastPage',id);
+
+  // Mettre à jour l'URL (sauf lors des navigations déclenchées par popstate)
+  if(!_sansHistory && id !== 'p-splash') _pushURL(id);
 }
 function openModal(id){document.getElementById(id)?.classList.add('open');}
 function closeM(id){document.getElementById(id)?.classList.remove('open');}
@@ -855,7 +983,10 @@ function openHistoire(id){
   _loadTotalLikesHistoire(id).catch(()=>{});
   const backDest=(prevPage==='p-histoire'||prevPage==='p-lecture')?'p-main':prevPage;
   document.getElementById('histoire-back-btn').onclick=function(){go(backDest);};
-  go('p-histoire');
+  // Mettre à jour l'URL (sauf si appelé depuis popstate)
+  const _sansHistHist = arguments[1];
+  if(!_sansHistHist) _pushURL('p-histoire', { histoireId: id });
+  go('p-histoire', true);
 }
 
 /* ══════════════════════════════════════════════════════

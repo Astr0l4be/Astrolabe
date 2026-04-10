@@ -229,7 +229,10 @@ async function openLecture(bookId,chapNum){
   quitterImmersif();
   // Ne remettre à zéro que s'il n'y a pas de position sauvegardée
   if(!_savedScroll) document.querySelector('#p-lecture .page-scroll').scrollTop=0;
-  go('p-lecture');
+  // Mettre à jour l'URL (sauf si appelé depuis popstate)
+  const _sansHistLect = arguments[2];
+  if(!_sansHistLect && typeof _pushURL === 'function') _pushURL('p-lecture', { histoireId: bookId, chapNum });
+  go('p-lecture', true);
   setTimeout(()=>applyLectureModeForHistoire(bookId),50);
   // Charger les commentaires et les likes
   if(typeof initCommentaires==='function') initCommentaires(bookId,chapNum).catch(()=>{});
